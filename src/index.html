@@ -33,7 +33,9 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     <h1 class="text-4xl font-bold tracking-tight">Claim Clash</h1>
                     <span class="text-[10px] px-1.5 py-0.5 bg-zinc-800 border border-zinc-700 rounded text-zinc-400">v<span id="header-version"></span></span>
                 </div>
-                <p class="text-zinc-400">Structured Fact-Finding Between Opposing Perspectives</p>
+                <p class="text-zinc-400">An Evidence-Based Discussion Game for Political Claims</p>
+                <p class="text-zinc-500 text-sm">Structured Fact-Finding Between Opposing Perspectives &bull; Facilitated by an AI Assistant</p>
+                <p class="text-zinc-600 text-xs mt-0.5">Rules v<span id="header-rules-version"></span> &bull; June 2026</p>
             </div>
             <div class="flex gap-x-3">
                 <button onclick="toggleFullScreen()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
@@ -54,8 +56,8 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         <!-- Who Goes First -->
         <div class="flex items-center gap-x-4 mb-6">
             <span class="text-sm font-medium text-zinc-400">Who goes first?</span>
-            <button onclick="setFirstPlayer('Blue')" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm">Blue</button>
-            <button onclick="setFirstPlayer('Red')" class="px-4 py-1.5 bg-red-600 hover:bg-red-700 rounded-2xl text-sm">Red</button>
+            <button onclick="setFirstPlayer('Team A')" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm">Team A</button>
+            <button onclick="setFirstPlayer('Team B')" class="px-4 py-1.5 bg-red-600 hover:bg-red-700 rounded-2xl text-sm">Team B</button>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -70,7 +72,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                         <div class="flex items-center gap-x-2">
                             <div id="player-badge"></div>
                             <button onclick="askGemini()" class="px-4 py-1 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm flex items-center gap-x-2">
-                                <i class="fa-solid fa-paper-plane"></i> <span>Enter</span>
+                                <i class="fa-solid fa-paper-plane"></i> <span>Ask New Question</span>
                             </button>
                         </div>
                     </div>
@@ -82,7 +84,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 <!-- Answer -->
                 <div class="section rounded-3xl p-6">
                     <div class="flex justify-between items-center mb-3">
-                        <span class="text-sm font-medium text-zinc-400">GEMINI'S ANSWER</span>
+                        <span class="text-sm font-medium text-zinc-400">AI ASSISTANT'S ANSWER</span>
                         <div>
                             <button id="follow-up-btn" onclick="followUp()" 
                                     class="px-4 py-1.5 rounded-2xl text-sm flex items-center gap-x-2">
@@ -101,8 +103,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 <div class="section rounded-3xl p-5">
                     <div class="text-sm font-medium text-zinc-400 mb-3">QUICK ACTIONS</div>
                     <div class="space-y-3">
-                        <button onclick="loadBlueExample()" class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-3 rounded-2xl text-sm">Load Blue Example</button>
-                        <button onclick="loadRedExample()" class="w-full bg-red-600 hover:bg-red-700 px-4 py-3 rounded-2xl text-sm">Load Red Example</button>
+                        <button onclick="loadExampleFlow()" class="w-full bg-amber-700 hover:bg-amber-800 px-4 py-3 rounded-2xl text-sm">Load Example Flow</button>
                         <button onclick="addBookmark()" class="w-full bg-amber-600 hover:bg-amber-700 px-4 py-3 rounded-2xl text-sm flex items-center justify-center gap-x-2">
                             <i class="fa-solid fa-bookmark"></i> <span>Bookmark Concern</span>
                         </button>
@@ -113,24 +114,28 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 <div class="section rounded-3xl p-5">
                     <div class="text-sm font-medium text-zinc-400 mb-2">Core Rules</div>
                     <div class="text-[11px] text-zinc-300 space-y-0.5 leading-snug">
-                        <div>• Red or Blue starts by typing a clear, specific question in the CURRENT QUESTION box and pressing Enter (or clicking the Enter button). Gemini then provides an evidence-based response.</div>
-                        <div>• Players alternate turns. After reviewing the answer, click Follow Up to switch to the other player.</div>
-                        <div>• Questions should seek evidence, clarification, or verification of specific claims.</div>
-                        <div>• Keep questions relevant to the ongoing thread for coherent exploration.</div>
-                        <div>• Maintain respect and focus on the claims themselves, not on each other.</div>
+                        <div>• One focused question per turn.</div>
+                        <div>• Questions should seek evidence, clarification, or verification of specific claims — not judgments about a person's character.</div>
+                        <div>• Keep questions relevant to the current topic for coherent discussion.</div>
+                        <div>• Follow-up questions are encouraged when more detail or counter-evidence is needed.</div>
+                        <div>• Maintain respect and focus on the claims, not on each other.</div>
+                        <div>• Ask the AI to ground its responses in primary sources, investigations, and documented facts.</div>
                     </div>
                 </div>
 
                 <div class="section rounded-3xl p-5">
                     <div class="text-sm font-medium text-zinc-400 mb-3">RULES REFERENCE</div>
                     <div class="grid grid-cols-2 gap-2 text-xs">
-                        <button onclick="showRuleSection('intro')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Intro &amp; Purpose</button>
-                        <button onclick="showRuleSection('best')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Best Practices</button>
-                        <button onclick="showRuleSection('focus')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Staying Focused</button>
-                        <button onclick="showRuleSection('tips')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Tips for Game</button>
+                        <button onclick="showRuleSection('intro')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Introduction</button>
                         <button onclick="showRuleSection('how')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">How to Play</button>
+                        <button onclick="showRuleSection('core')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Core Rules</button>
+                        <button onclick="showRuleSection('challenge')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Challenging an Answer</button>
+                        <button onclick="showRuleSection('focus')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Staying Focused</button>
+                        <button onclick="showRuleSection('ending')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Ending a Round</button>
+                        <button onclick="showRuleSection('best')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Best Practices</button>
+                        <button onclick="showRuleSection('tips')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Tips for a Great Game</button>
                     </div>
-                    <button onclick="showRuleSection('examples')" class="mt-2 w-full px-3 py-2 bg-amber-900 hover:bg-amber-800 rounded-xl text-xs text-left">Example Flows</button>
+                    <button onclick="showRuleSection('examples')" class="mt-2 w-full px-3 py-2 bg-amber-900 hover:bg-amber-800 rounded-xl text-xs text-left">Example Flow</button>
                 </div>
             </div>
         </div>
@@ -318,7 +323,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             }
             return invokeFn(cmd, args);
         }
-        let currentPlayer = "Blue";
+        let currentPlayer = "Team A";
         let bookmarks = [];
 
         // === TESTING DEFAULT API KEY ===
@@ -327,6 +332,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         // IMPORTANT: This is only for personal/testing use. Do not share builds containing real keys.
         const DEFAULT_GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
         const APP_VERSION = "0.1.0";
+        const RULES_VERSION = "3.0";
 
         // Clean build: remove any previously saved personal Gemini key (one-time clear)
         if (!localStorage.getItem('cleanBuildCleared')) {
@@ -364,32 +370,39 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         const RULE_SECTIONS = {
             intro: {
                 title: "Introduction & Objective",
-                content: "This game provides a structured, respectful format for two players to explore politically charged claims from different perspectives through evidence-based questions to Gemini.\n\nThe goal is not to win, but to reach the point where both sides can agree on what the evidence presented to Gemini actually shows, while building AI literacy through direct engagement with sourced, evidence-focused responses.\n\nImportant Note on Gemini: Gemini is not infallible and regularly updates its knowledge as new information becomes available. Challenging or questioning its answers with evidence or counterpoints is not only valid, it is encouraged and helpful for reaching better understanding."
-            },
-            core: {
-                title: "Core Rules",
-                content: "• Red or Blue starts by typing a clear, specific question in the CURRENT QUESTION box and pressing Enter (or clicking the Enter button). Gemini then provides an evidence-based response.\n• Players alternate turns. After reviewing the answer, click Follow Up to switch to the other player.\n• Questions should seek evidence, clarification, or verification of specific claims.\n• Keep questions relevant to the ongoing thread for coherent exploration.\n• Maintain respect and focus on the claims themselves, not on each other."
-            },
-            best: {
-                title: "Best Practices",
-                content: "• Keep responses concise\n• Prioritize primary sources\n• Jury conclusions ≠ full reality\n\n• Be specific: “List the top 5 most credible pieces of evidence...” or “What primary sources say about X?”\n• Use clear phrasing such as “Did X happen?” or “I heard that...” to ask for verification.\n• One focused question per turn works best for clear, deep responses.\n• Request structure when it helps: “Answer in bullet points with sources” or “Pros and cons table”.\n• Follow up iteratively: “Based on your last answer, drill into Y”.\n• Add focus: “Focus on primary sources” or “Note uncertainties and unverified aspects”.\n• Follow-up questions are encouraged when you have more detail or counter-evidence.\n• Gemini aims to ground answers in primary sources, investigations, and documented facts."
-            },
-            focus: {
-                title: "Staying Focused During Play",
-                content: "It is important to bring up one question at a time and continue drilling down on one area, even if Red or Blue have multiple issues with Gemini’s answer.\n\nUse the Bookmark Concern button (in Quick Actions) to note other concerns as they come up (e.g. bookmark concerns A, B, and C). Bookmarks appear in the list at the bottom of the screen.\n\nWhen ready to address a saved concern, click Manage, then Use on the desired bookmark. This loads the question back into the CURRENT QUESTION box.\n\nWhen the current thread is complete, load the next bookmark and ask Gemini to continue.\n\nThis keeps the conversation coherent and productive."
-            },
-            tips: {
-                title: "Tips for a Great Game",
-                content: "• Both Red and Blue perspectives are valued equally.\n• Take breaks if emotions rise.\n• Success comes from clearer shared understanding of what the evidence actually shows (or does not show).\n\nReady to begin? Either Red or Blue can start — share your first question!"
+                content: "Claim Clash is a structured discussion game designed for two players to explore politically charged claims through evidence-based questions to an AI assistant. The goal is not to win, but to reach clearer shared understanding of what the evidence actually shows. The game also helps players develop stronger AI literacy by treating the AI as a thinking tool rather than an authority.\n\nImportant Note: The AI assistant you use is not infallible and may update its answers as new information becomes available. Challenging or questioning its answers with evidence is valid and encouraged."
             },
             how: {
                 title: "How to Play",
-                content: "Step 1: Red or Blue starts with a clear, specific question to Gemini.\n\nStep 2: Gemini provides an evidence-based response.\n\nStep 3: The other player asks their question, which may address claims they have encountered or seek clarification.\n\nStep 4: Gemini answers.\n\nStep 5: The first player continues with a relevant follow-up question.\n\nRepeat: Alternate turns while staying focused on the topic thread.\n\nTip: Use Bookmark Concern to save side issues. Click Manage → Use to bring a saved question back when the current thread is done."
+                content: "Step 1: Team A or Team B begins by typing a clear, specific question and clicking 'Ask New Question'. This player becomes the active player.\n\nStep 2: The AI provides a response based on available evidence.\n\nStep 3: The other player clicks 'Follow Up' to take their turn. This switches the active player and clears the question box.\n\nStep 4: The new active player types their question and clicks 'Ask New Question'.\n\nStep 5: Players continue alternating turns while staying focused on the same topic."
             },
-
+            core: {
+                title: "Core Rules",
+                content: "• One focused question per turn.\n• Questions should seek evidence, clarification, or verification of specific claims — not judgments about a person's character.\n• Keep questions relevant to the current topic for coherent discussion.\n• Follow-up questions are encouraged when more detail or counter-evidence is needed.\n• Maintain respect and focus on the claims, not on each other.\n• Ask the AI to ground its responses in primary sources, investigations, and documented facts."
+            },
+            challenge: {
+                title: "Challenging an Answer",
+                content: "Either player may use a turn to ask the AI to re-examine its previous answer in light of new evidence or a counter-source. A Challenge counts as that player's question for the turn — it does not get a free extra turn. This keeps the game's pacing fair while still encouraging pushback on weak or outdated answers."
+            },
+            focus: {
+                title: "Staying Focused During Play",
+                content: "It is important to explore one question at a time. If a player has multiple concerns with the AI's answer, they should bookmark the additional concerns rather than asking them all at once.\n\nTo bookmark concerns, include in your question: \"Bookmark: [A], [B], [C]\" — or use the Bookmark Concern button in Quick Actions.\n\nTo return to a bookmarked concern, include: \"Returning to bookmarked concern A\" in your question — or click Manage, then Use on a saved bookmark.\n\nThis keeps the discussion productive and easy to follow."
+            },
+            ending: {
+                title: "Ending a Round",
+                content: "• Both players agree the topic has been sufficiently explored, or\n• A turn limit is reached (10–12 exchanges is a reasonable default), or\n• Either player calls for a break.\n\nThere is no winner. Success is a clearer shared picture of what the evidence does and doesn't show."
+            },
             examples: {
-                title: "Example Flows",
-                content: "Blue Goes First\nBlue: “Did Donald J. Trump suggest injecting disinfectant to cure COVID during a White House press briefing?”\nGemini answers: Yes. During the April 23, 2020 briefing, Trump said...\n\nRed: “Did Trump later say the comment was sarcastic, and was there evidence people actually followed it?”\nGemini answers the follow-up.\n\nAnd so on in this fashion.\n\n---\n\nRed Goes First\nRed: “Is there any credible evidence that Donald J. Trump is a pedophile?”\nGemini answers: No, there is no credible evidence supporting that claim...\n\nBlue: “But I heard that in the Epstein files there was a witness claiming Trump sexually abused a 13-year-old girl who bit him.”\nGemini answers.\n\nRed: Follow-up question on details or verification status.\n\nAnd so on in this fashion."
+                title: "Example Flow",
+                content: "Team A: \"Did the 2024 Riverdale infrastructure bill include the $2B rural broadband provision that critics claimed was cut?\"\n\nThe AI answers.\n\nTeam B clicks Follow Up, then asks: \"Sources say the provision was reduced rather than cut entirely — what was the before-and-after funding figure?\"\n\nThe AI answers.\n\nTeam A clicks Follow Up and asks: \"Bookmark: [funding source], [timeline of the cut]. First, can you clarify who proposed the reduction?\"\n\nThe AI answers.\n\nTeam B clicks Follow Up, says \"Returning to bookmarked concern: funding source,\" and the round continues."
+            },
+            best: {
+                title: "Best Practices for Asking the AI",
+                content: "• Be specific: \"What are the top 5 most credible pieces of evidence…\" or \"What do primary sources say about X?\"\n• Use clear phrasing such as \"Did X happen?\" or \"I heard that…\" when seeking verification.\n• Request structure when helpful: \"Answer in bullet points with sources\" or \"Provide a pros and cons table.\"\n• Follow up iteratively: \"Based on your last answer, please expand on Y.\"\n• Add focus: \"Focus on primary sources\" or \"Note any uncertainties or unverified claims.\"\n• Frame claims about people as claims about actions, policies, or events."
+            },
+            tips: {
+                title: "Tips for a Great Game",
+                content: "• Both perspectives are treated equally.\n• Take breaks if emotions rise.\n• If a question feels like it's targeting a person rather than a claim, pause and rephrase it around the underlying policy, event, or specific factual assertion.\n• Success is measured by clearer shared understanding of what the evidence shows (or does not show).\n\nReady to begin? Either player can start — type your first question and click Ask New Question."
             }
         };
 
@@ -397,11 +410,11 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             const badge = document.getElementById("player-badge");
             const followUpBtn = document.getElementById("follow-up-btn");
 
-            if (currentPlayer === "Blue") {
-                badge.innerHTML = `<span class="px-3 py-1 bg-blue-600 text-white text-xs font-bold rounded-2xl">BLUE</span>`;
+            if (currentPlayer === "Team A") {
+                badge.innerHTML = `<span class="px-3 py-1 bg-blue-600 text-white text-xs font-bold rounded-2xl">TEAM A</span>`;
                 followUpBtn.className = "px-4 py-1.5 bg-red-600 hover:bg-red-700 rounded-2xl text-sm flex items-center gap-x-2";
             } else {
-                badge.innerHTML = `<span class="px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-2xl">RED</span>`;
+                badge.innerHTML = `<span class="px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-2xl">TEAM B</span>`;
                 followUpBtn.className = "px-4 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm flex items-center gap-x-2";
             }
         }
@@ -412,22 +425,14 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         }
 
         function switchPlayer() {
-            currentPlayer = currentPlayer === "Blue" ? "Red" : "Blue";
+            currentPlayer = currentPlayer === "Team A" ? "Team B" : "Team A";
             updatePlayerBadge();
         }
 
-        function loadBlueExample() {
-            document.getElementById("question-box").innerHTML = "Did 51 former intelligence officials sign a public letter suggesting that the Hunter Biden laptop story had all the classic earmarks of Russian disinformation?";
+        function loadExampleFlow() {
+            document.getElementById("question-box").innerHTML = "Did the 2024 Riverdale infrastructure bill include the $2B rural broadband provision that critics claimed was cut?";
             document.getElementById("answer-box").innerHTML = "";
-            currentPlayer = "Blue";
-            conversationHistory = [];
-            updatePlayerBadge();
-        }
-
-        function loadRedExample() {
-            document.getElementById("question-box").innerHTML = "Is there any credible evidence that Donald J. Trump is a pedophile?";
-            document.getElementById("answer-box").innerHTML = "";
-            currentPlayer = "Red";
+            currentPlayer = "Team A";
             conversationHistory = [];
             updatePlayerBadge();
         }
@@ -550,7 +555,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             renderAIResponses();
 
             const answerBox = document.getElementById("answer-box");
-            answerBox.innerHTML = "Asking Gemini...";
+            answerBox.innerHTML = "Asking AI assistant...";
 
             const jail = getJailbreakPrompt();
             conversationHistory = [];
@@ -1069,7 +1074,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         function showAbout() {
             const modal = document.getElementById("about-modal");
             const verEl = document.getElementById("about-version");
-            if (verEl) verEl.textContent = APP_VERSION;
+            if (verEl) verEl.textContent = `${APP_VERSION} (Rules v${RULES_VERSION}, June 2026)`;
             if (modal) modal.classList.remove("hidden");
         }
 
@@ -1093,6 +1098,8 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             const ver = typeof APP_VERSION !== 'undefined' ? APP_VERSION : '0.1.0';
             const headerVer = document.getElementById("header-version");
             if (headerVer) headerVer.textContent = ver;
+            const rulesVer = document.getElementById("header-rules-version");
+            if (rulesVer) rulesVer.textContent = typeof RULES_VERSION !== 'undefined' ? RULES_VERSION : '3.0';
 
             document.getElementById("question-box").setAttribute("contenteditable", "true");
             document.getElementById("answer-box").setAttribute("contenteditable", "true");
