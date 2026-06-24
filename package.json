@@ -1,0 +1,16 @@
+{
+  "name": "claim-clash-tv",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Claim Clash - Structured Fact-Finding Between Opposing Perspectives",
+  "author": "Zachary H. Roberts",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "tauri": "tauri",
+    "tauri:store": "tauri build --config src-tauri/tauri.store.conf.json"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
+}
