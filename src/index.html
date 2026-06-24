@@ -422,6 +422,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         function setFirstPlayer(player) {
             currentPlayer = player;
             updatePlayerBadge();
+            pushCurrentContentToCast();
         }
 
         function switchPlayer() {
@@ -464,6 +465,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     <span>${b.concern} <span class="text-xs text-zinc-500">(${b.player})</span></span>
                 </div>
             `).join("");
+            pushCurrentContentToCast();
         }
 
         function showBookmarkModal() {
@@ -574,6 +576,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 if (anySelected) {
                     setTimeout(() => querySelectedAIs(), 150);
                 }
+                pushCurrentContentToCast();
             });
         }
 
@@ -581,6 +584,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         function followUp() {
             document.getElementById("question-box").innerHTML = "";
             switchPlayer();
+            pushCurrentContentToCast();
         }
 
         // ========== AI COMPARISON LOGIC ==========
@@ -643,6 +647,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         function updateJailbreak() {
             const toggle = document.getElementById("jailbreak-toggle");
             jailbreakMode = toggle ? toggle.checked : false;
+            pushCurrentContentToCast();
         }
 
         function getJailbreakPrompt() {
@@ -848,6 +853,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         // ========== CAST TO SMART TV ==========
 
         let currentCastUrl = null;
+        let castSyncInterval = null;
 
         function startCast() {
             const btn = document.getElementById('cast-button');
@@ -885,6 +891,8 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     }
 
                     await pushCurrentContentToCast();
+                    if (castSyncInterval) clearInterval(castSyncInterval);
+                    castSyncInterval = setInterval(pushCurrentContentToCast, 2000);
                     if (btn) btn.textContent = 'Cast to TV (active)';
                 } catch (error) {
                     console.error('Cast start error:', error);
@@ -897,6 +905,10 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         window.startCast = startCast;
 
         async function stopCast() {
+            if (castSyncInterval) {
+                clearInterval(castSyncInterval);
+                castSyncInterval = null;
+            }
             if (currentCastUrl) {
                 try {
                     await tauriInvoke('stop_cast');
@@ -917,23 +929,33 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             if (!currentCastUrl) return;
 
             const question = document.getElementById("question-box").innerHTML.trim();
-            
-            // Collect answers from the AI response boxes
+            const mainAnswer = document.getElementById("answer-box").innerHTML.trim();
+
             const answers = [];
             document.querySelectorAll('.ai-response').forEach(div => {
                 const provider = div.getAttribute('data-provider');
                 const nameEl = div.parentElement.querySelector('.text-sm.font-medium');
                 const name = nameEl ? nameEl.textContent.trim() : provider || 'AI';
                 const text = div.innerHTML.trim();
-                if (text && text !== 'Querying...' && text !== 'Click "Ask" or use "Query Selected"') {
+                if (text && text !== 'Querying...' && text !== 'Click "Ask" or use "Query Selected"' && !text.includes('Click "Open in Grok"')) {
                     answers.push([name, text]);
                 }
             });
 
+            const selectedAis = AI_PROVIDERS.filter(p => selectedAIs[p.id]).map(p => p.name);
+            const bookmarkData = bookmarks.map(b => ({ concern: b.concern, player: b.player }));
+
             try {
                 await tauriInvoke('update_cast_content', {
                     question: question,
-                    answers: answers
+                    main_answer: mainAnswer,
+                    current_player: currentPlayer,
+                    answers: answers,
+                    bookmarks: bookmarkData,
+                    selected_ais: selectedAis,
+                    jailbreak_mode: jailbreakMode,
+                    app_version: APP_VERSION,
+                    rules_version: RULES_VERSION
                 });
             } catch (e) {
                 console.error("Failed to update cast content", e);

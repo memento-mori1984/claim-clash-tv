@@ -6,9 +6,22 @@ use std::sync::{Arc, Mutex};
 use tiny_http::{Server, Response, Header};
 
 #[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+pub struct CastBookmark {
+    pub concern: String,
+    pub player: String,
+}
+
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 pub struct CastContent {
     pub question: String,
+    pub main_answer: String,
+    pub current_player: String,
     pub answers: Vec<(String, String)>, // (ai_name, response)
+    pub bookmarks: Vec<CastBookmark>,
+    pub selected_ais: Vec<String>,
+    pub jailbreak_mode: bool,
+    pub app_version: String,
+    pub rules_version: String,
 }
 
 #[derive(Default)]
@@ -48,12 +61,25 @@ fn start_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<String, Stri
                 let content = content.lock().unwrap();
                 let json = serde_json::json!({
                     "question": content.question,
+                    "main_answer": content.main_answer,
+                    "current_player": content.current_player,
                     "answers": content.answers.iter().map(|(name, text)| {
                         serde_json::json!({ "name": name, "text": text })
-                    }).collect::<Vec<_>>()
+                    }).collect::<Vec<_>>(),
+                    "bookmarks": content.bookmarks,
+                    "selected_ais": content.selected_ais,
+                    "jailbreak_mode": content.jailbreak_mode,
+                    "app_version": content.app_version,
+                    "rules_version": content.rules_version,
                 });
                 let response = Response::from_string(json.to_string())
                     .with_header(Header::from_bytes("Content-Type", "application/json").unwrap())
+                    .with_header(Header::from_bytes("Access-Control-Allow-Origin", "*").unwrap());
+                let _ = request.respond(response);
+            } else if url_path == "/claimsclash.png" {
+                let bytes = include_bytes!("../../src/claimsclash.png");
+                let response = Response::from_data(bytes.to_vec())
+                    .with_header(Header::from_bytes("Content-Type", "image/png").unwrap())
                     .with_header(Header::from_bytes("Access-Control-Allow-Origin", "*").unwrap());
                 let _ = request.respond(response);
             } else {
@@ -85,74 +111,31 @@ fn stop_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<(), String> {
 fn update_cast_content(
     state: tauri::State<Arc<Mutex<CastState>>>,
     question: String,
+    main_answer: String,
+    current_player: String,
     answers: Vec<(String, String)>,
+    bookmarks: Vec<CastBookmark>,
+    selected_ais: Vec<String>,
+    jailbreak_mode: bool,
+    app_version: String,
+    rules_version: String,
 ) -> Result<(), String> {
     let cast_state = state.lock().map_err(|e| e.to_string())?;
     let mut content = cast_state.content.lock().unwrap();
     content.question = question;
+    content.main_answer = main_answer;
+    content.current_player = current_player;
     content.answers = answers;
+    content.bookmarks = bookmarks;
+    content.selected_ais = selected_ais;
+    content.jailbreak_mode = jailbreak_mode;
+    content.app_version = app_version;
+    content.rules_version = rules_version;
     Ok(())
 }
 
 fn get_cast_receiver_html() -> String {
-    r#"<!-- Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
-"Claim Clash" is a trademark of Zachary H. Roberts. -->
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Claim Clash - Cast</title>
-    <style>
-        body { font-family: system-ui, sans-serif; background: #111; color: #eee; margin: 0; padding: 40px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        h1 { font-size: 3rem; margin-bottom: 0.2em; }
-        .question { font-size: 2rem; background: #222; padding: 20px; border-radius: 12px; margin-bottom: 30px; }
-        .answer { background: #1a1a1a; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
-        .model { font-weight: bold; color: #0af; margin-bottom: 8px; }
-        .text { line-height: 1.5; white-space: pre-wrap; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Claim Clash</h1>
-        <div id="question" class="question">Loading...</div>
-        <div id="answers"></div>
-        <footer style="margin-top:40px;text-align:center;font-size:0.75rem;color:#666;">
-            Copyright &copy; 2026 Zachary H. Roberts. All rights reserved.<br>
-            &ldquo;Claim Clash&rdquo; is a trademark of Zachary H. Roberts.
-        </footer>
-    </div>
-
-    <script>
-        async function fetchState() {
-            try {
-                const res = await fetch('/state');
-                const data = await res.json();
-                document.getElementById('question').innerHTML = data.question || 'No question';
-                
-                const answersEl = document.getElementById('answers');
-                answersEl.innerHTML = '';
-                if (data.answers && data.answers.length > 0) {
-                    data.answers.forEach(a => {
-                        const div = document.createElement('div');
-                        div.className = 'answer';
-                        div.innerHTML = `<div class="model">${a.name}</div><div class="text">${a.text}</div>`;
-                        answersEl.appendChild(div);
-                    });
-                } else {
-                    answersEl.innerHTML = '<div class="answer">Waiting for responses...</div>';
-                }
-            } catch(e) {
-                console.error(e);
-            }
-        }
-        
-        setInterval(fetchState, 2000);
-        fetchState();
-    </script>
-</body>
-</html>"#.to_string()
+    include_str!("../../src/cast-mirror.html").to_string()
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

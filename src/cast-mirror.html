@@ -1,0 +1,305 @@
+<!-- Copyright (c) 2026 Zachary H. Roberts. All rights reserved. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claim Clash - TV Cast</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: Inter, system-ui, -apple-system, sans-serif;
+            background: #0a0a0a;
+            color: #e4e4e7;
+            margin: 0;
+            padding: 24px;
+            min-height: 100vh;
+        }
+        .wrap { max-width: 1400px; margin: 0 auto; }
+        .section {
+            background: #111113;
+            border: 1px solid #27272a;
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .logo { display: block; margin: 0 auto 12px; width: 180px; border-radius: 16px; border: 1px solid #3f3f46; }
+        h1 { font-size: 2.5rem; margin: 0; font-weight: 700; }
+        .muted { color: #a1a1aa; }
+        .dim { color: #71717a; font-size: 0.9rem; }
+        .tiny { color: #52525b; font-size: 0.75rem; }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+        .btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+        .btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 16px; border-radius: 16px; border: none;
+            font-size: 0.9rem; font-weight: 500; color: #fff;
+            opacity: 0.95;
+        }
+        .btn-zinc { background: #27272a; }
+        .btn-blue { background: #2563eb; }
+        .btn-red { background: #dc2626; }
+        .btn-emerald { background: #059669; }
+        .btn-amber { background: #b45309; }
+        .btn-purple { background: #7c3aed; }
+        .btn.active-team { box-shadow: 0 0 0 3px #fbbf24; }
+        .btn.inactive-team { opacity: 0.45; }
+        .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+        .label { font-size: 0.8rem; font-weight: 600; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+        .panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 12px; flex-wrap: wrap; }
+        .badge { padding: 4px 12px; border-radius: 16px; font-size: 0.75rem; font-weight: 700; color: #fff; }
+        .badge-a { background: #2563eb; }
+        .badge-b { background: #dc2626; }
+        .box {
+            min-height: 100px;
+            padding: 16px;
+            background: #18181b;
+            border: 1px solid #3f3f46;
+            border-radius: 16px;
+            font-size: 1.15rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .box.answer { min-height: 140px; font-size: 1.05rem; }
+        .box.empty { color: #71717a; font-style: italic; }
+        .stack > * + * { margin-top: 10px; }
+        .rules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .rules-grid .btn { width: 100%; justify-content: flex-start; font-size: 0.75rem; padding: 8px 10px; }
+        .rules-list { font-size: 0.72rem; line-height: 1.45; color: #d4d4d8; }
+        .rules-list div { margin-bottom: 4px; }
+        .ai-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+        .ai-card { background: #18181b; border: 1px solid #3f3f46; border-radius: 16px; padding: 14px; min-height: 120px; }
+        .ai-name { font-size: 0.85rem; font-weight: 600; color: #34d399; margin-bottom: 8px; }
+        .ai-text { font-size: 0.95rem; line-height: 1.45; white-space: pre-wrap; }
+        .toggle-chip { display: inline-block; padding: 4px 10px; border-radius: 14px; font-size: 0.75rem; margin: 2px; background: #27272a; border: 1px solid #3f3f46; }
+        .toggle-chip.on { background: #059669; border-color: #10b981; }
+        .cast-banner {
+            text-align: center; padding: 8px; margin-bottom: 16px;
+            background: #581c87; border: 1px solid #7e22ce; border-radius: 12px;
+            font-size: 0.85rem; color: #f3e8ff;
+        }
+        footer { text-align: center; margin-top: 24px; font-size: 0.7rem; color: #52525b; line-height: 1.5; }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="cast-banner">📺 Live Cast View — control the game on your computer; this screen mirrors the action.</div>
+
+        <img class="logo" src="/claimsclash.png" alt="Claim Clash" onerror="this.style.display='none'">
+
+        <div class="header">
+            <div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <h1>Claim Clash</h1>
+                    <span class="tiny" style="padding:2px 6px;background:#27272a;border:1px solid #3f3f46;border-radius:4px;">v<span id="app-version">0.1.0</span></span>
+                </div>
+                <p class="muted">An Evidence-Based Discussion Game for Political Claims</p>
+                <p class="dim">Structured Fact-Finding Between Opposing Perspectives • Facilitated by an AI Assistant</p>
+                <p class="tiny">Rules v<span id="rules-version">3.0</span> • June 2026</p>
+            </div>
+            <div class="btn-row">
+                <span class="btn btn-zinc">⛶ Full Screen</span>
+                <span class="btn btn-zinc">📖 Rules</span>
+                <span class="btn btn-zinc">⚙ Settings</span>
+                <span class="btn btn-zinc">ℹ About</span>
+            </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+            <span class="dim" style="font-weight:600;">Who goes first?</span>
+            <span id="team-a-btn" class="btn btn-blue">Team A</span>
+            <span id="team-b-btn" class="btn btn-red">Team B</span>
+        </div>
+
+        <div class="grid">
+            <div class="stack">
+                <div class="section">
+                    <div class="panel-head">
+                        <span class="label">Current Question</span>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span id="player-badge" class="badge badge-a">TEAM A</span>
+                            <span class="btn btn-emerald">✈ Ask New Question</span>
+                        </div>
+                    </div>
+                    <div id="question" class="box empty">No question yet</div>
+                </div>
+
+                <div class="section">
+                    <div class="panel-head">
+                        <span class="label">AI Assistant's Answer</span>
+                        <span id="follow-up-btn" class="btn btn-red">↩ Follow Up</span>
+                    </div>
+                    <div id="main-answer" class="box answer empty">Waiting for responses...</div>
+                </div>
+            </div>
+
+            <div class="stack">
+                <div class="section">
+                    <div class="label">Quick Actions</div>
+                    <div class="stack">
+                        <span class="btn btn-amber" style="width:100%;justify-content:center;">Load Example Flow</span>
+                        <span class="btn btn-amber" style="width:100%;justify-content:center;">🔖 Bookmark Concern</span>
+                        <span class="btn btn-zinc" style="width:100%;justify-content:center;">Clear Current</span>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="label">Core Rules</div>
+                    <div class="rules-list">
+                        <div>• One focused question per turn.</div>
+                        <div>• Questions should seek evidence, clarification, or verification of specific claims.</div>
+                        <div>• Keep questions relevant to the current topic.</div>
+                        <div>• Follow-up questions are encouraged when more detail or counter-evidence is needed.</div>
+                        <div>• Maintain respect and focus on the claims, not on each other.</div>
+                        <div>• Ask the AI to ground its responses in primary sources and documented facts.</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="label">Rules Reference</div>
+                    <div class="rules-grid">
+                        <span class="btn btn-zinc">Introduction</span>
+                        <span class="btn btn-zinc">How to Play</span>
+                        <span class="btn btn-zinc">Core Rules</span>
+                        <span class="btn btn-zinc">Challenging an Answer</span>
+                        <span class="btn btn-zinc">Staying Focused</span>
+                        <span class="btn btn-zinc">Ending a Round</span>
+                        <span class="btn btn-zinc">Best Practices</span>
+                        <span class="btn btn-zinc">Tips for a Great Game</span>
+                    </div>
+                    <span class="btn btn-amber" style="width:100%;justify-content:center;margin-top:8px;">Example Flow</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="panel-head">
+                <div>
+                    <span style="font-weight:600;">Compare with Other AIs</span>
+                    <span class="tiny" style="margin-left:8px;">(Requires API keys on host PC)</span>
+                </div>
+                <div class="btn-row">
+                    <span id="jailbreak-label" class="dim">Jailbreak Mode: Off</span>
+                    <span class="btn btn-emerald">Query Selected</span>
+                    <span class="btn btn-purple">Cast to TV (active)</span>
+                </div>
+            </div>
+            <div id="ai-toggles" style="margin-bottom:12px;"></div>
+            <div id="ai-responses" class="ai-grid"></div>
+        </div>
+
+        <div class="section">
+            <div class="panel-head">
+                <span style="font-weight:600;">Bookmarks</span>
+                <span class="btn btn-zinc" style="font-size:0.75rem;padding:4px 12px;">Manage</span>
+            </div>
+            <div id="bookmarks" class="dim">No bookmarks yet.</div>
+        </div>
+
+        <footer>
+            Copyright © 2026 Zachary H. Roberts. All rights reserved.<br>
+            "Claim Clash" is a trademark of Zachary H. Roberts.
+        </footer>
+    </div>
+
+    <script>
+        function setText(id, html, emptyText) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const val = (html || '').trim();
+            if (!val) {
+                el.innerHTML = emptyText || '';
+                el.classList.add('empty');
+            } else {
+                el.innerHTML = val;
+                el.classList.remove('empty');
+            }
+        }
+
+        function updatePlayerUI(player) {
+            const badge = document.getElementById('player-badge');
+            const followUp = document.getElementById('follow-up-btn');
+            const teamA = document.getElementById('team-a-btn');
+            const teamB = document.getElementById('team-b-btn');
+            const isA = player === 'Team A';
+
+            if (badge) {
+                badge.textContent = isA ? 'TEAM A' : 'TEAM B';
+                badge.className = 'badge ' + (isA ? 'badge-a' : 'badge-b');
+            }
+            if (followUp) {
+                followUp.className = 'btn ' + (isA ? 'btn-red' : 'btn-blue');
+            }
+            if (teamA) teamA.className = 'btn btn-blue' + (isA ? ' active-team' : ' inactive-team');
+            if (teamB) teamB.className = 'btn btn-red' + (!isA ? ' active-team' : ' inactive-team');
+        }
+
+        function renderState(data) {
+            setText('question', data.question, 'No question yet');
+            setText('main-answer', data.main_answer, 'Waiting for responses...');
+            updatePlayerUI(data.current_player || 'Team A');
+
+            if (data.app_version) document.getElementById('app-version').textContent = data.app_version;
+            if (data.rules_version) document.getElementById('rules-version').textContent = data.rules_version;
+
+            const jailbreak = document.getElementById('jailbreak-label');
+            if (jailbreak) jailbreak.textContent = 'Jailbreak Mode: ' + (data.jailbreak_mode ? 'On' : 'Off');
+
+            const toggles = document.getElementById('ai-toggles');
+            if (toggles) {
+                toggles.innerHTML = '';
+                (data.selected_ais || []).forEach(name => {
+                    const chip = document.createElement('span');
+                    chip.className = 'toggle-chip on';
+                    chip.textContent = name + ' ✓';
+                    toggles.appendChild(chip);
+                });
+            }
+
+            const aiGrid = document.getElementById('ai-responses');
+            if (aiGrid) {
+                aiGrid.innerHTML = '';
+                const answers = data.answers || [];
+                if (answers.length === 0) {
+                    aiGrid.innerHTML = '<div class="ai-card"><div class="ai-text dim">No comparison AI responses yet.</div></div>';
+                } else {
+                    answers.forEach(a => {
+                        const card = document.createElement('div');
+                        card.className = 'ai-card';
+                        card.innerHTML = '<div class="ai-name">' + (a.name || 'AI') + '</div><div class="ai-text">' + (a.text || '') + '</div>';
+                        aiGrid.appendChild(card);
+                    });
+                }
+            }
+
+            const bookmarksEl = document.getElementById('bookmarks');
+            if (bookmarksEl) {
+                const bookmarks = data.bookmarks || [];
+                if (bookmarks.length === 0) {
+                    bookmarksEl.innerHTML = 'No bookmarks yet.';
+                } else {
+                    bookmarksEl.innerHTML = bookmarks.map(b =>
+                        '<div style="padding:4px 0;border-bottom:1px solid #27272a;">' +
+                        (b.concern || 'Concern') + ' <span class="tiny">(' + (b.player || '') + ')</span></div>'
+                    ).join('');
+                }
+            }
+        }
+
+        async function fetchState() {
+            try {
+                const res = await fetch('/state');
+                const data = await res.json();
+                renderState(data);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        setInterval(fetchState, 1500);
+        fetchState();
+    </script>
+</body>
+</html>
