@@ -2,8 +2,6 @@
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Claim Clash",
   "identifier": "YOUR_PUBLISHER.ClaimClash",
-  // Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
-  // "Claim Clash" is a trademark of Zachary H. Roberts.
   "bundle": {
     "active": true,
     "targets": ["msix"],

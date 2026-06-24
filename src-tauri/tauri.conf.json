@@ -3,8 +3,6 @@
   "productName": "Claim Clash",
   "version": "0.1.0",
   "identifier": "com.ranzh.claim-clash",
-  // Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
-  // "Claim Clash" is a trademark of Zachary H. Roberts. Licensed under MIT.
   "build": {
     "frontendDist": "../src"
   },
@@ -26,7 +24,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["nsis", "msix"],
+    "targets": ["nsis"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
