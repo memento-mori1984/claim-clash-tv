@@ -297,7 +297,8 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             
             <div id="cast-qr" class="flex justify-center mb-4"></div>
             
-            <p class="text-xs text-zinc-500 mb-4">The page will automatically update when you query new answers.</p>
+            <p id="cast-sync-status" class="text-xs text-emerald-400 mb-2">Syncing to TV...</p>
+            <p class="text-xs text-zinc-500 mb-4">The TV page updates live as you play. Refresh the TV browser if it looks stuck.</p>
             
             <div class="flex justify-end">
                 <button onclick="stopCastAndClose()" class="px-6 py-2 bg-red-600 hover:bg-red-700 rounded-2xl text-sm">Stop Casting</button>
@@ -436,6 +437,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             currentPlayer = "Team A";
             conversationHistory = [];
             updatePlayerBadge();
+            scheduleCastPush();
         }
 
         function addBookmark() {
@@ -604,6 +606,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     if (provider.id === 'gemini') selectedAIs.gemini = true; // keep gemini always available
                     renderAIToggles();
                     renderAIResponses();
+                    scheduleCastPush();
                 };
                 container.appendChild(btn);
             });
@@ -671,6 +674,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             } catch (e) {
                 if (responseDiv) responseDiv.innerHTML = `<span class="text-red-400">Error: ${e.message}</span>`;
             }
+            scheduleCastPush();
         }
 
         async function querySelectedAIs() {
@@ -853,7 +857,44 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         // ========== CAST TO SMART TV ==========
 
         let currentCastUrl = null;
+        let isCasting = false;
         let castSyncInterval = null;
+        let castPushDebounce = null;
+
+        function scheduleCastPush() {
+            if (!isCasting) return;
+            clearTimeout(castPushDebounce);
+            castPushDebounce = setTimeout(pushCurrentContentToCast, 200);
+        }
+
+        function setupCastObservers() {
+            const watchIds = ['question-box', 'answer-box', 'ai-responses', 'bookmarks-list', 'player-badge'];
+            watchIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const observer = new MutationObserver(scheduleCastPush);
+                observer.observe(el, { childList: true, subtree: true, characterData: true });
+            });
+
+            ['question-box', 'answer-box'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.addEventListener('input', scheduleCastPush);
+                el.addEventListener('blur', scheduleCastPush);
+            });
+        }
+
+        function updateCastSyncStatus(ok, detail) {
+            const el = document.getElementById('cast-sync-status');
+            if (!el) return;
+            if (ok) {
+                el.textContent = 'Live sync active — last push ' + new Date().toLocaleTimeString();
+                el.className = 'text-xs text-emerald-400 mb-2';
+            } else {
+                el.textContent = 'Sync issue: ' + (detail || 'unknown error');
+                el.className = 'text-xs text-red-400 mb-2';
+            }
+        }
 
         function startCast() {
             const btn = document.getElementById('cast-button');
@@ -865,6 +906,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     // Call without extra arg object; command takes no user args
                     const url = await tauriInvoke('start_cast');
                     currentCastUrl = url;
+                    isCasting = true;
 
                     // Show modal
                     const urlEl = document.getElementById('cast-url');
@@ -892,10 +934,12 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
                     await pushCurrentContentToCast();
                     if (castSyncInterval) clearInterval(castSyncInterval);
-                    castSyncInterval = setInterval(pushCurrentContentToCast, 2000);
+                    castSyncInterval = setInterval(pushCurrentContentToCast, 1000);
                     if (btn) btn.textContent = 'Cast to TV (active)';
                 } catch (error) {
                     console.error('Cast start error:', error);
+                    isCasting = false;
+                    currentCastUrl = null;
                     alert("Failed to start cast server: " + (error && error.message ? error.message : error));
                     if (btn) btn.textContent = originalText || 'Cast to TV';
                 }
@@ -905,9 +949,14 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         window.startCast = startCast;
 
         async function stopCast() {
+            isCasting = false;
             if (castSyncInterval) {
                 clearInterval(castSyncInterval);
                 castSyncInterval = null;
+            }
+            if (castPushDebounce) {
+                clearTimeout(castPushDebounce);
+                castPushDebounce = null;
             }
             if (currentCastUrl) {
                 try {
@@ -926,7 +975,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         }
 
         async function pushCurrentContentToCast() {
-            if (!currentCastUrl) return;
+            if (!isCasting) return;
 
             const question = document.getElementById("question-box").innerHTML.trim();
             const mainAnswer = document.getElementById("answer-box").innerHTML.trim();
@@ -938,7 +987,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 const name = nameEl ? nameEl.textContent.trim() : provider || 'AI';
                 const text = div.innerHTML.trim();
                 if (text && text !== 'Querying...' && text !== 'Click "Ask" or use "Query Selected"' && !text.includes('Click "Open in Grok"')) {
-                    answers.push([name, text]);
+                    answers.push({ name: name, text: text });
                 }
             });
 
@@ -957,8 +1006,10 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     app_version: APP_VERSION,
                     rules_version: RULES_VERSION
                 });
+                updateCastSyncStatus(true);
             } catch (e) {
                 console.error("Failed to update cast content", e);
+                updateCastSyncStatus(false, e && e.message ? e.message : String(e));
             }
         }
 
@@ -1079,6 +1130,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             document.getElementById("question-box").innerHTML = "";
             document.getElementById("answer-box").innerHTML = "";
             conversationHistory = [];
+            scheduleCastPush();
         }
 
         function showRuleSection(key) {
@@ -1136,10 +1188,20 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             const jToggle = document.getElementById("jailbreak-toggle");
             if (jToggle) jToggle.checked = jailbreakMode;
 
+            setupCastObservers();
+
             // Attach cast button listener (use onclick to ensure single handler)
             const castBtn = document.getElementById('cast-button');
             if (castBtn) {
-                castBtn.onclick = window.startCast || startCast;
+                castBtn.onclick = () => {
+                    if (isCasting) {
+                        const modalEl = document.getElementById('cast-modal');
+                        if (modalEl) modalEl.classList.remove('hidden');
+                        pushCurrentContentToCast();
+                    } else {
+                        (window.startCast || startCast)();
+                    }
+                };
             }
         }
 

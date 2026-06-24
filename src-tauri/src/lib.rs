@@ -3,7 +3,8 @@
 //
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 use std::sync::{Arc, Mutex};
-use tiny_http::{Server, Response, Header};
+use std::time::{SystemTime, UNIX_EPOCH};
+use tiny_http::{Header, Response, Server};
 
 #[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 pub struct CastBookmark {
@@ -12,16 +13,30 @@ pub struct CastBookmark {
 }
 
 #[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
+pub struct CastAnswer {
+    pub name: String,
+    pub text: String,
+}
+
+#[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 pub struct CastContent {
     pub question: String,
     pub main_answer: String,
     pub current_player: String,
-    pub answers: Vec<(String, String)>, // (ai_name, response)
+    pub answers: Vec<CastAnswer>,
     pub bookmarks: Vec<CastBookmark>,
     pub selected_ais: Vec<String>,
     pub jailbreak_mode: bool,
     pub app_version: String,
     pub rules_version: String,
+    pub updated_at: u64,
+}
+
+fn now_secs() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs()
 }
 
 #[derive(Default)]
@@ -55,7 +70,7 @@ fn start_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<String, Stri
     // Run HTTP server in a background thread
     std::thread::spawn(move || {
         for request in server.incoming_requests() {
-            let url_path = request.url().to_string();
+            let url_path = request.url().split('?').next().unwrap_or("/").to_string();
 
             if url_path == "/state" {
                 let content = content.lock().unwrap();
@@ -63,17 +78,18 @@ fn start_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<String, Stri
                     "question": content.question,
                     "main_answer": content.main_answer,
                     "current_player": content.current_player,
-                    "answers": content.answers.iter().map(|(name, text)| {
-                        serde_json::json!({ "name": name, "text": text })
-                    }).collect::<Vec<_>>(),
+                    "answers": content.answers,
                     "bookmarks": content.bookmarks,
                     "selected_ais": content.selected_ais,
                     "jailbreak_mode": content.jailbreak_mode,
                     "app_version": content.app_version,
                     "rules_version": content.rules_version,
+                    "updated_at": content.updated_at,
                 });
                 let response = Response::from_string(json.to_string())
                     .with_header(Header::from_bytes("Content-Type", "application/json").unwrap())
+                    .with_header(Header::from_bytes("Cache-Control", "no-store, no-cache, must-revalidate").unwrap())
+                    .with_header(Header::from_bytes("Pragma", "no-cache").unwrap())
                     .with_header(Header::from_bytes("Access-Control-Allow-Origin", "*").unwrap());
                 let _ = request.respond(response);
             } else if url_path == "/claimsclash.png" {
@@ -113,7 +129,7 @@ fn update_cast_content(
     question: String,
     main_answer: String,
     current_player: String,
-    answers: Vec<(String, String)>,
+    answers: Vec<CastAnswer>,
     bookmarks: Vec<CastBookmark>,
     selected_ais: Vec<String>,
     jailbreak_mode: bool,
@@ -131,6 +147,7 @@ fn update_cast_content(
     content.jailbreak_mode = jailbreak_mode;
     content.app_version = app_version;
     content.rules_version = rules_version;
+    content.updated_at = now_secs();
     Ok(())
 }
 

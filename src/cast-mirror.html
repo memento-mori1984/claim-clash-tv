@@ -85,7 +85,7 @@
 </head>
 <body>
     <div class="wrap">
-        <div class="cast-banner">📺 Live Cast View — control the game on your computer; this screen mirrors the action.</div>
+        <div class="cast-banner">📺 Live Cast View — control the game on your computer; this screen mirrors the action.<br><span id="sync-status" class="tiny" style="color:#e9d5ff;">Connecting...</span></div>
 
         <img class="logo" src="/claimsclash.png" alt="Claim Clash" onerror="this.style.display='none'">
 
@@ -236,10 +236,26 @@
             if (teamB) teamB.className = 'btn btn-red' + (!isA ? ' active-team' : ' inactive-team');
         }
 
+        let lastUpdatedAt = 0;
+
         function renderState(data) {
             setText('question', data.question, 'No question yet');
             setText('main-answer', data.main_answer, 'Waiting for responses...');
             updatePlayerUI(data.current_player || 'Team A');
+
+            const syncEl = document.getElementById('sync-status');
+            if (syncEl) {
+                if (data.updated_at && data.updated_at > 0) {
+                    const changed = data.updated_at !== lastUpdatedAt;
+                    lastUpdatedAt = data.updated_at;
+                    const when = new Date(data.updated_at * 1000).toLocaleTimeString();
+                    syncEl.textContent = changed
+                        ? 'Live — last synced at ' + when
+                        : 'Live — synced at ' + when;
+                } else {
+                    syncEl.textContent = 'Waiting for game updates from your computer...';
+                }
+            }
 
             if (data.app_version) document.getElementById('app-version').textContent = data.app_version;
             if (data.rules_version) document.getElementById('rules-version').textContent = data.rules_version;
@@ -290,15 +306,18 @@
 
         async function fetchState() {
             try {
-                const res = await fetch('/state');
+                const res = await fetch('/state?t=' + Date.now(), { cache: 'no-store' });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
                 const data = await res.json();
                 renderState(data);
             } catch (e) {
                 console.error(e);
+                const syncEl = document.getElementById('sync-status');
+                if (syncEl) syncEl.textContent = 'Connection issue — retrying...';
             }
         }
 
-        setInterval(fetchState, 1500);
+        setInterval(fetchState, 1000);
         fetchState();
     </script>
 </body>
