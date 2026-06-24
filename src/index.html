@@ -107,6 +107,14 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                         <button onclick="addBookmark()" class="w-full bg-amber-600 hover:bg-amber-700 px-4 py-3 rounded-2xl text-sm flex items-center justify-center gap-x-2">
                             <i class="fa-solid fa-bookmark"></i> <span>Bookmark Concern</span>
                         </button>
+                        <label id="jailbreak-action" class="w-full flex items-center justify-between bg-zinc-800 hover:bg-zinc-700 px-4 py-3 rounded-2xl text-sm cursor-pointer">
+                            <span class="flex items-center gap-x-2">
+                                <i class="fa-solid fa-unlock"></i>
+                                <span>Jailbreak Mode</span>
+                            </span>
+                            <input type="checkbox" id="jailbreak-toggle" onchange="updateJailbreak()" class="accent-red-600 w-4 h-4">
+                        </label>
+                        <p class="text-[10px] text-zinc-500 px-1 -mt-1">Applies to the AI assistant and every comparison AI when enabled.</p>
                         <button onclick="clearCurrent()" class="w-full bg-zinc-800 hover:bg-zinc-700 px-4 py-3 rounded-2xl text-sm">Clear Current</button>
                     </div>
                 </div>
@@ -148,10 +156,6 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     <span class="text-xs text-zinc-500 ml-2">(Requires your own API keys • Add in Settings)</span>
                 </div>
                 <div class="flex items-center gap-x-3">
-                    <label class="flex items-center gap-x-2 text-sm cursor-pointer">
-                        <input type="checkbox" id="jailbreak-toggle" onchange="updateJailbreak()" class="accent-red-600">
-                        <span>Jailbreak Mode</span>
-                    </label>
                     <button onclick="querySelectedAIs()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm">Query Selected</button>
                     <button id="cast-button" class="px-4 py-1.5 bg-purple-600 hover:bg-purple-700 rounded-2xl text-sm">Cast to TV</button>
                 </div>
@@ -650,7 +654,12 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         function updateJailbreak() {
             const toggle = document.getElementById("jailbreak-toggle");
             jailbreakMode = toggle ? toggle.checked : false;
-            pushCurrentContentToCast();
+            const action = document.getElementById("jailbreak-action");
+            if (action) {
+                action.classList.toggle("ring-2", jailbreakMode);
+                action.classList.toggle("ring-red-600", jailbreakMode);
+            }
+            scheduleCastPush();
         }
 
         function getJailbreakPrompt() {
@@ -834,7 +843,9 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
             const rulesText = Object.values(RULE_SECTIONS).map(s => `${s.title}\n${s.content}`).join("\n\n");
 
+            const jail = getJailbreakPrompt();
             const prompt = `You are facilitating the Claim Clash game.\n\n` +
+                (jail ? `${jail}\n\n` : '') +
                 `Here are the full rules:\n${rulesText}\n\n` +
                 `Current question from the player:\n${question}\n\n` +
                 `Please respond as Grok in the style of the game, providing a structured, evidence-based answer.`;
@@ -1187,6 +1198,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             // Sync jailbreak toggle
             const jToggle = document.getElementById("jailbreak-toggle");
             if (jToggle) jToggle.checked = jailbreakMode;
+            updateJailbreak();
 
             setupCastObservers();
 

@@ -141,6 +141,10 @@
                     <div class="stack">
                         <span class="btn btn-amber" style="width:100%;justify-content:center;">Load Example Flow</span>
                         <span class="btn btn-amber" style="width:100%;justify-content:center;">🔖 Bookmark Concern</span>
+                        <span id="jailbreak-action" class="btn btn-zinc" style="width:100%;justify-content:space-between;">
+                            <span>🔓 Jailbreak Mode</span>
+                            <span id="jailbreak-status">Off</span>
+                        </span>
                         <span class="btn btn-zinc" style="width:100%;justify-content:center;">Clear Current</span>
                     </div>
                 </div>
@@ -181,7 +185,6 @@
                     <span class="tiny" style="margin-left:8px;">(Requires API keys on host PC)</span>
                 </div>
                 <div class="btn-row">
-                    <span id="jailbreak-label" class="dim">Jailbreak Mode: Off</span>
                     <span class="btn btn-emerald">Query Selected</span>
                     <span class="btn btn-purple">Cast to TV (active)</span>
                 </div>
@@ -260,8 +263,14 @@
             if (data.app_version) document.getElementById('app-version').textContent = data.app_version;
             if (data.rules_version) document.getElementById('rules-version').textContent = data.rules_version;
 
-            const jailbreak = document.getElementById('jailbreak-label');
-            if (jailbreak) jailbreak.textContent = 'Jailbreak Mode: ' + (data.jailbreak_mode ? 'On' : 'Off');
+            const jailbreakStatus = document.getElementById('jailbreak-status');
+            const jailbreakAction = document.getElementById('jailbreak-action');
+            if (jailbreakStatus) jailbreakStatus.textContent = data.jailbreak_mode ? 'On' : 'Off';
+            if (jailbreakAction) {
+                jailbreakAction.className = 'btn ' + (data.jailbreak_mode ? 'btn-red' : 'btn-zinc');
+                jailbreakAction.style.width = '100%';
+                jailbreakAction.style.justifyContent = 'space-between';
+            }
 
             const toggles = document.getElementById('ai-toggles');
             if (toggles) {
