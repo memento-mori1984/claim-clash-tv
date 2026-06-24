@@ -122,8 +122,6 @@ Copyright © 2026 Zachary H. Roberts. All rights reserved.
 
 "Claim Clash" is a trademark of Zachary H. Roberts.
 
-"Claim Clash" is a trademark of Ranzh.
-
 ## Recommended IDE
 
 - VS Code + Tauri extension + rust-analyzer

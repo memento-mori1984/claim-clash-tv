@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
+ * "Claim Clash" is a trademark of Zachary H. Roberts.
+ */
+
 .logo.vanilla:hover {
   filter: drop-shadow(0 0 2em #ffe21c);
 }

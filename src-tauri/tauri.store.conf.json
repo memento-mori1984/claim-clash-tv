@@ -4,6 +4,11 @@
   "identifier": "YOUR_PUBLISHER.ClaimClash",
   "bundle": {
     "active": true,
+    "copyright": "Copyright (c) 2026 Zachary H. Roberts. All rights reserved.",
+    "publisher": "Zachary H. Roberts",
+    "license": "MIT",
+    "licenseFile": "../LICENSE",
+    "shortDescription": "Structured fact-finding between opposing perspectives",
     "targets": ["msix"],
     "icon": [
       "icons/32x32.png",

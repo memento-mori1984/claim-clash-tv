@@ -118,6 +118,10 @@ fn get_cast_receiver_html() -> String {
         <h1>Claim Clash</h1>
         <div id="question" class="question">Loading...</div>
         <div id="answers"></div>
+        <footer style="margin-top:40px;text-align:center;font-size:0.75rem;color:#666;">
+            Copyright &copy; 2026 Zachary H. Roberts. All rights reserved.<br>
+            &ldquo;Claim Clash&rdquo; is a trademark of Zachary H. Roberts.
+        </footer>
     </div>
 
     <script>
