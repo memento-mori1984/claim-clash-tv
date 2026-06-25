@@ -26,6 +26,9 @@ pub struct CastContent {
     pub answers: Vec<CastAnswer>,
     pub bookmarks: Vec<CastBookmark>,
     pub selected_ais: Vec<String>,
+    // ARCHIVED: jailbreak_mode synced jailbreak toggle to TV cast mirror.
+    // Feature disabled in shipping build; frontend always sends false.
+    // Full implementation notes: src/jailbreak-mode.archive.js
     pub jailbreak_mode: bool,
     pub app_version: String,
     pub rules_version: String,
@@ -132,7 +135,7 @@ fn update_cast_content(
     answers: Vec<CastAnswer>,
     bookmarks: Vec<CastBookmark>,
     selected_ais: Vec<String>,
-    jailbreak_mode: bool,
+    jailbreak_mode: bool, // ARCHIVED: always false from frontend — see jailbreak-mode.archive.js
     app_version: String,
     rules_version: String,
 ) -> Result<(), String> {
