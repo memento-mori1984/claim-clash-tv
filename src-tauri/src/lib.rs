@@ -26,6 +26,7 @@ pub struct CastContent {
     pub answers: Vec<CastAnswer>,
     pub bookmarks: Vec<CastBookmark>,
     pub selected_ais: Vec<String>,
+    pub primary_provider: String,
     // ARCHIVED: jailbreak_mode synced jailbreak toggle to TV cast mirror.
     // Feature disabled in shipping build; frontend always sends false.
     // Full implementation notes: src/jailbreak-mode.archive.js
@@ -84,6 +85,7 @@ fn start_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<String, Stri
                     "answers": content.answers,
                     "bookmarks": content.bookmarks,
                     "selected_ais": content.selected_ais,
+                    "primary_provider": content.primary_provider,
                     "jailbreak_mode": content.jailbreak_mode,
                     "app_version": content.app_version,
                     "rules_version": content.rules_version,
@@ -135,6 +137,7 @@ fn update_cast_content(
     answers: Vec<CastAnswer>,
     bookmarks: Vec<CastBookmark>,
     selected_ais: Vec<String>,
+    primary_provider: String,
     jailbreak_mode: bool, // ARCHIVED: always false from frontend — see jailbreak-mode.archive.js
     app_version: String,
     rules_version: String,
@@ -147,6 +150,7 @@ fn update_cast_content(
     content.answers = answers;
     content.bookmarks = bookmarks;
     content.selected_ais = selected_ais;
+    content.primary_provider = primary_provider;
     content.jailbreak_mode = jailbreak_mode;
     content.app_version = app_version;
     content.rules_version = rules_version;

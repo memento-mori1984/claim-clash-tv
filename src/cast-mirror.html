@@ -128,10 +128,17 @@
 
                 <div class="section">
                     <div class="panel-head">
-                        <span class="label">AI Assistant's Answer</span>
+                        <span id="primary-answer-label" class="label">Primary AI Answer</span>
                         <span id="follow-up-btn" class="btn btn-red">↩ Follow Up</span>
                     </div>
                     <div id="main-answer" class="box answer empty">Waiting for responses...</div>
+                </div>
+
+                <div class="section">
+                    <div class="panel-head">
+                        <span class="label">Other AI Responses</span>
+                    </div>
+                    <div id="ai-responses" class="stack"></div>
                 </div>
             </div>
 
@@ -173,21 +180,6 @@
                     <span class="btn btn-amber" style="width:100%;justify-content:center;margin-top:8px;">Example Flow</span>
                 </div>
             </div>
-        </div>
-
-        <div class="section">
-            <div class="panel-head">
-                <div>
-                    <span style="font-weight:600;">Compare with Other AIs</span>
-                    <span class="tiny" style="margin-left:8px;">(Requires API keys on host PC)</span>
-                </div>
-                <div class="btn-row">
-                    <span class="btn btn-emerald">Query Selected</span>
-                    <span class="btn btn-purple">Cast to TV (active)</span>
-                </div>
-            </div>
-            <div id="ai-toggles" style="margin-bottom:12px;"></div>
-            <div id="ai-responses" class="ai-grid"></div>
         </div>
 
         <div class="section">
@@ -241,6 +233,10 @@
         function renderState(data) {
             setText('question', data.question, 'No question yet');
             setText('main-answer', data.main_answer, 'Waiting for responses...');
+            if (data.primary_provider) {
+                const pl = document.getElementById('primary-answer-label');
+                if (pl) pl.textContent = data.primary_provider.toUpperCase() + ' ANSWER (PRIMARY)';
+            }
             updatePlayerUI(data.current_player || 'Team A');
 
             const syncEl = document.getElementById('sync-status');
@@ -262,23 +258,12 @@
 
             // ARCHIVED: jailbreak_mode TV mirror removed — see src/jailbreak-mode.archive.js
 
-            const toggles = document.getElementById('ai-toggles');
-            if (toggles) {
-                toggles.innerHTML = '';
-                (data.selected_ais || []).forEach(name => {
-                    const chip = document.createElement('span');
-                    chip.className = 'toggle-chip on';
-                    chip.textContent = name + ' ✓';
-                    toggles.appendChild(chip);
-                });
-            }
-
             const aiGrid = document.getElementById('ai-responses');
             if (aiGrid) {
                 aiGrid.innerHTML = '';
                 const answers = data.answers || [];
                 if (answers.length === 0) {
-                    aiGrid.innerHTML = '<div class="ai-card"><div class="ai-text dim">No comparison AI responses yet.</div></div>';
+                    aiGrid.innerHTML = '<div class="ai-card"><div class="ai-text dim">No other AI responses yet.</div></div>';
                 } else {
                     answers.forEach(a => {
                         const card = document.createElement('div');

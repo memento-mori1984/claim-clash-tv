@@ -19,7 +19,27 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
     </style>
 </head>
 <body class="text-zinc-200">
-    <div class="max-w-[1400px] mx-auto p-6 relative">
+
+    <!-- Setup / Welcome Screen -->
+    <div id="setup-screen" class="min-h-screen flex flex-col items-center px-6 py-10">
+        <div id="setup-logo-wrap" class="text-center mb-8 transition-opacity" title="Enter at least one API key to continue">
+            <img id="setup-logo" src="claimsclash.png" alt="Claim Clash"
+                 class="w-56 h-auto rounded-2xl border border-zinc-700 shadow-lg mx-auto opacity-50 cursor-not-allowed" />
+            <p id="setup-logo-hint" class="text-sm text-zinc-500 mt-4 max-w-md mx-auto">
+                Enter at least one API key below, then click the logo to begin.
+            </p>
+        </div>
+
+        <div class="w-full max-w-2xl section rounded-3xl p-6">
+            <h2 class="text-lg font-semibold mb-1">Configure Your AIs</h2>
+            <p class="text-xs text-zinc-500 mb-4">Add API keys in any order. Use the arrows to set display order. Star your primary AI — its answers appear in the main box.</p>
+            <div id="setup-provider-list" class="space-y-3"></div>
+            <p class="text-[10px] text-zinc-600 mt-4">Grok uses a browser link (no API key). Keys are stored only in localStorage on this device.</p>
+        </div>
+    </div>
+
+    <!-- Main Game Screen -->
+    <div id="game-screen" class="hidden max-w-[1400px] mx-auto p-6 relative">
         <!-- Logo in top middle -->
         <div class="flex justify-center mb-2">
             <img src="claimsclash.png" alt="Claim Clash" 
@@ -71,7 +91,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                         <span class="text-sm font-medium text-zinc-400">CURRENT QUESTION</span>
                         <div class="flex items-center gap-x-2">
                             <div id="player-badge"></div>
-                            <button onclick="askGemini()" class="px-4 py-1 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm flex items-center gap-x-2">
+                            <button onclick="askPrimaryAI()" class="px-4 py-1 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm flex items-center gap-x-2">
                                 <i class="fa-solid fa-paper-plane"></i> <span>Ask New Question</span>
                             </button>
                         </div>
@@ -81,10 +101,10 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     </div>
                 </div>
 
-                <!-- Answer -->
+                <!-- Primary AI Answer -->
                 <div class="section rounded-3xl p-6">
                     <div class="flex justify-between items-center mb-3">
-                        <span class="text-sm font-medium text-zinc-400">AI ASSISTANT'S ANSWER</span>
+                        <span id="primary-answer-label" class="text-sm font-medium text-zinc-400">PRIMARY AI ANSWER</span>
                         <div>
                             <button id="follow-up-btn" onclick="followUp()" 
                                     class="px-4 py-1.5 rounded-2xl text-sm flex items-center gap-x-2">
@@ -95,6 +115,22 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     <div id="answer-box" contenteditable="true" 
                          class="min-h-[120px] text-lg p-4 bg-zinc-900 border border-zinc-700 rounded-2xl focus:outline-none focus:border-blue-500">
                     </div>
+                </div>
+
+                <!-- Other AI comparison boxes (directly under primary) -->
+                <div class="section rounded-3xl p-5">
+                    <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+                        <div>
+                            <span class="font-medium text-sm">Other AI Responses</span>
+                            <span class="text-xs text-zinc-500 ml-2">(below your primary AI)</span>
+                        </div>
+                        <div class="flex items-center gap-x-2 flex-wrap">
+                            <button onclick="querySelectedAIs()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-xs">Query Selected</button>
+                            <button id="cast-button" class="px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded-2xl text-xs">Cast to TV</button>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-2 mb-3" id="ai-toggles"></div>
+                    <div id="ai-responses" class="space-y-3"></div>
                 </div>
             </div>
 
@@ -145,28 +181,6 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             </div>
         </div>
 
-        <!-- AI Comparison -->
-        <div class="mt-6 section rounded-3xl p-6">
-            <div class="flex items-center justify-between mb-4">
-                <div>
-                    <span class="font-medium">Compare with Other AIs</span>
-                    <span class="text-xs text-zinc-500 ml-2">(Requires your own API keys • Add in Settings)</span>
-                </div>
-                <div class="flex items-center gap-x-3">
-                    <button onclick="querySelectedAIs()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm">Query Selected</button>
-                    <button id="cast-button" class="px-4 py-1.5 bg-purple-600 hover:bg-purple-700 rounded-2xl text-sm">Cast to TV</button>
-                </div>
-            </div>
-
-            <div class="flex flex-wrap gap-2 mb-4" id="ai-toggles">
-                <!-- Populated by JS -->
-            </div>
-
-            <div id="ai-responses" class="grid gap-4">
-                <!-- Dynamic response boxes -->
-            </div>
-        </div>
-
         <!-- Bookmarks -->
         <div class="mt-6 section rounded-3xl p-5">
             <div class="flex justify-between items-center mb-3">
@@ -196,44 +210,9 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
     <!-- Settings Modal -->
     <div id="settings-modal" onclick="closeSettingsModal()" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
         <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 border border-zinc-700 rounded-3xl p-6 w-full max-w-lg mx-4">
-            <h3 class="text-xl font-semibold mb-4">Settings - API Keys</h3>
-            <p class="text-xs text-zinc-500 mb-4">All keys are stored only in your browser's localStorage. Never share builds containing real keys.</p>
-
-            <div class="space-y-4">
-                <!-- Gemini -->
-                <div>
-                    <label class="block text-sm mb-1">Gemini API Key</label>
-                    <input id="gemini-key-input" type="password" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-2 text-sm" placeholder="AIza...">
-                </div>
-
-                <!-- OpenAI -->
-                <div>
-                    <label class="block text-sm mb-1">OpenAI API Key</label>
-                    <input id="openai-key-input" type="password" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-2 text-sm" placeholder="sk-...">
-                </div>
-
-                <!-- Anthropic -->
-                <div>
-                    <label class="block text-sm mb-1">Anthropic API Key</label>
-                    <input id="anthropic-key-input" type="password" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-2 text-sm" placeholder="sk-ant-...">
-                </div>
-
-                <!-- Groq -->
-                <div>
-                    <label class="block text-sm mb-1">Groq API Key</label>
-                    <input id="groq-key-input" type="password" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-2 text-sm" placeholder="gsk_...">
-                </div>
-
-                <!-- OpenRouter -->
-                <div>
-                    <label class="block text-sm mb-1">OpenRouter API Key</label>
-                    <input id="openrouter-key-input" type="password" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-2 text-sm" placeholder="sk-or-...">
-                </div>
-
-                <div class="pt-2 text-xs text-amber-400">
-                    Grok (xAI): No public API yet. Use the "Open in Grok" link below (it will preload the rules + your question).
-                </div>
-            </div>
+            <h3 class="text-xl font-semibold mb-4">Settings</h3>
+            <p class="text-xs text-zinc-500 mb-4">API keys, display order, and primary AI. Keys stay in localStorage on this device only.</p>
+            <div id="settings-provider-list" class="space-y-3 max-h-[420px] overflow-auto pr-1"></div>
 
             <div class="mt-6 flex justify-end gap-x-3">
                 <button onclick="closeSettingsModal()" class="px-6 py-2 bg-zinc-700 hover:bg-zinc-600 rounded-2xl">Cancel</button>
@@ -350,17 +329,20 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
         const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.0-flash-exp"];
 
-        // Major AI Providers for comparison
+        const DEFAULT_PROVIDER_ORDER = ['gemini', 'openai', 'anthropic', 'groq', 'openrouter', 'grok'];
+
         const AI_PROVIDERS = [
-            { id: 'gemini', name: 'Gemini', requiresKey: true, keyStorage: 'geminiApiKey' },
-            { id: 'openai', name: 'OpenAI (GPT-4o / o1)', requiresKey: true, keyStorage: 'openaiApiKey' },
-            { id: 'anthropic', name: 'Anthropic (Claude 3.5 Sonnet)', requiresKey: true, keyStorage: 'anthropicApiKey' },
-            { id: 'groq', name: 'Groq (Llama 3.1 / Mixtral)', requiresKey: true, keyStorage: 'groqApiKey' },
-            { id: 'openrouter', name: 'OpenRouter', requiresKey: true, keyStorage: 'openrouterApiKey' },
-            { id: 'grok', name: 'Grok (xAI)', requiresKey: false, isLink: true }
+            { id: 'gemini', name: 'Gemini', requiresKey: true, keyStorage: 'geminiApiKey', placeholder: 'AIza...' },
+            { id: 'openai', name: 'OpenAI (GPT-4o)', requiresKey: true, keyStorage: 'openaiApiKey', placeholder: 'sk-...' },
+            { id: 'anthropic', name: 'Anthropic (Claude 3.5)', requiresKey: true, keyStorage: 'anthropicApiKey', placeholder: 'sk-ant-...' },
+            { id: 'groq', name: 'Groq (Llama 3)', requiresKey: true, keyStorage: 'groqApiKey', placeholder: 'gsk_...' },
+            { id: 'openrouter', name: 'OpenRouter', requiresKey: true, keyStorage: 'openrouterApiKey', placeholder: 'sk-or-...' },
+            { id: 'grok', name: 'Grok (xAI)', requiresKey: false, isLink: true, placeholder: 'No key — browser link' }
         ];
 
-        let selectedAIs = { gemini: true };
+        let providerOrder = loadProviderOrder();
+        let primaryProviderId = loadPrimaryProviderId();
+        let selectedAIs = {};
 
         // Jailbreak feature is disabled in shipping builds (always false for cast sync).
         const JAILBREAK_FEATURE_DISABLED = true;
@@ -371,6 +353,252 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         let anthropicApiKey = localStorage.getItem('anthropicApiKey') || '';
         let groqApiKey = localStorage.getItem('groqApiKey') || '';
         let openrouterApiKey = localStorage.getItem('openrouterApiKey') || '';
+
+        function loadProviderOrder() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('providerOrder') || 'null');
+                if (Array.isArray(saved) && saved.length) {
+                    const valid = saved.filter(id => AI_PROVIDERS.some(p => p.id === id));
+                    const missing = DEFAULT_PROVIDER_ORDER.filter(id => !valid.includes(id));
+                    return valid.concat(missing);
+                }
+            } catch (e) {}
+            return [...DEFAULT_PROVIDER_ORDER];
+        }
+
+        function saveProviderOrder() {
+            localStorage.setItem('providerOrder', JSON.stringify(providerOrder));
+        }
+
+        function loadPrimaryProviderId() {
+            const saved = localStorage.getItem('primaryProviderId');
+            if (saved && AI_PROVIDERS.some(p => p.id === saved)) return saved;
+            return DEFAULT_PROVIDER_ORDER[0];
+        }
+
+        function savePrimaryProviderId() {
+            localStorage.setItem('primaryProviderId', primaryProviderId);
+        }
+
+        function getProviderById(id) {
+            return AI_PROVIDERS.find(p => p.id === id);
+        }
+
+        function getOrderedProviders() {
+            return providerOrder.map(id => getProviderById(id)).filter(Boolean);
+        }
+
+        function reloadApiKeysFromStorage() {
+            geminiApiKey = localStorage.getItem('geminiApiKey') || '';
+            if (geminiApiKey === 'YOUR_GEMINI_API_KEY_HERE') geminiApiKey = '';
+            openaiApiKey = localStorage.getItem('openaiApiKey') || '';
+            anthropicApiKey = localStorage.getItem('anthropicApiKey') || '';
+            groqApiKey = localStorage.getItem('groqApiKey') || '';
+            openrouterApiKey = localStorage.getItem('openrouterApiKey') || '';
+        }
+
+        function getApiKeyForProvider(id) {
+            switch (id) {
+                case 'gemini': return geminiApiKey;
+                case 'openai': return openaiApiKey;
+                case 'anthropic': return anthropicApiKey;
+                case 'groq': return groqApiKey;
+                case 'openrouter': return openrouterApiKey;
+                default: return '';
+            }
+        }
+
+        function providerIsConfigured(id) {
+            const p = getProviderById(id);
+            if (!p) return false;
+            if (p.isLink) return true;
+            const key = getApiKeyForProvider(id);
+            return !!(key && key.trim());
+        }
+
+        function countConfiguredProviders() {
+            return AI_PROVIDERS.filter(p => !p.isLink && providerIsConfigured(p.id)).length;
+        }
+
+        function ensureValidPrimary() {
+            if (providerIsConfigured(primaryProviderId)) return;
+            const fallback = providerOrder.find(id => providerIsConfigured(id));
+            if (fallback) primaryProviderId = fallback;
+        }
+
+        function syncSelectedAIsFromKeys() {
+            selectedAIs = {};
+            getOrderedProviders().forEach(p => {
+                if (p.id !== primaryProviderId && providerIsConfigured(p.id)) {
+                    selectedAIs[p.id] = true;
+                }
+            });
+        }
+
+        function updatePrimaryAnswerLabel() {
+            const el = document.getElementById('primary-answer-label');
+            const p = getProviderById(primaryProviderId);
+            if (el && p) {
+                el.textContent = p.name.toUpperCase() + ' ANSWER (PRIMARY)';
+            }
+        }
+
+        function moveProviderInOrder(id, direction) {
+            const idx = providerOrder.indexOf(id);
+            if (idx < 0) return;
+            const swap = direction === 'up' ? idx - 1 : idx + 1;
+            if (swap < 0 || swap >= providerOrder.length) return;
+            const next = [...providerOrder];
+            [next[idx], next[swap]] = [next[swap], next[idx]];
+            providerOrder = next;
+            saveProviderOrder();
+            renderSetupProviders();
+            renderSettingsProviders();
+            renderAIToggles();
+            renderAIResponses();
+        }
+
+        function setPrimaryProvider(id) {
+            if (!providerIsConfigured(id)) {
+                alert('Set an API key for this provider first (or use Grok which needs no key).');
+                return;
+            }
+            primaryProviderId = id;
+            savePrimaryProviderId();
+            syncSelectedAIsFromKeys();
+            updatePrimaryAnswerLabel();
+            renderSetupProviders();
+            renderSettingsProviders();
+            renderAIToggles();
+            renderAIResponses();
+            scheduleCastPush();
+        }
+
+        function buildProviderRow(provider, context) {
+            const row = document.createElement('div');
+            row.className = 'flex items-center gap-2 p-3 bg-zinc-900 border border-zinc-700 rounded-2xl';
+            row.dataset.providerId = provider.id;
+
+            const orderBtns = document.createElement('div');
+            orderBtns.className = 'flex flex-col gap-0.5';
+            const upBtn = document.createElement('button');
+            upBtn.type = 'button';
+            upBtn.className = 'px-2 py-0.5 text-[10px] bg-zinc-800 hover:bg-zinc-700 rounded';
+            upBtn.textContent = '▲';
+            upBtn.onclick = () => moveProviderInOrder(provider.id, 'up');
+            const downBtn = document.createElement('button');
+            downBtn.type = 'button';
+            downBtn.className = 'px-2 py-0.5 text-[10px] bg-zinc-800 hover:bg-zinc-700 rounded';
+            downBtn.textContent = '▼';
+            downBtn.onclick = () => moveProviderInOrder(provider.id, 'down');
+            orderBtns.appendChild(upBtn);
+            orderBtns.appendChild(downBtn);
+
+            const primaryBtn = document.createElement('button');
+            primaryBtn.type = 'button';
+            primaryBtn.className = 'px-2 py-1 text-sm rounded-xl ' + (primaryProviderId === provider.id ? 'bg-amber-600 text-white' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-400');
+            primaryBtn.title = 'Set as primary AI (main answer box)';
+            primaryBtn.innerHTML = '<i class="fa-solid fa-star"></i>';
+            primaryBtn.onclick = () => setPrimaryProvider(provider.id);
+
+            const body = document.createElement('div');
+            body.className = 'flex-1 min-w-0';
+            const label = document.createElement('label');
+            label.className = 'block text-sm font-medium mb-1';
+            label.textContent = provider.name + (primaryProviderId === provider.id ? ' (Primary)' : '');
+            body.appendChild(label);
+
+            if (provider.isLink) {
+                const note = document.createElement('p');
+                note.className = 'text-xs text-zinc-500';
+                note.textContent = 'Opens in browser — no API key required.';
+                body.appendChild(note);
+            } else {
+                const input = document.createElement('input');
+                input.type = 'password';
+                input.className = 'w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-sm setup-key-input';
+                input.dataset.providerId = provider.id;
+                input.dataset.keyStorage = provider.keyStorage;
+                input.placeholder = provider.placeholder || 'API key';
+                input.value = localStorage.getItem(provider.keyStorage) || '';
+                if (provider.keyStorage === 'geminiApiKey' && input.value === 'YOUR_GEMINI_API_KEY_HERE') input.value = '';
+                input.addEventListener('input', updateSetupLogoState);
+                body.appendChild(input);
+            }
+
+            row.appendChild(orderBtns);
+            row.appendChild(primaryBtn);
+            row.appendChild(body);
+            return row;
+        }
+
+        function renderSetupProviders() {
+            const list = document.getElementById('setup-provider-list');
+            if (!list) return;
+            list.innerHTML = '';
+            getOrderedProviders().forEach(p => list.appendChild(buildProviderRow(p, 'setup')));
+            updateSetupLogoState();
+        }
+
+        function renderSettingsProviders() {
+            const list = document.getElementById('settings-provider-list');
+            if (!list) return;
+            list.innerHTML = '';
+            getOrderedProviders().forEach(p => list.appendChild(buildProviderRow(p, 'settings')));
+        }
+
+        function saveKeysFromInputs(rootSelector) {
+            const root = document.querySelector(rootSelector) || document;
+            root.querySelectorAll('.setup-key-input').forEach(input => {
+                const storage = input.dataset.keyStorage;
+                const val = input.value.trim();
+                if (!storage) return;
+                if (val) localStorage.setItem(storage, val);
+                else localStorage.removeItem(storage);
+            });
+            reloadApiKeysFromStorage();
+            ensureValidPrimary();
+            syncSelectedAIsFromKeys();
+        }
+
+        function updateSetupLogoState() {
+            const logo = document.getElementById('setup-logo');
+            const hint = document.getElementById('setup-logo-hint');
+            const wrap = document.getElementById('setup-logo-wrap');
+            if (!logo || !hint) return;
+
+            const tempCount = document.querySelectorAll('#setup-provider-list .setup-key-input')
+                .length ? [...document.querySelectorAll('#setup-provider-list .setup-key-input')].filter(i => i.value.trim()).length : 0;
+            const ready = tempCount >= 1;
+
+            if (ready) {
+                logo.className = 'w-56 h-auto rounded-2xl border-2 border-emerald-500 shadow-lg mx-auto cursor-pointer hover:scale-[1.02] transition-transform';
+                hint.textContent = 'Ready! Click the logo to enter Claim Clash.';
+                hint.className = 'text-sm text-emerald-400 mt-4 max-w-md mx-auto';
+                if (wrap) wrap.onclick = enterMainGame;
+            } else {
+                logo.className = 'w-56 h-auto rounded-2xl border border-zinc-700 shadow-lg mx-auto opacity-50 cursor-not-allowed';
+                hint.textContent = 'Enter at least one API key below, then click the logo to begin.';
+                hint.className = 'text-sm text-zinc-500 mt-4 max-w-md mx-auto';
+                if (wrap) wrap.onclick = null;
+            }
+        }
+
+        function enterMainGame() {
+            saveKeysFromInputs('#setup-screen');
+            if (countConfiguredProviders() < 1) {
+                alert('Please enter at least one API key before continuing.');
+                return;
+            }
+            ensureValidPrimary();
+            savePrimaryProviderId();
+            saveProviderOrder();
+            syncSelectedAIsFromKeys();
+
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            initGameUI();
+        }
 
         const RULE_SECTIONS = {
             intro: {
@@ -549,39 +777,61 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             return { success: false, error: "All models failed." };
         }
 
-        function askGemini() {
-            if (!geminiApiKey || geminiApiKey === "YOUR_GEMINI_API_KEY_HERE") {
-                alert("Please add your Gemini API key in Settings.");
+        function askPrimaryAI() {
+            if (!providerIsConfigured(primaryProviderId)) {
+                alert("Please configure your primary AI in Settings.");
                 showSettings();
                 return;
             }
+
+            const primary = getProviderById(primaryProviderId);
             const question = document.getElementById("question-box").innerHTML.trim();
             if (!question) return alert("Please enter a question first.");
 
-            // Immediately copy current query into all comparison AI boxes
             renderAIResponses();
 
             const answerBox = document.getElementById("answer-box");
-            answerBox.innerHTML = "Asking AI assistant...";
 
-            conversationHistory = [];
-            conversationHistory.push({ role: "user", parts: [{ text: question }] });
-
-            callGemini(conversationHistory).then(result => {
-                if (result.success) {
-                    answerBox.innerHTML = result.text + `<br><small class="text-zinc-500">(via ${result.modelUsed})</small>`;
-                    conversationHistory.push({ role: "model", parts: [{ text: result.text }] });
-                } else {
-                    answerBox.innerHTML = `Error: ${result.error}`;
-                }
-                // Auto-query the comparison AIs (the query text is already copied by the render at start of askGemini)
-                const anySelected = Object.keys(selectedAIs).some(k => selectedAIs[k]);
-                if (anySelected) {
-                    setTimeout(() => querySelectedAIs(), 150);
-                }
+            if (primary.isLink) {
+                answerBox.innerHTML = '<span class="text-zinc-400">Grok is your primary AI. Use the Grok box below or Open in Grok.</span>';
+                openGrokWithQuery();
                 pushCurrentContentToCast();
-            });
+                return;
+            }
+
+            answerBox.innerHTML = "Asking " + primary.name + "...";
+
+            const finishPrimary = (text, modelUsed, isError) => {
+                if (isError) {
+                    answerBox.innerHTML = `Error: ${text}`;
+                } else {
+                    answerBox.innerHTML = text + (modelUsed ? `<br><small class="text-zinc-500">(via ${modelUsed})</small>` : '');
+                }
+                const anySelected = Object.keys(selectedAIs).some(k => selectedAIs[k]);
+                if (anySelected) setTimeout(() => querySelectedAIs(), 150);
+                pushCurrentContentToCast();
+            };
+
+            if (primaryProviderId === 'gemini') {
+                conversationHistory = [];
+                conversationHistory.push({ role: "user", parts: [{ text: question }] });
+                callGemini(conversationHistory).then(result => {
+                    if (result.success) {
+                        conversationHistory.push({ role: "model", parts: [{ text: result.text }] });
+                        finishPrimary(result.text, result.modelUsed, false);
+                    } else {
+                        finishPrimary(result.error, null, true);
+                    }
+                });
+            } else {
+                callAIProvider(primaryProviderId, question)
+                    .then(result => finishPrimary(result.text, result.modelUsed, false))
+                    .catch(e => finishPrimary(e.message, null, true));
+            }
         }
+
+        // Back-compat alias
+        function askGemini() { askPrimaryAI(); }
 
         // Follow Up = Switch turn + clear question box (no Gemini call)
         function followUp() {
@@ -597,14 +847,16 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             if (!container) return;
             container.innerHTML = "";
 
-            AI_PROVIDERS.forEach(provider => {
+            getOrderedProviders().forEach(provider => {
+                if (provider.id === primaryProviderId) return;
+                if (!providerIsConfigured(provider.id)) return;
+
                 const isOn = !!selectedAIs[provider.id];
                 const btn = document.createElement("button");
                 btn.className = `px-3 py-1 text-xs rounded-2xl border transition ${isOn ? 'bg-emerald-600 border-emerald-500 text-white' : 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-700'}`;
                 btn.innerHTML = `${provider.name} ${isOn ? '✓' : ''}`;
                 btn.onclick = () => {
                     selectedAIs[provider.id] = !selectedAIs[provider.id];
-                    if (provider.id === 'gemini') selectedAIs.gemini = true; // keep gemini always available
                     renderAIToggles();
                     renderAIResponses();
                     scheduleCastPush();
@@ -618,16 +870,17 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             if (!grid) return;
             grid.innerHTML = "";
 
-            const active = AI_PROVIDERS.filter(p => selectedAIs[p.id]);
-            if (active.length === 0) return;
-
-            grid.className = `grid grid-cols-1 md:grid-cols-2 gap-4`;
+            const active = getOrderedProviders().filter(p => p.id !== primaryProviderId && selectedAIs[p.id] && providerIsConfigured(p.id));
+            if (active.length === 0) {
+                grid.innerHTML = '<p class="text-xs text-zinc-500">No other AIs selected. Toggle providers above or add keys in Settings.</p>';
+                return;
+            }
 
             const question = document.getElementById("question-box").innerHTML.trim();
 
             active.forEach(provider => {
                 const box = document.createElement("div");
-                box.className = "section rounded-3xl p-4 min-h-[140px] flex flex-col";
+                box.className = "bg-zinc-900/50 border border-zinc-700 rounded-2xl p-4 min-h-[100px] flex flex-col";
 
                 let header = `<div class="flex justify-between items-center mb-2"><span class="text-sm font-medium">${provider.name}</span>`;
                 if (provider.isLink) {
@@ -640,8 +893,8 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 box.innerHTML = `
                     ${header}
                     <div class="text-[10px] text-zinc-500 mb-1 truncate">Query: ${question || '(none)'}</div>
-                    <div class="ai-response flex-1 text-sm p-3 bg-zinc-900 border border-zinc-700 rounded-2xl overflow-auto" data-provider="${provider.id}">
-                        ${provider.isLink ? '<span class="text-zinc-500 text-xs">Click "Open in Grok" above</span>' : 'Querying...'}
+                    <div class="ai-response flex-1 text-sm p-3 bg-zinc-900 border border-zinc-700 rounded-2xl overflow-auto min-h-[80px]" data-provider="${provider.id}">
+                        ${provider.isLink ? '<span class="text-zinc-500 text-xs">Click "Open in Grok" above</span>' : 'Waiting...'}
                     </div>
                 `;
                 grid.appendChild(box);
@@ -720,7 +973,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             const question = document.getElementById("question-box").innerHTML.trim();
             if (!question) return alert("Please enter a question first.");
 
-            const active = AI_PROVIDERS.filter(p => selectedAIs[p.id]);
+            const active = getOrderedProviders().filter(p => p.id !== primaryProviderId && selectedAIs[p.id] && providerIsConfigured(p.id) && !p.isLink);
 
             for (const provider of active) {
                 const boxes = document.querySelectorAll(`.ai-response[data-provider="${provider.id}"]`);
@@ -1015,13 +1268,14 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 const nameEl = div.parentElement.querySelector('.text-sm.font-medium');
                 const name = nameEl ? nameEl.textContent.trim() : provider || 'AI';
                 const text = div.innerHTML.trim();
-                if (text && text !== 'Querying...' && text !== 'Click "Ask" or use "Query Selected"' && !text.includes('Click "Open in Grok"')) {
+                if (text && text !== 'Querying...' && text !== 'Waiting...' && text !== 'Click "Ask" or use "Query Selected"' && !text.includes('Click "Open in Grok"')) {
                     answers.push({ name: name, text: text });
                 }
             });
 
-            const selectedAis = AI_PROVIDERS.filter(p => selectedAIs[p.id]).map(p => p.name);
+            const selectedAis = getOrderedProviders().filter(p => p.id !== primaryProviderId && selectedAIs[p.id]).map(p => p.name);
             const bookmarkData = bookmarks.map(b => ({ concern: b.concern, player: b.player }));
+            const primaryName = (getProviderById(primaryProviderId) || {}).name || 'Primary AI';
 
             try {
                 await tauriInvoke('update_cast_content', {
@@ -1031,6 +1285,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     answers: answers,
                     bookmarks: bookmarkData,
                     selected_ais: selectedAis,
+                    primary_provider: primaryName,
                     jailbreak_mode: false, // ARCHIVED: was jailbreakMode — see JAILBREAK MODE ARCHIVE
                     app_version: APP_VERSION,
                     rules_version: RULES_VERSION
@@ -1062,33 +1317,36 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             qbox.addEventListener("keydown", function(e) {
                 if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
-                    askGemini();
+                    askPrimaryAI();
                 }
             });
         }
 
+        function initGameUI() {
+            updatePlayerBadge();
+            updatePrimaryAnswerLabel();
+            updateBookmarksList();
+            setupKeyboard();
+            renderAIToggles();
+            renderAIResponses();
+            setupCastObservers();
+
+            const castBtn = document.getElementById('cast-button');
+            if (castBtn) {
+                castBtn.onclick = () => {
+                    if (isCasting) {
+                        const modalEl = document.getElementById('cast-modal');
+                        if (modalEl) modalEl.classList.remove('hidden');
+                        pushCurrentContentToCast();
+                    } else {
+                        (window.startCast || startCast)();
+                    }
+                };
+            }
+        }
+
         function showSettings() {
-            // Gemini
-            const gKey = localStorage.getItem("geminiApiKey");
-            const gInput = document.getElementById("gemini-key-input");
-            if (gInput) gInput.value = (gKey && gKey !== "YOUR_GEMINI_API_KEY_HERE") ? gKey : '';
-
-            // OpenAI
-            const oInput = document.getElementById("openai-key-input");
-            if (oInput) oInput.value = localStorage.getItem("openaiApiKey") || '';
-
-            // Anthropic
-            const aInput = document.getElementById("anthropic-key-input");
-            if (aInput) aInput.value = localStorage.getItem("anthropicApiKey") || '';
-
-            // Groq
-            const grInput = document.getElementById("groq-key-input");
-            if (grInput) grInput.value = localStorage.getItem("groqApiKey") || '';
-
-            // OpenRouter
-            const orInput = document.getElementById("openrouter-key-input");
-            if (orInput) orInput.value = localStorage.getItem("openrouterApiKey") || '';
-
+            renderSettingsProviders();
             document.getElementById("settings-modal").classList.remove("hidden");
         }
 
@@ -1097,58 +1355,15 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         }
 
         function saveAllApiKeys() {
-            // Gemini
-            const gVal = (document.getElementById("gemini-key-input") || {}).value?.trim();
-            if (gVal && gVal !== DEFAULT_GEMINI_API_KEY) {
-                geminiApiKey = gVal;
-                localStorage.setItem("geminiApiKey", gVal);
-            } else if (!gVal) {
-                localStorage.removeItem("geminiApiKey");
-                geminiApiKey = '';
-            }
-
-            // OpenAI
-            const oVal = (document.getElementById("openai-key-input") || {}).value?.trim();
-            if (oVal) {
-                openaiApiKey = oVal;
-                localStorage.setItem("openaiApiKey", oVal);
-            } else {
-                localStorage.removeItem("openaiApiKey");
-                openaiApiKey = '';
-            }
-
-            // Anthropic
-            const aVal = (document.getElementById("anthropic-key-input") || {}).value?.trim();
-            if (aVal) {
-                anthropicApiKey = aVal;
-                localStorage.setItem("anthropicApiKey", aVal);
-            } else {
-                localStorage.removeItem("anthropicApiKey");
-                anthropicApiKey = '';
-            }
-
-            // Groq
-            const grVal = (document.getElementById("groq-key-input") || {}).value?.trim();
-            if (grVal) {
-                groqApiKey = grVal;
-                localStorage.setItem("groqApiKey", grVal);
-            } else {
-                localStorage.removeItem("groqApiKey");
-                groqApiKey = '';
-            }
-
-            // OpenRouter
-            const orVal = (document.getElementById("openrouter-key-input") || {}).value?.trim();
-            if (orVal) {
-                openrouterApiKey = orVal;
-                localStorage.setItem("openrouterApiKey", orVal);
-            } else {
-                localStorage.removeItem("openrouterApiKey");
-                openrouterApiKey = '';
-            }
-
+            saveKeysFromInputs('#settings-modal');
+            saveProviderOrder();
+            savePrimaryProviderId();
+            updatePrimaryAnswerLabel();
+            renderAIToggles();
+            renderAIResponses();
             closeSettingsModal();
-            alert("API keys saved!");
+            scheduleCastPush();
+            alert("Settings saved!");
         }
 
         function showRules() {
@@ -1195,41 +1410,22 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         }
 
         function init() {
-            updatePlayerBadge();
+            reloadApiKeysFromStorage();
+            ensureValidPrimary();
+            syncSelectedAIsFromKeys();
 
-            // Populate version numbers for transparency
             const ver = typeof APP_VERSION !== 'undefined' ? APP_VERSION : '0.1.0';
             const headerVer = document.getElementById("header-version");
             if (headerVer) headerVer.textContent = ver;
             const rulesVer = document.getElementById("header-rules-version");
             if (rulesVer) rulesVer.textContent = typeof RULES_VERSION !== 'undefined' ? RULES_VERSION : '3.0';
 
-            document.getElementById("question-box").setAttribute("contenteditable", "true");
-            document.getElementById("answer-box").setAttribute("contenteditable", "true");
-            updateBookmarksList();
-            setupKeyboard();
+            const qbox = document.getElementById("question-box");
+            const abox = document.getElementById("answer-box");
+            if (qbox) qbox.setAttribute("contenteditable", "true");
+            if (abox) abox.setAttribute("contenteditable", "true");
 
-            // AI comparison init
-            renderAIToggles();
-            renderAIResponses();
-
-            // ARCHIVED: jailbreak toggle init removed — see JAILBREAK MODE ARCHIVE
-
-            setupCastObservers();
-
-            // Attach cast button listener (use onclick to ensure single handler)
-            const castBtn = document.getElementById('cast-button');
-            if (castBtn) {
-                castBtn.onclick = () => {
-                    if (isCasting) {
-                        const modalEl = document.getElementById('cast-modal');
-                        if (modalEl) modalEl.classList.remove('hidden');
-                        pushCurrentContentToCast();
-                    } else {
-                        (window.startCast || startCast)();
-                    }
-                };
-            }
+            renderSetupProviders();
         }
 
         window.onload = init;
