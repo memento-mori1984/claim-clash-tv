@@ -19,6 +19,14 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         .toolbar-btn { white-space: nowrap; flex-shrink: 0; }
         .panel-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; }
         .panel-head-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+        .solo-help-btn {
+            opacity: 0.18;
+            transition: opacity 0.15s ease;
+        }
+        .solo-help-btn:hover,
+        .solo-help-btn:focus-visible {
+            opacity: 0.55;
+        }
     </style>
 </head>
 <body class="text-zinc-200">
@@ -85,8 +93,25 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             </div>
         </div>
 
+        <!-- Single Player Interrogation Mode -->
+        <div class="flex flex-wrap items-center gap-x-2 gap-y-2 mb-4">
+            <button id="solo-interrogation-btn" type="button" onclick="toggleSinglePlayerInterrogationMode()"
+                    class="toolbar-btn px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-2xl text-sm">
+                Single Player Interrogation Mode
+            </button>
+            <div class="relative inline-flex items-center">
+                <button id="solo-interrogation-help" type="button" onclick="toggleSinglePlayerInterrogationHelp(event)"
+                        class="solo-help-btn w-6 h-6 flex items-center justify-center rounded-full text-xs text-zinc-400 hover:text-zinc-200"
+                        title="What is this?" aria-label="Single Player Interrogation Mode help">?</button>
+                <div id="solo-interrogation-help-popover" onclick="event.stopPropagation()"
+                     class="hidden absolute left-1/2 -translate-x-1/2 top-full mt-2 z-20 w-56 bg-zinc-950 border border-zinc-700 rounded-2xl px-4 py-3 text-sm text-zinc-300 shadow-lg text-center">
+                    This is where you play with yourself.
+                </div>
+            </div>
+        </div>
+
         <!-- Who Goes First -->
-        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mb-6">
+        <div id="first-player-row" class="flex flex-wrap items-center gap-x-4 gap-y-2 mb-6">
             <span class="text-sm font-medium text-zinc-400">Who goes first?</span>
             <button onclick="setFirstPlayer('Team A')" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm">Team A</button>
             <button onclick="setFirstPlayer('Team B')" class="px-4 py-1.5 bg-red-600 hover:bg-red-700 rounded-2xl text-sm">Team B</button>
@@ -437,6 +462,8 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         }
         // --- 2. Constants and global state ---
         let currentPlayer = "Team A";
+        let singlePlayerInterrogationMode = false;
+        const SOLO_INTERROGATION_KEY = 'claimClashSoloInterrogation';
         let bookmarks = [];
 
         // === TESTING DEFAULT API KEY ===
@@ -444,7 +471,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         // It will be used unless you have saved a different key in Settings.
         // IMPORTANT: This is only for personal/testing use. Do not share builds containing real keys.
         const DEFAULT_GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
-        const APP_VERSION = "0.1.26";
+        const APP_VERSION = "0.1.27";
         const APP_PHASE = "Alpha";
         const FEEDBACK_EMAIL = "";
         const RULES_VERSION = "3.0";
@@ -782,16 +809,82 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
         // --- 4. Game flow (turns, bookmarks, rules) ---
 
+        function loadSinglePlayerInterrogationMode() {
+            try {
+                return localStorage.getItem(SOLO_INTERROGATION_KEY) === '1';
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function saveSinglePlayerInterrogationMode() {
+            try {
+                localStorage.setItem(SOLO_INTERROGATION_KEY, singlePlayerInterrogationMode ? '1' : '0');
+            } catch (e) {}
+        }
+
+        function closeSinglePlayerInterrogationHelp() {
+            const popover = document.getElementById('solo-interrogation-help-popover');
+            if (popover) popover.classList.add('hidden');
+        }
+
+        function toggleSinglePlayerInterrogationHelp(ev) {
+            if (ev) ev.stopPropagation();
+            const popover = document.getElementById('solo-interrogation-help-popover');
+            if (!popover) return;
+            popover.classList.toggle('hidden');
+        }
+
+        function updateSinglePlayerInterrogationUI() {
+            const btn = document.getElementById('solo-interrogation-btn');
+            const firstPlayerRow = document.getElementById('first-player-row');
+            const followUpBtn = document.getElementById('follow-up-btn');
+            if (btn) {
+                if (singlePlayerInterrogationMode) {
+                    btn.className = 'toolbar-btn px-4 py-2 bg-violet-700 hover:bg-violet-800 border border-violet-500 rounded-2xl text-sm';
+                } else {
+                    btn.className = 'toolbar-btn px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-2xl text-sm';
+                }
+            }
+            if (firstPlayerRow) {
+                firstPlayerRow.classList.toggle('hidden', singlePlayerInterrogationMode);
+            }
+            if (followUpBtn) {
+                followUpBtn.classList.toggle('hidden', singlePlayerInterrogationMode);
+            }
+            if (singlePlayerInterrogationMode) {
+                currentPlayer = 'Solo';
+            } else if (currentPlayer === 'Solo') {
+                currentPlayer = 'Team A';
+            }
+            updatePlayerBadge();
+            scheduleCastPush();
+        }
+
+        function toggleSinglePlayerInterrogationMode() {
+            singlePlayerInterrogationMode = !singlePlayerInterrogationMode;
+            saveSinglePlayerInterrogationMode();
+            updateSinglePlayerInterrogationUI();
+        }
+
+        window.toggleSinglePlayerInterrogationMode = toggleSinglePlayerInterrogationMode;
+        window.toggleSinglePlayerInterrogationHelp = toggleSinglePlayerInterrogationHelp;
+
         function updatePlayerBadge() {
             const badge = document.getElementById("player-badge");
             const followUpBtn = document.getElementById("follow-up-btn");
 
+            if (singlePlayerInterrogationMode || currentPlayer === 'Solo') {
+                badge.innerHTML = `<span class="px-3 py-1 bg-violet-700 text-white text-xs font-bold rounded-2xl">SOLO</span>`;
+                return;
+            }
+
             if (currentPlayer === "Team A") {
                 badge.innerHTML = `<span class="px-3 py-1 bg-blue-600 text-white text-xs font-bold rounded-2xl">TEAM A</span>`;
-                followUpBtn.className = "px-4 py-1.5 bg-red-600 hover:bg-red-700 rounded-2xl text-sm flex items-center gap-x-2";
+                followUpBtn.className = "toolbar-btn px-4 py-1.5 bg-red-600 hover:bg-red-700 rounded-2xl text-sm flex items-center gap-x-2";
             } else {
                 badge.innerHTML = `<span class="px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-2xl">TEAM B</span>`;
-                followUpBtn.className = "px-4 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm flex items-center gap-x-2";
+                followUpBtn.className = "toolbar-btn px-4 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm flex items-center gap-x-2";
             }
         }
 
@@ -847,6 +940,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
         /** Closes every overlay modal except the cast modal (cast has its own lifecycle). */
         function closeAllModals() {
+            closeSinglePlayerInterrogationHelp();
             ['bookmark-modal', 'settings-modal', 'about-modal', 'rules-modal', 'feedback-modal'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.classList.add('hidden');
@@ -991,6 +1085,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
         // Follow Up = Switch turn + clear question box (no Gemini call)
         function followUp() {
+            if (singlePlayerInterrogationMode) return;
             document.getElementById("question-box").innerHTML = "";
             switchPlayer();
             pushCurrentContentToCast();
@@ -2000,6 +2095,8 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         }
 
         function initGameUI() {
+            singlePlayerInterrogationMode = loadSinglePlayerInterrogationMode();
+            updateSinglePlayerInterrogationUI();
             updatePlayerBadge();
             updatePrimaryAnswerLabel();
             updateBookmarksList();
@@ -2008,6 +2105,11 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             renderAIResponses();
             setupCastObservers();
             updateCastIndicator(false);
+
+            if (!window._soloHelpClickBound) {
+                window._soloHelpClickBound = true;
+                document.addEventListener('click', closeSinglePlayerInterrogationHelp);
+            }
 
             const castBtn = document.getElementById('cast-button');
             if (castBtn) {
