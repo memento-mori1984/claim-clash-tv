@@ -7,8 +7,11 @@
 //! opens the URL returned by [`start_cast`] and polls `/state` for JSON updates.
 //! The mirror page HTML is embedded from `src/cast-mirror.html` via [`get_cast_receiver_html`].
 
+use std::io::Cursor;
 use std::sync::{Arc, Mutex};
 use std::time::{SystemTime, UNIX_EPOCH};
+use image::{ImageFormat, Luma};
+use qrcode::QrCode;
 use tiny_http::{Header, Response, Server};
 
 /// A bookmarked concern shown on the TV mirror.
@@ -49,6 +52,24 @@ pub struct CastContent {
     pub updated_at: u64,
 }
 
+/// Connection details returned when casting starts.
+#[derive(serde::Serialize)]
+pub struct CastStartResponse {
+    pub url: String,
+    pub ip: String,
+    pub port: u16,
+}
+
+/// Status returned to the frontend for the cast button indicator dot.
+#[derive(serde::Serialize)]
+pub struct CastStatus {
+    pub running: bool,
+    pub tv_connected: bool,
+    pub url: String,
+    pub ip: String,
+    pub port: u16,
+}
+
 /// Returns current Unix timestamp in seconds for cache-busting and sync markers.
 fn now_secs() -> u64 {
     SystemTime::now()
@@ -62,6 +83,9 @@ struct CastState {
     content: Arc<Mutex<CastContent>>,
     running: bool,
     tv_connected: Arc<Mutex<bool>>,
+    cast_url: String,
+    cast_ip: String,
+    cast_port: u16,
 }
 
 impl Default for CastState {
@@ -70,15 +94,28 @@ impl Default for CastState {
             content: Arc::new(Mutex::new(CastContent::default())),
             running: false,
             tv_connected: Arc::new(Mutex::new(false)),
+            cast_url: String::new(),
+            cast_ip: String::new(),
+            cast_port: 0,
         }
     }
 }
 
-/// Status returned to the frontend for the cast button indicator dot.
-#[derive(serde::Serialize)]
-struct CastStatus {
-    running: bool,
-    tv_connected: bool,
+/// Builds a scannable PNG QR code for the cast URL (served at `/qr.png`).
+fn generate_qr_png(data: &str) -> Result<Vec<u8>, String> {
+    let code = QrCode::new(data.as_bytes()).map_err(|e| e.to_string())?;
+    let img = code
+        .render::<Luma<u8>>()
+        .quiet_zone(true)
+        .min_dimensions(256, 256)
+        .module_dimensions(8, 8)
+        .build();
+
+    let mut bytes = Vec::new();
+    image::DynamicImage::ImageLuma8(img)
+        .write_to(&mut Cursor::new(&mut bytes), ImageFormat::Png)
+        .map_err(|e| e.to_string())?;
+    Ok(bytes)
 }
 
 #[tauri::command]
@@ -86,14 +123,15 @@ fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
-/// Starts a background HTTP server on a random local port and returns the TV URL.
+/// Starts a background HTTP server on a random local port and returns connection info.
 ///
 /// Serves:
 /// - `/` and `/index.html`: embedded cast mirror HTML
 /// - `/state`: JSON snapshot of [`CastContent`]
+/// - `/qr.png`: scannable QR for the cast URL
 /// - `/claimsclash.png`: app logo asset
 #[tauri::command]
-fn start_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<String, String> {
+fn start_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<CastStartResponse, String> {
     let mut cast_state = state.lock().map_err(|e| e.to_string())?;
 
     if cast_state.running {
@@ -101,16 +139,21 @@ fn start_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<String, Stri
     }
 
     let local_ip = local_ip_address::local_ip().map_err(|e| e.to_string())?;
+    let ip = local_ip.to_string();
 
     // Bind to random port on all interfaces
     let server = Server::http("0.0.0.0:0").map_err(|e| e.to_string())?;
     let port = server.server_addr().to_ip().unwrap().port();
-    let url = format!("http://{}:{}", local_ip, port);
+    let url = format!("http://{}:{}", ip, port);
 
+    cast_state.cast_url = url.clone();
+    cast_state.cast_ip = ip.clone();
+    cast_state.cast_port = port;
     *cast_state.tv_connected.lock().map_err(|e| e.to_string())? = false;
 
     let content = cast_state.content.clone();
     let tv_connected = cast_state.tv_connected.clone();
+    let qr_url = url.clone();
 
     // Run HTTP server in a background thread
     std::thread::spawn(move || {
@@ -148,6 +191,13 @@ fn start_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<String, Stri
                     .with_header(Header::from_bytes("Pragma", "no-cache").unwrap())
                     .with_header(Header::from_bytes("Access-Control-Allow-Origin", "*").unwrap());
                 let _ = request.respond(response);
+            } else if url_path == "/qr.png" {
+                let bytes = generate_qr_png(&qr_url).unwrap_or_default();
+                let response = Response::from_data(bytes)
+                    .with_header(Header::from_bytes("Content-Type", "image/png").unwrap())
+                    .with_header(Header::from_bytes("Cache-Control", "no-store, no-cache, must-revalidate").unwrap())
+                    .with_header(Header::from_bytes("Access-Control-Allow-Origin", "*").unwrap());
+                let _ = request.respond(response);
             } else if url_path == "/claimsclash.png" {
                 let bytes = include_bytes!("../../src/claimsclash.png");
                 let response = Response::from_data(bytes.to_vec())
@@ -166,7 +216,7 @@ fn start_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<String, Stri
 
     cast_state.running = true;
 
-    Ok(url)
+    Ok(CastStartResponse { url, ip, port })
 }
 
 /// Stops casting, clears synced content, and resets the TV-connected flag.
@@ -174,6 +224,9 @@ fn start_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<String, Stri
 fn stop_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<(), String> {
     let mut cast_state = state.lock().map_err(|e| e.to_string())?;
     cast_state.running = false;
+    cast_state.cast_url.clear();
+    cast_state.cast_ip.clear();
+    cast_state.cast_port = 0;
     if let Ok(mut seen) = cast_state.tv_connected.lock() {
         *seen = false;
     }
@@ -183,7 +236,7 @@ fn stop_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<(), String> {
     Ok(())
 }
 
-/// Returns whether the cast server is running and whether a TV has loaded the mirror page.
+/// Returns whether the cast server is running and connection details for the setup modal.
 #[tauri::command]
 fn get_cast_status(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<CastStatus, String> {
     let cast_state = state.lock().map_err(|e| e.to_string())?;
@@ -191,6 +244,9 @@ fn get_cast_status(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<CastSta
     Ok(CastStatus {
         running: cast_state.running,
         tv_connected: *tv_connected,
+        url: cast_state.cast_url.clone(),
+        ip: cast_state.cast_ip.clone(),
+        port: cast_state.cast_port,
     })
 }
 

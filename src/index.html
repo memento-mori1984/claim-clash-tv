@@ -11,7 +11,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
     <title>Claim Clash</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
     <style>
         body { font-family: 'Inter', system_ui, sans-serif; background-color: #0a0a0a; }
         .section { background-color: #111113; border: 1px solid #27272a; }
@@ -340,18 +340,45 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         </div>
     </div>
     <!-- Cast to TV Modal -->
-    <div id="cast-modal" onclick="stopCastAndClose()" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-        <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 border border-zinc-700 rounded-3xl p-6 w-full max-w-md mx-4">
-            <h3 class="text-xl font-semibold mb-4">Casting to Smart TV</h3>
-            <p class="text-sm text-zinc-400 mb-3">Open this address in your Smart TV's web browser (same Wi-Fi):</p>
-            
-            <div class="bg-zinc-950 border border-zinc-700 rounded-2xl p-3 mb-4 font-mono text-sm break-all" id="cast-url"></div>
-            
-            <div id="cast-qr" class="flex justify-center mb-4"></div>
-            
-            <p id="cast-sync-status" class="text-xs text-amber-400 mb-2">Waiting for your TV to open this URL...</p>
-            <p class="text-xs text-zinc-500 mb-4">This window closes automatically once your TV connects. The Cast to TV button shows a green dot when live, red when not connected.</p>
-            
+    <div id="cast-modal" onclick="stopCastAndClose()" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+        <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 border border-zinc-700 rounded-3xl p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 class="text-xl font-semibold mb-2">Connect Your TV</h3>
+            <ol class="text-sm text-zinc-300 space-y-1.5 mb-4 list-decimal list-inside">
+                <li>Put your <strong>TV and this PC on the same Wi-Fi</strong>.</li>
+                <li>Open the <strong>web browser</strong> on your TV (not a streaming app).</li>
+                <li>Type the <strong>IP address</strong> and <strong>Port</strong> below, then press Go.</li>
+            </ol>
+
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <div class="bg-zinc-950 border border-emerald-700/50 rounded-2xl p-4 text-center">
+                    <div class="text-[10px] uppercase tracking-wide text-zinc-500 mb-1">IP Address</div>
+                    <div id="cast-ip" class="text-2xl font-bold font-mono text-emerald-400 break-all"></div>
+                </div>
+                <div class="bg-zinc-950 border border-emerald-700/50 rounded-2xl p-4 text-center">
+                    <div class="text-[10px] uppercase tracking-wide text-zinc-500 mb-1">Port</div>
+                    <div id="cast-port" class="text-2xl font-bold font-mono text-emerald-400"></div>
+                </div>
+            </div>
+
+            <p class="text-[11px] text-zinc-500 mb-1">Full address (if your TV asks for one URL):</p>
+            <div class="bg-zinc-950 border border-zinc-700 rounded-2xl p-3 mb-3 font-mono text-sm break-all" id="cast-url"></div>
+
+            <div class="flex flex-wrap gap-2 mb-4">
+                <button onclick="copyCastUrl()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
+                    <i class="fa-solid fa-copy"></i> <span>Copy URL</span>
+                </button>
+                <button onclick="openCastOnPhone()" class="px-4 py-2 bg-blue-700 hover:bg-blue-800 rounded-2xl text-sm flex items-center gap-x-2">
+                    <i class="fa-solid fa-mobile-screen"></i> <span>Open on my phone</span>
+                </button>
+            </div>
+
+            <p class="text-xs text-zinc-400 mb-2 text-center"><strong>Easier option:</strong> Scan this QR with your <strong>phone camera</strong> (same Wi-Fi). It opens the cast page on your phone so you can confirm it works, then type the IP and Port on your TV.</p>
+            <div id="cast-qr" class="flex justify-center mb-3"></div>
+            <p id="cast-qr-hint" class="text-[10px] text-zinc-600 text-center mb-3"></p>
+
+            <p id="cast-sync-status" class="text-xs text-amber-400 mb-2">Waiting for your TV to open this address...</p>
+            <p class="text-xs text-zinc-500 mb-4">This window closes automatically when your TV connects. The Cast to TV button shows a green dot when live.</p>
+
             <div class="flex justify-end">
                 <button onclick="stopCastAndClose()" class="px-6 py-2 bg-red-600 hover:bg-red-700 rounded-2xl text-sm">Stop Casting</button>
             </div>
@@ -402,7 +429,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         // It will be used unless you have saved a different key in Settings.
         // IMPORTANT: This is only for personal/testing use. Do not share builds containing real keys.
         const DEFAULT_GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
-        const APP_VERSION = "0.1.24";
+        const APP_VERSION = "0.1.25";
         const APP_PHASE = "Alpha";
         const FEEDBACK_EMAIL = "";
         const RULES_VERSION = "3.0";
@@ -1253,6 +1280,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         // --- 6. Cast to Smart TV (local HTTP server via Rust backend) ---
 
         let currentCastUrl = null;
+        let currentCastInfo = null;
         let isCasting = false;
         let castSyncInterval = null;
         let castStatusPollInterval = null;
@@ -1328,11 +1356,14 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         function updateCastSyncStatus(ok, detail) {
             const el = document.getElementById('cast-sync-status');
             if (!el) return;
-            if (ok) {
+            if (detail) {
+                el.textContent = detail;
+                el.className = 'text-xs ' + (ok ? 'text-emerald-400' : 'text-amber-400') + ' mb-2';
+            } else if (ok) {
                 el.textContent = 'Live sync active. Last push ' + new Date().toLocaleTimeString();
                 el.className = 'text-xs text-emerald-400 mb-2';
             } else {
-                el.textContent = 'Sync issue: ' + (detail || 'unknown error');
+                el.textContent = 'Sync issue: unknown error';
                 el.className = 'text-xs text-red-400 mb-2';
             }
         }
@@ -1358,6 +1389,109 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         function closeCastModal() {
             const modal = document.getElementById('cast-modal');
             if (modal) modal.classList.add('hidden');
+        }
+
+        /** Normalizes start_cast / get_cast_status payloads into { url, ip, port }. */
+        function normalizeCastInfo(result) {
+            if (!result) return null;
+            if (typeof result === 'string') {
+                try {
+                    const u = new URL(result);
+                    return { url: result, ip: u.hostname, port: parseInt(u.port, 10) || 80 };
+                } catch (e) {
+                    return { url: result, ip: '', port: 0 };
+                }
+            }
+            const url = result.url || '';
+            let ip = result.ip || '';
+            let port = result.port || 0;
+            if (url && (!ip || !port)) {
+                try {
+                    const u = new URL(url);
+                    if (!ip) ip = u.hostname;
+                    if (!port) port = parseInt(u.port, 10) || 80;
+                } catch (e) {}
+            }
+            return { url, ip, port };
+        }
+
+        /** Fills the connect modal with IP, port, URL, and a scannable QR image. */
+        async function renderCastConnectUI(info) {
+            const normalized = normalizeCastInfo(info);
+            if (!normalized || !normalized.url) return;
+            currentCastInfo = normalized;
+            currentCastUrl = normalized.url;
+
+            const ipEl = document.getElementById('cast-ip');
+            const portEl = document.getElementById('cast-port');
+            const urlEl = document.getElementById('cast-url');
+            if (ipEl) ipEl.textContent = normalized.ip || '(unknown)';
+            if (portEl) portEl.textContent = normalized.port ? String(normalized.port) : '(unknown)';
+            if (urlEl) urlEl.textContent = normalized.url;
+
+            const qrContainer = document.getElementById('cast-qr');
+            const qrHint = document.getElementById('cast-qr-hint');
+            if (!qrContainer) return;
+            qrContainer.innerHTML = '';
+
+            const serverQr = normalized.url.replace(/\/$/, '') + '/qr.png?t=' + Date.now();
+            let rendered = false;
+
+            if (typeof QRCode !== 'undefined' && typeof QRCode.toDataURL === 'function') {
+                try {
+                    const dataUrl = await QRCode.toDataURL(normalized.url, {
+                        width: 220,
+                        margin: 2,
+                        errorCorrectionLevel: 'M'
+                    });
+                    const img = document.createElement('img');
+                    img.src = dataUrl;
+                    img.alt = 'QR code to open cast URL on your phone';
+                    img.width = 220;
+                    img.height = 220;
+                    img.className = 'rounded-xl border-2 border-zinc-700 bg-white p-2';
+                    qrContainer.appendChild(img);
+                    rendered = true;
+                    if (qrHint) qrHint.textContent = 'Point your phone camera at the code above.';
+                } catch (e) {
+                    console.warn('Client QR render failed, using server QR', e);
+                }
+            }
+
+            if (!rendered) {
+                const img = document.createElement('img');
+                img.src = serverQr;
+                img.alt = 'QR code to open cast URL';
+                img.width = 220;
+                img.height = 220;
+                img.className = 'rounded-xl border-2 border-zinc-700 bg-white p-2';
+                img.onerror = () => {
+                    qrContainer.innerHTML = '<p class="text-xs text-zinc-500 p-4 border border-zinc-700 rounded-xl">QR unavailable. Use Copy URL or type IP and Port on your TV.</p>';
+                };
+                qrContainer.appendChild(img);
+                if (qrHint) qrHint.textContent = 'Server-generated QR (scan with your phone).';
+            }
+        }
+
+        async function copyCastUrl() {
+            const url = currentCastUrl || (currentCastInfo && currentCastInfo.url);
+            if (!url) return;
+            try {
+                await navigator.clipboard.writeText(url);
+                updateCastSyncStatus(true, 'URL copied. Paste into your TV browser if it supports paste.');
+            } catch (e) {
+                prompt('Copy this URL:', url);
+            }
+        }
+
+        async function openCastOnPhone() {
+            const url = currentCastUrl || (currentCastInfo && currentCastInfo.url);
+            if (!url) return;
+            const opened = await openExternalUrl(url);
+            if (!opened) {
+                try { await navigator.clipboard.writeText(url); } catch (e) {}
+                alert('Could not open browser automatically. URL copied to clipboard.');
+            }
         }
 
         async function pollCastStatus() {
@@ -1400,33 +1534,12 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             (async () => {
                 try {
                     // Call without extra arg object; command takes no user args
-                    const url = await tauriInvoke('start_cast');
-                    currentCastUrl = url;
+                    const info = await tauriInvoke('start_cast');
                     isCasting = true;
 
-                    // Show modal
-                    const urlEl = document.getElementById('cast-url');
                     const modalEl = document.getElementById('cast-modal');
-                    if (urlEl) urlEl.textContent = url;
                     if (modalEl) modalEl.classList.remove('hidden');
-
-                    // Generate QR code
-                    const qrContainer = document.getElementById('cast-qr');
-                    if (qrContainer) {
-                        qrContainer.innerHTML = '';
-                        
-                        if (typeof QRCode !== 'undefined') {
-                            new QRCode(qrContainer, {
-                                text: url,
-                                width: 180,
-                                height: 180,
-                                colorDark : "#000000",
-                                colorLight : "#ffffff",
-                            });
-                        } else {
-                            qrContainer.innerHTML = `<div class="text-xs text-zinc-400 p-4 border border-zinc-700 rounded">Scan with your TV browser or open the URL above</div>`;
-                        }
-                    }
+                    await renderCastConnectUI(info);
 
                     await pushCurrentContentToCast();
                     if (castSyncInterval) clearInterval(castSyncInterval);
@@ -1438,6 +1551,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     console.error('Cast start error:', error);
                     isCasting = false;
                     currentCastUrl = null;
+                    currentCastInfo = null;
                     stopCastStatusPolling();
                     alert("Failed to start cast server: " + (error && error.message ? error.message : error));
                     setCastButtonLabel(originalText || 'Cast to TV');
@@ -1463,6 +1577,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     await tauriInvoke('stop_cast');
                 } catch (e) {}
                 currentCastUrl = null;
+                currentCastInfo = null;
             }
             stopCastStatusPolling();
             setCastButtonLabel('Cast to TV');
@@ -1558,10 +1673,18 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
             const castBtn = document.getElementById('cast-button');
             if (castBtn) {
-                castBtn.onclick = () => {
+                castBtn.onclick = async () => {
                     if (isCasting) {
                         const modalEl = document.getElementById('cast-modal');
                         if (modalEl) modalEl.classList.remove('hidden');
+                        if (currentCastInfo) {
+                            await renderCastConnectUI(currentCastInfo);
+                        } else {
+                            try {
+                                const status = await tauriInvoke('get_cast_status');
+                                await renderCastConnectUI(status);
+                            } catch (e) {}
+                        }
                         pushCurrentContentToCast();
                     } else {
                         (window.startCast || startCast)();
