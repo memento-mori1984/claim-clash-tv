@@ -21,20 +21,27 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         .panel-head-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; flex-shrink: 0; }
         /* Hidden easter-egg hit target beside Single Player Interrogation Mode */
         .solo-help-btn {
-            opacity: 0;
-            color: transparent;
-            background: transparent;
-            border: none;
+            opacity: 0 !important;
+            color: transparent !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            font-size: 0 !important;
+            line-height: 0 !important;
             cursor: default;
+            -webkit-appearance: none;
+            appearance: none;
+            pointer-events: auto;
         }
         .solo-help-btn:hover,
         .solo-help-btn:focus,
-        .solo-help-btn:focus-visible {
-            opacity: 0;
-            color: transparent;
-            background: transparent;
-            outline: none;
-            box-shadow: none;
+        .solo-help-btn:focus-visible,
+        .solo-help-btn:active {
+            opacity: 0 !important;
+            color: transparent !important;
+            background: transparent !important;
+            outline: none !important;
+            box-shadow: none !important;
         }
         .cast-help-btn {
             opacity: 0.72;
@@ -126,19 +133,17 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         </div>
 
         <!-- Single Player Interrogation Mode -->
-        <div class="flex flex-wrap items-center gap-x-2 gap-y-2 mb-4">
+        <div class="relative inline-flex flex-wrap items-center gap-x-0 gap-y-2 mb-4">
             <button id="solo-interrogation-btn" type="button" onclick="toggleSinglePlayerInterrogationMode()"
                     class="toolbar-btn px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-2xl text-sm">
                 Single Player Interrogation Mode
             </button>
-            <div class="relative inline-flex items-center">
-                <button id="solo-interrogation-help" type="button" onclick="toggleSinglePlayerInterrogationHelp(event)"
-                        class="solo-help-btn w-6 h-6 flex items-center justify-center rounded-full text-xs"
-                        tabindex="-1" aria-hidden="true">?</button>
-                <div id="solo-interrogation-help-popover" onclick="event.stopPropagation()"
-                     class="hidden absolute left-1/2 -translate-x-1/2 top-full mt-2 z-20 w-56 bg-zinc-950 border border-zinc-700 rounded-2xl px-4 py-3 text-sm text-zinc-300 shadow-lg text-center">
-                    This is where you play with yourself.
-                </div>
+            <button id="solo-interrogation-help" type="button" onclick="toggleSinglePlayerInterrogationHelp(event)"
+                    class="solo-help-btn absolute right-0 top-0 h-full w-8 rounded-r-2xl"
+                    tabindex="-1" aria-hidden="true"></button>
+            <div id="solo-interrogation-help-popover" onclick="event.stopPropagation()"
+                 class="hidden absolute left-full ml-2 top-1/2 -translate-y-1/2 z-20 w-56 bg-zinc-950 border border-zinc-700 rounded-2xl px-4 py-3 text-sm text-zinc-300 shadow-lg text-center">
+                This is where you play with yourself.
             </div>
         </div>
 
@@ -527,7 +532,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         // It will be used unless you have saved a different key in Settings.
         // IMPORTANT: This is only for personal/testing use. Do not share builds containing real keys.
         const DEFAULT_GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
-        const APP_VERSION = "0.1.31";
+        const APP_VERSION = "0.1.32";
         const APP_PHASE = "Alpha";
         const FEEDBACK_EMAIL = "ClaimsClashFeedback@gmail.com";
         const MAILTO_BODY_URL_LIMIT = 1200;
