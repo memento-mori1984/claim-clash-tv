@@ -41,6 +41,11 @@ pub struct CastContent {
     pub jailbreak_mode: bool,
     pub app_version: String,
     pub rules_version: String,
+    /// Window scroll position as a fraction (0.0 = top, 1.0 = bottom).
+    pub scroll_fraction: f64,
+    pub question_scroll_fraction: f64,
+    pub answer_scroll_fraction: f64,
+    pub ai_responses_scroll_fraction: f64,
     pub updated_at: u64,
 }
 
@@ -131,6 +136,10 @@ fn start_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<String, Stri
                     "jailbreak_mode": content.jailbreak_mode,
                     "app_version": content.app_version,
                     "rules_version": content.rules_version,
+                    "scroll_fraction": content.scroll_fraction,
+                    "question_scroll_fraction": content.question_scroll_fraction,
+                    "answer_scroll_fraction": content.answer_scroll_fraction,
+                    "ai_responses_scroll_fraction": content.ai_responses_scroll_fraction,
                     "updated_at": content.updated_at,
                 });
                 let response = Response::from_string(json.to_string())
@@ -201,6 +210,10 @@ fn update_cast_content(
     jailbreak_mode: bool, // ARCHIVED: always false from frontend. See jailbreak-mode.archive.js
     app_version: String,
     rules_version: String,
+    scroll_fraction: f64,
+    question_scroll_fraction: f64,
+    answer_scroll_fraction: f64,
+    ai_responses_scroll_fraction: f64,
 ) -> Result<(), String> {
     let cast_state = state.lock().map_err(|e| e.to_string())?;
     let mut content = cast_state.content.lock().unwrap();
@@ -214,6 +227,10 @@ fn update_cast_content(
     content.jailbreak_mode = jailbreak_mode;
     content.app_version = app_version;
     content.rules_version = rules_version;
+    content.scroll_fraction = scroll_fraction.clamp(0.0, 1.0);
+    content.question_scroll_fraction = question_scroll_fraction.clamp(0.0, 1.0);
+    content.answer_scroll_fraction = answer_scroll_fraction.clamp(0.0, 1.0);
+    content.ai_responses_scroll_fraction = ai_responses_scroll_fraction.clamp(0.0, 1.0);
     content.updated_at = now_secs();
     Ok(())
 }

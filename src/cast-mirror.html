@@ -77,6 +77,8 @@
             word-break: break-word;
         }
         .box.answer { min-height: 140px; font-size: 1.05rem; }
+        .box.scroll-panel { max-height: 280px; overflow-y: auto; }
+        #ai-responses.scroll-panel { max-height: 420px; overflow-y: auto; }
         .box.empty { color: #71717a; font-style: italic; }
         .stack > * + * { margin-top: 10px; }
         .rules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -137,7 +139,7 @@
                             <span class="btn btn-emerald">✈ Ask</span>
                         </div>
                     </div>
-                    <div id="question" class="box empty">No question yet</div>
+                    <div id="question" class="box scroll-panel empty">No question yet</div>
                 </div>
 
                 <div class="section">
@@ -145,14 +147,14 @@
                         <span id="primary-answer-label" class="label">Primary AI Answer</span>
                         <span id="follow-up-btn" class="btn btn-red">↩ Follow Up</span>
                     </div>
-                    <div id="main-answer" class="box answer empty">Waiting for responses...</div>
+                    <div id="main-answer" class="box answer scroll-panel empty">Waiting for responses...</div>
                 </div>
 
                 <div class="section">
                     <div class="panel-head">
                         <span class="label">Other AI Responses</span>
                     </div>
-                    <div id="ai-responses" class="stack"></div>
+                    <div id="ai-responses" class="stack scroll-panel"></div>
                 </div>
             </div>
 
@@ -239,6 +241,29 @@
 
         let lastUpdatedAt = 0;
 
+        /** Applies synced scroll fractions from the PC (works across different screen heights). */
+        function applyScrollState(data) {
+            const applyFraction = (el, fraction) => {
+                if (!el || fraction == null || Number.isNaN(fraction)) return;
+                const max = Math.max(0, el.scrollHeight - el.clientHeight);
+                const target = Math.min(1, Math.max(0, fraction)) * max;
+                if (Math.abs(el.scrollTop - target) > 1) el.scrollTop = target;
+            };
+
+            requestAnimationFrame(() => {
+                const pageFrac = data.scroll_fraction ?? data.scrollFraction ?? 0;
+                const doc = document.documentElement;
+                const pageMax = Math.max(0, doc.scrollHeight - doc.clientHeight);
+                const pageTarget = Math.min(1, Math.max(0, pageFrac)) * pageMax;
+                if (Math.abs(window.scrollY - pageTarget) > 2) {
+                    window.scrollTo(0, pageTarget);
+                }
+                applyFraction(document.getElementById('question'), data.question_scroll_fraction ?? data.questionScrollFraction);
+                applyFraction(document.getElementById('main-answer'), data.answer_scroll_fraction ?? data.answerScrollFraction);
+                applyFraction(document.getElementById('ai-responses'), data.ai_responses_scroll_fraction ?? data.aiResponsesScrollFraction);
+            });
+        }
+
         /** Applies a full CastContent snapshot from /state to the mirror DOM. */
         function renderState(data) {
             setText('question', data.question, 'No question yet');
@@ -296,6 +321,8 @@
                     ).join('');
                 }
             }
+
+            applyScrollState(data);
         }
 
         /** Fetches /state with cache-busting; retries on the 1s poll interval. */
@@ -312,7 +339,7 @@
             }
         }
 
-        setInterval(fetchState, 1000);
+        setInterval(fetchState, 400);
         fetchState();
     </script>
 </body>

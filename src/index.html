@@ -402,7 +402,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         // It will be used unless you have saved a different key in Settings.
         // IMPORTANT: This is only for personal/testing use. Do not share builds containing real keys.
         const DEFAULT_GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
-        const APP_VERSION = "0.1.23";
+        const APP_VERSION = "0.1.24";
         const APP_PHASE = "Alpha";
         const FEEDBACK_EMAIL = "";
         const RULES_VERSION = "3.0";
@@ -1011,6 +1011,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 `;
                 grid.appendChild(box);
             });
+            bindCastScrollOnAiResponses();
         }
 
         /*
@@ -1264,6 +1265,25 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             castPushDebounce = setTimeout(pushCurrentContentToCast, 200);
         }
 
+        /** Returns scroll position as 0..1 for an element (window when el is null). */
+        function getScrollFraction(el) {
+            const node = el || document.documentElement;
+            const max = node.scrollHeight - node.clientHeight;
+            if (max <= 0) return 0;
+            const top = el ? el.scrollTop : (window.scrollY || node.scrollTop || 0);
+            return Math.min(1, Math.max(0, top / max));
+        }
+
+        /** Collects window and panel scroll fractions for TV mirror sync. */
+        function getCastScrollState() {
+            return {
+                scrollFraction: getScrollFraction(null),
+                questionScrollFraction: getScrollFraction(document.getElementById('question-box')),
+                answerScrollFraction: getScrollFraction(document.getElementById('answer-box')),
+                aiResponsesScrollFraction: getScrollFraction(document.getElementById('ai-responses')),
+            };
+        }
+
         function setupCastObservers() {
             const watchIds = ['question-box', 'answer-box', 'ai-responses', 'bookmarks-list', 'player-badge'];
             watchIds.forEach(id => {
@@ -1279,6 +1299,30 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 el.addEventListener('input', scheduleCastPush);
                 el.addEventListener('blur', scheduleCastPush);
             });
+
+            setupCastScrollSync();
+        }
+
+        /** Attaches scroll listeners to AI response panels (recreated when providers change). */
+        function bindCastScrollOnAiResponses() {
+            document.querySelectorAll('.ai-response').forEach(el => {
+                if (el.dataset.castScrollBound) return;
+                el.dataset.castScrollBound = '1';
+                el.addEventListener('scroll', () => scheduleCastPush(), { passive: true });
+            });
+        }
+
+        /** Pushes scroll position to TV whenever the user scrolls on PC. */
+        function setupCastScrollSync() {
+            if (window._castScrollSyncBound) return;
+            window._castScrollSyncBound = true;
+            const onScroll = () => scheduleCastPush();
+            window.addEventListener('scroll', onScroll, { passive: true });
+            ['question-box', 'answer-box', 'ai-responses', 'game-screen'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('scroll', onScroll, { passive: true });
+            });
+            bindCastScrollOnAiResponses();
         }
 
         function updateCastSyncStatus(ok, detail) {
@@ -1386,7 +1430,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
                     await pushCurrentContentToCast();
                     if (castSyncInterval) clearInterval(castSyncInterval);
-                    castSyncInterval = setInterval(pushCurrentContentToCast, 1000);
+                    castSyncInterval = setInterval(pushCurrentContentToCast, 400);
                     startCastStatusPolling();
                     setCastButtonLabel('Cast to TV');
                     updateCastIndicator(false);
@@ -1451,6 +1495,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             const selectedAis = getOrderedProviders().filter(p => p.id !== primaryProviderId && selectedAIs[p.id]).map(p => p.name);
             const bookmarkData = bookmarks.map(b => ({ concern: b.concern, player: b.player }));
             const primaryName = (getProviderById(primaryProviderId) || {}).name || 'Primary AI';
+            const scroll = getCastScrollState();
 
             try {
                 await tauriInvoke('update_cast_content', {
@@ -1463,7 +1508,11 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     primaryProvider: primaryName,
                     jailbreakMode: false, // ARCHIVED: see JAILBREAK MODE ARCHIVE
                     appVersion: APP_VERSION,
-                    rulesVersion: RULES_VERSION
+                    rulesVersion: RULES_VERSION,
+                    scrollFraction: scroll.scrollFraction,
+                    questionScrollFraction: scroll.questionScrollFraction,
+                    answerScrollFraction: scroll.answerScrollFraction,
+                    aiResponsesScrollFraction: scroll.aiResponsesScrollFraction
                 });
                 updateCastSyncStatus(true);
             } catch (e) {
