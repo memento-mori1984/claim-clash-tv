@@ -343,7 +343,22 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
     <div id="cast-modal" onclick="stopCastAndClose()" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
         <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 border border-zinc-700 rounded-3xl p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
             <h3 class="text-xl font-semibold mb-2">Connect Your TV</h3>
-            <ol class="text-sm text-zinc-300 space-y-1.5 mb-4 list-decimal list-inside">
+
+            <div class="mb-4 relative">
+                <label for="cast-tv-brand" class="block text-xs text-zinc-400 mb-1">What TV brand are you using?</label>
+                <input id="cast-tv-brand" type="text" autocomplete="off" spellcheck="false"
+                       class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-sm"
+                       placeholder="Start typing: Samsung, LG, Fire TV, Roku..."
+                       oninput="onCastBrandInput()" onkeydown="onCastBrandKeydown(event)" />
+                <div id="cast-brand-suggestions" class="hidden absolute z-10 left-0 right-0 mt-1 bg-zinc-950 border border-zinc-700 rounded-xl shadow-lg overflow-hidden"></div>
+            </div>
+
+            <div id="cast-brand-instructions" class="hidden mb-4 bg-zinc-950 border border-blue-700/40 rounded-2xl p-4">
+                <div class="text-sm font-semibold text-blue-300 mb-2" id="cast-brand-title"></div>
+                <ol id="cast-brand-steps" class="text-sm text-zinc-300 space-y-1.5 list-decimal list-inside"></ol>
+            </div>
+
+            <ol id="cast-generic-steps" class="text-sm text-zinc-300 space-y-1.5 mb-4 list-decimal list-inside">
                 <li>Put your <strong>TV and this PC on the same Wi-Fi</strong>.</li>
                 <li>Open the <strong>web browser</strong> on your TV (not a streaming app).</li>
                 <li>Type the <strong>IP address</strong> and <strong>Port</strong> below, then press Go.</li>
@@ -429,7 +444,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         // It will be used unless you have saved a different key in Settings.
         // IMPORTANT: This is only for personal/testing use. Do not share builds containing real keys.
         const DEFAULT_GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
-        const APP_VERSION = "0.1.25";
+        const APP_VERSION = "0.1.26";
         const APP_PHASE = "Alpha";
         const FEEDBACK_EMAIL = "";
         const RULES_VERSION = "3.0";
@@ -1281,7 +1296,328 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
         let currentCastUrl = null;
         let currentCastInfo = null;
+        let selectedTvBrandId = null;
         let isCasting = false;
+        const CAST_TV_BRAND_KEY = 'claimClashTvBrand';
+
+        /** TV brand guides: aliases support fuzzy spelling match as the user types. */
+        const TV_BRAND_GUIDES = [
+            {
+                id: 'samsung',
+                name: 'Samsung',
+                aliases: ['samsung', 'samsun', 'samung', 'tizen', 'smart hub'],
+                steps: [
+                    'Press Home on your Samsung remote.',
+                    'Open Samsung Internet (or Internet app from the app row).',
+                    'Move to the address bar at the top of the browser.',
+                    'Type the IP Address, then a colon :, then the Port number shown below.',
+                    'Press Go or Enter and wait for the Claim Clash mirror to load.'
+                ]
+            },
+            {
+                id: 'lg',
+                name: 'LG',
+                aliases: ['lg', 'l g', 'webos', 'web os', 'lg webos'],
+                steps: [
+                    'Press Home on your LG remote.',
+                    'Open the LG / webOS Browser app (globe icon).',
+                    'Select the URL bar at the top.',
+                    'Type the IP Address, then :, then the Port from this screen.',
+                    'Press Go. The page should connect within a few seconds.'
+                ]
+            },
+            {
+                id: 'roku',
+                name: 'Roku TV',
+                aliases: ['roku', 'roku tv', 'rokutv', 'roco', 'rocku'],
+                steps: [
+                    'Press Home on your Roku remote.',
+                    'Open Streaming Channels and search for a web browser (for example Web Browser X) if you do not already have one.',
+                    'Launch the browser app.',
+                    'Use the browser address field and type http:// then the IP Address, colon, and Port below.',
+                    'Submit the address. Keep this PC app open while the TV loads the mirror.'
+                ]
+            },
+            {
+                id: 'firetv',
+                name: 'Amazon Fire TV',
+                aliases: ['fire tv', 'firetv', 'amazon fire', 'fire stick', 'firestick', 'silk', 'amazon'],
+                steps: [
+                    'From the Fire TV home screen, go to Find or Your Apps.',
+                    'Open Silk Browser (or Firefox if installed).',
+                    'Select the address bar at the top.',
+                    'Type http://, the IP Address, :, and the Port shown below.',
+                    'Press Go. Return here to confirm the Cast button turns green.'
+                ]
+            },
+            {
+                id: 'sony',
+                name: 'Sony',
+                aliases: ['sony', 'sonny', 'google tv sony', 'bravia'],
+                steps: [
+                    'Press Home on your Sony remote.',
+                    'Open Apps and launch Internet Browser (or Google Chrome on Google TV models).',
+                    'Focus the address bar.',
+                    'Enter http:// plus the IP Address, colon, and Port from this window.',
+                    'Press Go and wait for the live mirror to appear.'
+                ]
+            },
+            {
+                id: 'vizio',
+                name: 'Vizio',
+                aliases: ['vizio', 'visio', 'smartcast', 'smart cast'],
+                steps: [
+                    'Press Home or Input on your Vizio remote.',
+                    'Open the Vizio Internet Apps or Browser app.',
+                    'Navigate to the URL / address field.',
+                    'Type the IP Address, colon, and Port listed below.',
+                    'Press Go to load Claim Clash on the TV.'
+                ]
+            },
+            {
+                id: 'hisense',
+                name: 'Hisense',
+                aliases: ['hisense', 'hi sense', 'vidaa'],
+                steps: [
+                    'Press Home on your Hisense remote.',
+                    'Open the VIDAA Browser or Internet app.',
+                    'Select the address bar.',
+                    'Type http://, the IP Address, :, and Port from this screen.',
+                    'Press Enter and keep casting active on this PC.'
+                ]
+            },
+            {
+                id: 'tcl',
+                name: 'TCL',
+                aliases: ['tcl', 't c l', 'tcl roku', 'tcl google'],
+                steps: [
+                    'Press Home on your TCL remote.',
+                    'If your TCL uses Roku: open a browser channel. If it uses Google TV: open Chrome or the Browser app.',
+                    'Focus the browser address bar.',
+                    'Type http://, the IP Address, :, and Port shown below.',
+                    'Press Go to open the mirror page.'
+                ]
+            },
+            {
+                id: 'googletv',
+                name: 'Google TV / Chromecast',
+                aliases: ['google tv', 'googletv', 'chromecast', 'android tv', 'androidtv', 'nvidia shield', 'shield tv'],
+                steps: [
+                    'From the home screen, open Google Chrome or the Browser app.',
+                    'If no browser is installed, install Chrome from the Play Store on the device.',
+                    'Tap the address bar.',
+                    'Type http://, the IP Address, :, and Port from this window.',
+                    'Press Go. The TV mirror updates live from this computer.'
+                ]
+            },
+            {
+                id: 'appletv',
+                name: 'Apple TV',
+                aliases: ['apple tv', 'appletv', 'apple'],
+                steps: [
+                    'Apple TV has limited web browsing. Easiest path: use AirPlay from a Mac or iPhone if available.',
+                    'Alternatively, install a browser app from the App Store (search "browser") if supported on your model.',
+                    'If a browser is available, enter http://, the IP Address, :, and Port below.',
+                    'For most users, scanning the QR on your phone and mirroring the phone to Apple TV is more reliable than typing on TV.'
+                ]
+            },
+            {
+                id: 'other',
+                name: 'Other / Generic Smart TV',
+                aliases: ['other', 'generic', 'smart tv', 'smarttv', 'unknown'],
+                steps: [
+                    'Connect TV and PC to the same Wi-Fi network.',
+                    'Open any full web browser app on the TV (not Netflix, Hulu, or Disney+).',
+                    'Find the URL or address bar in that browser.',
+                    'Type http://, then the IP Address, colon, and Port shown below.',
+                    'Press Go. If typing is hard, scan the QR with your phone first to verify the address works.'
+                ]
+            }
+        ];
+
+        let castBrandHighlight = -1;
+
+        /** Lowercases and collapses spaces for brand spelling comparisons. */
+        function normalizeBrandQuery(q) {
+            return (q || '').toLowerCase().trim().replace(/\s+/g, ' ');
+        }
+
+        /** Edit distance for typo-tolerant brand matching. */
+        function levenshteinDistance(a, b) {
+            if (a === b) return 0;
+            if (!a.length) return b.length;
+            if (!b.length) return a.length;
+            const row = Array.from({ length: b.length + 1 }, (_, i) => i);
+            for (let i = 1; i <= a.length; i++) {
+                let prev = i;
+                for (let j = 1; j <= b.length; j++) {
+                    const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+                    const val = Math.min(row[j] + 1, prev + 1, row[j - 1] + cost);
+                    row[j - 1] = prev;
+                    prev = val;
+                }
+                row[b.length] = prev;
+            }
+            return row[b.length];
+        }
+
+        /** Scores how well the typed query matches a brand name or alias. */
+        function scoreBrandMatch(query, brand) {
+            const q = normalizeBrandQuery(query);
+            if (!q) return 0;
+            const candidates = [brand.name, ...(brand.aliases || [])];
+            let best = 0;
+            for (const raw of candidates) {
+                const c = normalizeBrandQuery(raw);
+                if (!c) continue;
+                if (c === q) return 1000;
+                if (c.startsWith(q)) best = Math.max(best, 520 - (c.length - q.length) * 4);
+                if (q.startsWith(c)) best = Math.max(best, 420);
+                if (c.includes(q)) best = Math.max(best, 340);
+                const dist = levenshteinDistance(q, c);
+                if (dist <= 2) best = Math.max(best, 280 - dist * 40);
+                if (dist <= 4 && q.length >= 3) best = Math.max(best, 180 - dist * 20);
+            }
+            return best;
+        }
+
+        /** Returns brands ranked by spelling similarity to the query. */
+        function findTvBrandMatches(query, limit = 6) {
+            const q = normalizeBrandQuery(query);
+            if (!q) return [];
+            return TV_BRAND_GUIDES
+                .map(brand => ({ brand, score: scoreBrandMatch(q, brand) }))
+                .filter(item => item.score >= 120)
+                .sort((a, b) => b.score - a.score)
+                .slice(0, limit);
+        }
+
+        /** Shows or hides brand-specific steps vs generic cast steps. */
+        function renderCastBrandInstructions(brand, persistChoice = true) {
+            const panel = document.getElementById('cast-brand-instructions');
+            const generic = document.getElementById('cast-generic-steps');
+            const title = document.getElementById('cast-brand-title');
+            const steps = document.getElementById('cast-brand-steps');
+            if (!brand) {
+                selectedTvBrandId = null;
+                if (panel) panel.classList.add('hidden');
+                if (generic) generic.classList.remove('hidden');
+                return;
+            }
+            selectedTvBrandId = brand.id;
+            if (persistChoice) {
+                try { localStorage.setItem(CAST_TV_BRAND_KEY, brand.id); } catch (e) {}
+            }
+            if (title) title.textContent = brand.name + ' — open the browser on your TV';
+            if (steps) {
+                steps.innerHTML = '';
+                brand.steps.forEach(step => {
+                    const li = document.createElement('li');
+                    li.textContent = step;
+                    steps.appendChild(li);
+                });
+            }
+            if (panel) panel.classList.remove('hidden');
+            if (generic) generic.classList.add('hidden');
+        }
+
+        function renderCastBrandSuggestions(matches) {
+            const box = document.getElementById('cast-brand-suggestions');
+            if (!box) return;
+            if (!matches.length) {
+                box.classList.add('hidden');
+                box.innerHTML = '';
+                castBrandHighlight = -1;
+                return;
+            }
+            box.innerHTML = '';
+            matches.forEach((item, index) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'w-full text-left px-3 py-2 text-sm hover:bg-zinc-800' +
+                    (index === castBrandHighlight ? ' bg-zinc-800' : '');
+                btn.textContent = item.brand.name;
+                btn.onclick = () => selectCastBrand(item.brand.id);
+                box.appendChild(btn);
+            });
+            box.classList.remove('hidden');
+        }
+
+        function selectCastBrand(brandId) {
+            const brand = TV_BRAND_GUIDES.find(b => b.id === brandId);
+            const input = document.getElementById('cast-tv-brand');
+            if (brand && input) input.value = brand.name;
+            renderCastBrandInstructions(brand || null);
+            const box = document.getElementById('cast-brand-suggestions');
+            if (box) box.classList.add('hidden');
+            castBrandHighlight = -1;
+        }
+
+        /** Anticipates brand from spelling as the user types. */
+        function onCastBrandInput() {
+            const input = document.getElementById('cast-tv-brand');
+            if (!input) return;
+            const query = input.value;
+            const trimmed = normalizeBrandQuery(query);
+            const matches = findTvBrandMatches(query);
+            renderCastBrandSuggestions(matches);
+            const top = matches[0];
+            if (top && trimmed.length >= 2 && top.score >= 220) {
+                const persist = top.score >= 480;
+                renderCastBrandInstructions(top.brand, persist);
+            } else if (!trimmed.length) {
+                renderCastBrandInstructions(null, false);
+            } else {
+                renderCastBrandInstructions(null, false);
+            }
+        }
+
+        function onCastBrandKeydown(ev) {
+            const box = document.getElementById('cast-brand-suggestions');
+            const buttons = box ? [...box.querySelectorAll('button')] : [];
+            if (!buttons.length) return;
+            if (ev.key === 'ArrowDown') {
+                ev.preventDefault();
+                castBrandHighlight = Math.min(castBrandHighlight + 1, buttons.length - 1);
+                buttons.forEach((btn, i) => btn.classList.toggle('bg-zinc-800', i === castBrandHighlight));
+            } else if (ev.key === 'ArrowUp') {
+                ev.preventDefault();
+                castBrandHighlight = Math.max(castBrandHighlight - 1, 0);
+                buttons.forEach((btn, i) => btn.classList.toggle('bg-zinc-800', i === castBrandHighlight));
+            } else if (ev.key === 'Enter') {
+                ev.preventDefault();
+                const idx = castBrandHighlight >= 0 ? castBrandHighlight : 0;
+                buttons[idx]?.click();
+            } else if (ev.key === 'Escape') {
+                box.classList.add('hidden');
+                castBrandHighlight = -1;
+            }
+        }
+
+        /** Restores saved TV brand when the connect modal opens. */
+        function initCastTvBrandField() {
+            const input = document.getElementById('cast-tv-brand');
+            if (!input) return;
+            let savedId = null;
+            try { savedId = localStorage.getItem(CAST_TV_BRAND_KEY); } catch (e) {}
+            if (savedId) {
+                const brand = TV_BRAND_GUIDES.find(b => b.id === savedId);
+                if (brand) {
+                    input.value = brand.name;
+                    renderCastBrandInstructions(brand);
+                    return;
+                }
+            }
+            input.value = '';
+            renderCastBrandInstructions(null);
+            const box = document.getElementById('cast-brand-suggestions');
+            if (box) box.classList.add('hidden');
+        }
+
+        window.onCastBrandInput = onCastBrandInput;
+        window.onCastBrandKeydown = onCastBrandKeydown;
+        window.selectCastBrand = selectCastBrand;
+
         let castSyncInterval = null;
         let castStatusPollInterval = null;
         let castPushDebounce = null;
@@ -1428,6 +1764,8 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             if (ipEl) ipEl.textContent = normalized.ip || '(unknown)';
             if (portEl) portEl.textContent = normalized.port ? String(normalized.port) : '(unknown)';
             if (urlEl) urlEl.textContent = normalized.url;
+
+            initCastTvBrandField();
 
             const qrContainer = document.getElementById('cast-qr');
             const qrHint = document.getElementById('cast-qr-hint');
