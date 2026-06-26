@@ -85,7 +85,7 @@
 </head>
 <body>
     <div class="wrap">
-        <div class="cast-banner">📺 Live Cast View — control the game on your computer; this screen mirrors the action.<br><span id="sync-status" class="tiny" style="color:#e9d5ff;">Connecting...</span></div>
+        <div class="cast-banner">📺 Live Cast View. Control the game on your computer; this screen mirrors the action.<br><span id="sync-status" class="tiny" style="color:#e9d5ff;">Connecting...</span></div>
 
         <img class="logo" src="/claimsclash.png" alt="Claim Clash" onerror="this.style.display='none'">
 
@@ -149,7 +149,7 @@
                     <div class="stack">
                         <span class="btn btn-amber" style="width:100%;justify-content:center;">Load Example Flow</span>
                         <span class="btn btn-amber" style="width:100%;justify-content:center;">🔖 Bookmark Concern</span>
-                        <!-- ARCHIVED — JAILBREAK MODE TV mirror (disabled). See src/jailbreak-mode.archive.js -->
+                        <!-- ARCHIVED: JAILBREAK MODE TV mirror (disabled). See src/jailbreak-mode.archive.js -->
                         <span class="btn btn-zinc" style="width:100%;justify-content:center;">Clear Current</span>
                     </div>
                 </div>
@@ -247,8 +247,8 @@
                     lastUpdatedAt = data.updated_at;
                     const when = new Date(data.updated_at * 1000).toLocaleTimeString();
                     syncEl.textContent = changed
-                        ? 'Live — last synced at ' + when
-                        : 'Live — synced at ' + when;
+                        ? 'Live. Last synced at ' + when
+                        : 'Live. Synced at ' + when;
                 } else {
                     syncEl.textContent = 'Waiting for game updates from your computer...';
                 }
@@ -257,7 +257,7 @@
             if (data.app_version) document.getElementById('app-version').textContent = data.app_version;
             if (data.rules_version) document.getElementById('rules-version').textContent = data.rules_version;
 
-            // ARCHIVED: jailbreak_mode TV mirror removed — see src/jailbreak-mode.archive.js
+            // ARCHIVED: jailbreak_mode TV mirror removed. See src/jailbreak-mode.archive.js
 
             const aiGrid = document.getElementById('ai-responses');
             if (aiGrid) {
@@ -298,7 +298,7 @@
             } catch (e) {
                 console.error(e);
                 const syncEl = document.getElementById('sync-status');
-                if (syncEl) syncEl.textContent = 'Connection issue — retrying...';
+                if (syncEl) syncEl.textContent = 'Connection issue. Retrying...';
             }
         }
 

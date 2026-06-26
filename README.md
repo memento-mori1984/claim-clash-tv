@@ -93,9 +93,9 @@ npm run tauri build   # Production build
 
 ## Project Structure
 
-- `src/index.html` — Main UI + all game logic (Tailwind + vanilla JS)
-- `src-tauri/` — Tauri configuration and Rust backend (Cast to TV server, etc.)
-- `src/` — Assets, rules PDF, and logos
+- `src/index.html`: Main UI + all game logic (Tailwind + vanilla JS)
+- `src-tauri/`: Tauri configuration and Rust backend (Cast to TV server, etc.)
+- `src/`: Assets, rules PDF, and logos
 
 Most of the application logic is in the single HTML file, making it relatively easy to audit.
 

@@ -176,7 +176,7 @@ fn update_cast_content(
     bookmarks: Vec<CastBookmark>,
     selected_ais: Vec<String>,
     primary_provider: String,
-    jailbreak_mode: bool, // ARCHIVED: always false from frontend — see jailbreak-mode.archive.js
+    jailbreak_mode: bool, // ARCHIVED: always false from frontend. See jailbreak-mode.archive.js
     app_version: String,
     rules_version: String,
 ) -> Result<(), String> {
