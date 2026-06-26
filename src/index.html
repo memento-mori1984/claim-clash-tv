@@ -70,7 +70,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         </div>
 
         <div class="w-full max-w-2xl section rounded-3xl p-6">
-            <h2 class="text-lg font-semibold mb-1">Configure Your AIs</h2>
+            <h2 class="text-lg font-semibold mb-1">Choose Your AI Assistants</h2>
             <p class="text-xs text-zinc-500 mb-4">Add API keys in any order. Use the arrows to set display order. Star your primary AI. Its answers appear in the main box.</p>
             <div id="setup-provider-list" class="space-y-3"></div>
             <p class="text-[10px] text-zinc-600 mt-4">Grok uses a browser link (no API key). Keys are stored only in localStorage on this device.</p>
@@ -97,7 +97,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     <span id="header-phase" class="text-[10px] px-1.5 py-0.5 bg-amber-900 border border-amber-700 rounded text-amber-300 flex-shrink-0">Alpha</span>
                 </div>
                 <p class="text-zinc-400">An Evidence-Based Discussion Game for Political Claims</p>
-                <p class="text-zinc-500 text-sm">Structured Fact-Finding Between Opposing Perspectives &bull; Facilitated by an AI Assistant</p>
+                <p class="text-zinc-500 text-sm">Structured Fact-Finding Between Opposing Perspectives or Solo Inquiry &bull; Facilitated by an AI Assistant</p>
                 <p class="text-zinc-600 text-xs mt-0.5">Rules v<span id="header-rules-version"></span> &bull; June 2026</p>
             </div>
             <div class="flex flex-wrap gap-2 justify-start xl:justify-end flex-shrink-0 max-w-full">
@@ -229,7 +229,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
                 <div class="section rounded-3xl p-5">
                     <div class="text-sm font-medium text-zinc-400 mb-3">RULES &amp; GUIDELINES</div>
-                    <p class="text-[11px] text-zinc-500 mb-3">Each topic opens once. Use Load Example Flow in Quick Actions to try a sample round.</p>
+                    <p class="text-[11px] text-zinc-500 mb-3">Each button opens one rules topic. Use Load Example Flow in Quick Actions to try a sample round.</p>
                     <div class="grid grid-cols-2 gap-2 text-xs">
                         <button onclick="showRuleSection('intro')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Introduction</button>
                         <button onclick="showRuleSection('how')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">How to Play</button>
@@ -237,6 +237,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                         <button onclick="showRuleSection('challenge')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Challenging an Answer</button>
                         <button onclick="showRuleSection('focus')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Staying Focused</button>
                         <button onclick="showRuleSection('ending')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Ending a Round</button>
+                        <button onclick="showRuleSection('examples')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Example Flow</button>
                         <button onclick="showRuleSection('best')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Best Practices</button>
                         <button onclick="showRuleSection('tips')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Tips for a Great Game</button>
                     </div>
@@ -449,6 +450,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 <li>Put your <strong>TV or phone on the same Wi-Fi</strong> as this PC (or play here on the computer).</li>
                 <li>On a TV: open the <strong>web browser</strong> (not a streaming app). On a phone: scan the QR or tap Open on my phone.</li>
                 <li>Type the <strong>IP address</strong> and <strong>Port</strong> below on a TV, or use the full URL on a phone.</li>
+                <li><strong>Control stays on this PC.</strong> The TV or phone mirrors the game; you type questions and click Ask here.</li>
             </ol>
 
             <div class="grid grid-cols-2 gap-3 mb-3">
@@ -534,11 +536,11 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         // It will be used unless you have saved a different key in Settings.
         // IMPORTANT: This is only for personal/testing use. Do not share builds containing real keys.
         const DEFAULT_GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
-        const APP_VERSION = "0.1.33";
+        const APP_VERSION = "0.1.34";
         const APP_PHASE = "Alpha";
         const FEEDBACK_EMAIL = "ClaimsClashFeedback@gmail.com";
         const MAILTO_BODY_URL_LIMIT = 1200;
-        const RULES_VERSION = "3.0";
+        const RULES_VERSION = "3.1";
         const GMAIL_BODY_URL_LIMIT = 5500;
         const FEEDBACK_DRAFT_KEY = "claimClashFeedbackDraft";
 
@@ -835,39 +837,39 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         const RULE_SECTIONS = {
             intro: {
                 title: "Introduction & Objective",
-                content: "Claim Clash is a structured discussion game designed for two players to explore politically charged claims through evidence-based questions to an AI assistant. The goal is not to win, but to reach clearer shared understanding of what the evidence actually shows. The game also helps players develop stronger AI literacy by treating the AI as a thinking tool rather than an authority.\n\nImportant Note: The AI assistant you use is not infallible and may update its answers as new information becomes available. Challenging or questioning its answers with evidence is valid and encouraged."
+                content: "Claim Clash is a structured discussion game for exploring contentious factual claims through evidence-based questions to an AI assistant—with a partner or on your own. The goal is not to win, but to reach clearer shared understanding of what the evidence actually shows. The game also helps players develop stronger AI literacy by treating the AI as a thinking tool rather than an authority.\n\nYou can play on this computer only, or use Cast to TV to show the game on a TV or phone on the same Wi-Fi while you control questions here.\n\nNote: The AI assistant you use is not infallible and may update its answers as new information becomes available. Challenging or questioning its answers with evidence is valid and encouraged."
             },
             how: {
                 title: "How to Play",
-                content: "Step 1: Team A or Team B begins by typing a clear, specific question and clicking 'Ask'. This player becomes the active player.\n\nStep 2: The AI provides a response based on available evidence.\n\nStep 3: The other player clicks 'Follow Up' to take their turn. This switches the active player and clears the question box.\n\nStep 4: The new active player types their question and clicks 'Ask'.\n\nStep 5: Players continue alternating turns while staying focused on the same topic."
+                content: "TEAM PLAY\n\nStep 1: Team A or Team B types a clear, specific question and clicks Ask. That player becomes the active player.\n\nStep 2: The AI provides a response based on available evidence.\n\nStep 3: The other player clicks Follow Up. That passes the turn, clears the question box, and switches the active player (Team A or Team B).\n\nStep 4: The new active player types a question and clicks Ask.\n\nStep 5: Continue alternating turns while staying focused on the same topic.\n\nStep 6 (optional): Toggle other AIs below the main answer and click Query Selected to compare responses.\n\nSOLO PLAY (Single Player Interrogation Mode)\n\nTurn on Single Player Interrogation Mode above the question box. There are no teams and no Follow Up button. Type each new question and click Ask. Use the same evidence and focus rules as team play.\n\nCASTING\n\nUse Cast to TV to mirror the game on a TV or phone. You still type questions and click Ask on this computer."
             },
             core: {
                 title: "Core Rules",
-                content: "- One focused question per turn.\n- Questions should seek evidence, clarification, or verification of specific claims, not judgments about a person's character.\n- Keep questions relevant to the current topic for coherent discussion.\n- Follow-up questions are encouraged when more detail or counter-evidence is needed.\n- Maintain respect and focus on the claims, not on each other.\n- Ask the AI to ground its responses in primary sources, investigations, and documented facts."
+                content: "1. Ask one focused question each time you click Ask (one question per turn in team play).\n2. Questions should seek evidence, clarification, or verification of specific claims—not judgments about a person's character.\n3. Keep questions relevant to the current topic for a coherent discussion.\n4. Follow-up questions are encouraged when more detail or contradicting evidence is needed.\n5. Maintain respect and focus on the claims, not on each other.\n6. Ask the AI to ground its responses in primary sources, investigations, and documented facts."
             },
             challenge: {
                 title: "Challenging an Answer",
-                content: "Either player may use a turn to ask the AI to re-examine its previous answer in light of new evidence or a counter-source. A Challenge counts as that player's question for the turn. It does not get a free extra turn. This keeps the game's pacing fair while still encouraging pushback on weak or outdated answers."
+                content: "Either player may use a turn to ask the AI to re-examine its previous answer in light of new evidence or a contradicting source. You challenge by using your turn for that question—there is no separate Challenge button. It does not grant a free extra turn. This keeps the game's pacing fair while still encouraging pushback on weak or outdated answers."
             },
             focus: {
                 title: "Staying Focused During Play",
-                content: "It is important to explore one question at a time. If a player has multiple concerns with the AI's answer, they should bookmark the additional concerns rather than asking them all at once.\n\nTo bookmark concerns, include in your question: \"Bookmark: [A], [B], [C]\", or use the Bookmark Concern button in Quick Actions.\n\nTo return to a bookmarked concern, include: \"Returning to bookmarked concern A\" in your question, or click Manage, then Use on a saved bookmark.\n\nThis keeps the discussion productive and easy to follow."
+                content: "Explore one question at a time. If you have several concerns about the AI's answer, bookmark the extras and ask about one at a time.\n\nTo bookmark: click Bookmark Concern in Quick Actions (or add Bookmark: [label one], [label two] in your question).\n\nTo return: click Manage, then Use on a saved bookmark—or type Returning to bookmark: [label] in your question.\n\nThis keeps the discussion productive and easy to follow."
             },
             ending: {
                 title: "Ending a Round",
-                content: "- Both players agree the topic has been sufficiently explored, or\n- A turn limit is reached (10-12 exchanges is a reasonable default), or\n- Either player calls for a break.\n\nThere is no winner. Success is a clearer shared picture of what the evidence does and doesn't show."
+                content: "End a round when:\n- Players agree the topic has been sufficiently explored, or\n- A turn limit is reached (10–12 questions is a reasonable default; each Ask counts, Follow Up does not), or\n- Anyone calls for a break.\n\nThere is no winner. Success is a clearer shared picture of what the evidence does and doesn't show."
             },
             examples: {
                 title: "Example Flow",
-                content: "Team A: \"Did the 2024 Riverdale infrastructure bill include the $2B rural broadband provision that critics claimed was cut?\"\n\nThe AI answers.\n\nTeam B clicks Follow Up, then asks: \"Sources say the provision was reduced rather than cut entirely. What was the before-and-after funding figure?\"\n\nThe AI answers.\n\nTeam A clicks Follow Up and asks: \"Bookmark: [funding source], [timeline of the cut]. First, can you clarify who proposed the reduction?\"\n\nThe AI answers.\n\nTeam B clicks Follow Up, says \"Returning to bookmarked concern: funding source,\" and the round continues."
+                content: "Sample scenario (fictional):\n\nTeam A: \"Did the 2024 Riverdale infrastructure bill include the $2B rural broadband provision that critics claimed was cut?\"\n\nThe AI answers.\n\nTeam B clicks Follow Up, then asks: \"Sources say the provision was reduced rather than cut entirely. What was the before-and-after funding figure?\"\n\nThe AI answers.\n\nTeam A clicks Follow Up and asks: \"Bookmark: [funding source], [timeline of the cut]. First, can you clarify who proposed the reduction?\"\n\nThe AI answers.\n\nTeam B clicks Follow Up and asks: \"Returning to bookmark: [funding source]\"—and the round continues."
             },
             best: {
                 title: "Best Practices for Asking the AI",
-                content: "- Be specific: \"What are the top 5 most credible pieces of evidence...\" or \"What do primary sources say about X?\"\n- Use clear phrasing such as \"Did X happen?\" or \"I heard that...\" when seeking verification.\n- Request structure when helpful: \"Answer in bullet points with sources\" or \"Provide a pros and cons table.\"\n- Follow up iteratively: \"Based on your last answer, please expand on Y.\"\n- Add focus: \"Focus on primary sources\" or \"Note any uncertainties or unverified claims.\"\n- Frame claims about people as claims about actions, policies, or events."
+                content: "- Be specific: \"What are the top 5 most credible pieces of evidence...\" or \"What do primary sources say about X?\"\n- Ask the AI to cite sources when possible.\n- Use clear phrasing such as \"Did X happen?\" or \"I heard that...\" when seeking verification.\n- Request structure when helpful: \"Answer in bullet points with sources\" or \"Provide a pros and cons table.\"\n- Follow up iteratively: \"Based on your last answer, please expand on Y.\"\n- Add focus: \"Focus on primary sources\" or \"Note any uncertainties or unverified claims.\"\n- Frame claims about people as claims about actions, policies, or events.\n- If your primary AI is Grok, use Open in Grok and paste the composed prompt if the link does not preload."
             },
             tips: {
                 title: "Tips for a Great Game",
-                content: "- Both perspectives are treated equally.\n- Take breaks if emotions rise.\n- If a question feels like it's targeting a person rather than a claim, pause and rephrase it around the underlying policy, event, or specific factual assertion.\n- Success is measured by clearer shared understanding of what the evidence shows (or does not show).\n\nReady to begin? Either player can start. Type your first question and click Ask."
+                content: "- Both perspectives are treated equally in team play.\n- Take breaks if emotions rise.\n- If a question feels like it's targeting a person rather than a claim, pause and rephrase it around the underlying policy, event, or specific factual assertion.\n- Success is measured by clearer shared understanding of what the evidence shows (or does not show).\n\nReady to begin? In team play, either player can start—type your first question and click Ask. In solo play, click Ask when you are ready."
             }
         };
 
@@ -1473,7 +1475,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     'Press Home on your Samsung remote.',
                     'Open Samsung Internet (or Internet app from the app row).',
                     'Move to the address bar at the top of the browser.',
-                    'Type the IP Address, then a colon :, then the Port number shown below.',
+                    'Enter the full URL below, or type the IP Address, then a colon (:), then the Port shown below.',
                     'Press Go or Enter and wait for the Claim Clash mirror to load.'
                 ]
             },
@@ -1485,7 +1487,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     'Press Home on your LG remote.',
                     'Open the LG / webOS Browser app (globe icon).',
                     'Select the URL bar at the top.',
-                    'Type the IP Address, then :, then the Port from this screen.',
+                    'Enter the full URL below, or type the IP Address, then a colon (:), then the Port shown below.',
                     'Press Go. The page should connect within a few seconds.'
                 ]
             },
@@ -1497,7 +1499,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     'Press Home on your Roku remote.',
                     'Open Streaming Channels and search for a web browser (for example Web Browser X) if you do not already have one.',
                     'Launch the browser app.',
-                    'Use the browser address field and type http:// then the IP Address, colon, and Port below.',
+                    'Enter the full URL below, or type the IP Address, then a colon (:), then the Port shown below.',
                     'Submit the address. Keep this PC app open while the TV loads the mirror.'
                 ]
             },
@@ -1509,7 +1511,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     'From the Fire TV home screen, go to Find or Your Apps.',
                     'Open Silk Browser (or Firefox if installed).',
                     'Select the address bar at the top.',
-                    'Type http://, the IP Address, :, and the Port shown below.',
+                    'Enter the full URL below, or type the IP Address, then a colon (:), then the Port shown below.',
                     'Press Go. Return here to confirm the Cast button turns green.'
                 ]
             },
@@ -1521,7 +1523,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     'Press Home on your Sony remote.',
                     'Open Apps and launch Internet Browser (or Google Chrome on Google TV models).',
                     'Focus the address bar.',
-                    'Enter http:// plus the IP Address, colon, and Port from this window.',
+                    'Enter the full URL below, or type the IP Address, then a colon (:), then the Port shown below.',
                     'Press Go and wait for the live mirror to appear.'
                 ]
             },
@@ -1533,7 +1535,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     'Press Home or Input on your Vizio remote.',
                     'Open the Vizio Internet Apps or Browser app.',
                     'Navigate to the URL / address field.',
-                    'Type the IP Address, colon, and Port listed below.',
+                    'Enter the full URL below, or type the IP Address, then a colon (:), then the Port shown below.',
                     'Press Go to load Claim Clash on the TV.'
                 ]
             },
@@ -1545,7 +1547,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     'Press Home on your Hisense remote.',
                     'Open the VIDAA Browser or Internet app.',
                     'Select the address bar.',
-                    'Type http://, the IP Address, :, and Port from this screen.',
+                    'Enter the full URL below, or type the IP Address, then a colon (:), then the Port shown below.',
                     'Press Enter and keep casting active on this PC.'
                 ]
             },
@@ -1557,7 +1559,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     'Press Home on your TCL remote.',
                     'If your TCL uses Roku: open a browser channel. If it uses Google TV: open Chrome or the Browser app.',
                     'Focus the browser address bar.',
-                    'Type http://, the IP Address, :, and Port shown below.',
+                    'Enter the full URL below, or type the IP Address, then a colon (:), then the Port shown below.',
                     'Press Go to open the mirror page.'
                 ]
             },
@@ -1569,7 +1571,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     'From the home screen, open Google Chrome or the Browser app.',
                     'If no browser is installed, install Chrome from the Play Store on the device.',
                     'Tap the address bar.',
-                    'Type http://, the IP Address, :, and Port from this window.',
+                    'Enter the full URL below, or type the IP Address, then a colon (:), then the Port shown below.',
                     'Press Go. The TV mirror updates live from this computer.'
                 ]
             },
@@ -1580,7 +1582,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 steps: [
                     'Apple TV has limited web browsing. Easiest path: use AirPlay from a Mac or iPhone if available.',
                     'Alternatively, install a browser app from the App Store (search "browser") if supported on your model.',
-                    'If a browser is available, enter http://, the IP Address, :, and Port below.',
+                    'If a browser is available, enter the full URL below, or type the IP Address, then a colon (:), then the Port shown below.',
                     'For most users, scanning the QR on your phone and mirroring the phone to Apple TV is more reliable than typing on TV.'
                 ]
             },
@@ -1592,7 +1594,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     'Connect TV and PC to the same Wi-Fi network.',
                     'Open any full web browser app on the TV (not Netflix, Hulu, or Disney+).',
                     'Find the URL or address bar in that browser.',
-                    'Type http://, then the IP Address, colon, and Port shown below.',
+                    'Enter the full URL below, or type the IP Address, then a colon (:), then the Port shown below.',
                     'Press Go. If typing is hard, scan the QR with your phone first to verify the address works.'
                 ]
             }
@@ -2587,7 +2589,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             const headerPhase = document.getElementById("header-phase");
             if (headerPhase && typeof APP_PHASE !== 'undefined') headerPhase.textContent = APP_PHASE;
             const rulesVer = document.getElementById("header-rules-version");
-            if (rulesVer) rulesVer.textContent = typeof RULES_VERSION !== 'undefined' ? RULES_VERSION : '3.0';
+            if (rulesVer) rulesVer.textContent = typeof RULES_VERSION !== 'undefined' ? RULES_VERSION : '3.1';
 
             const qbox = document.getElementById("question-box");
             const abox = document.getElementById("answer-box");
