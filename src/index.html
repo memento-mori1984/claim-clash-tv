@@ -368,7 +368,6 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
             <div class="mt-5 flex flex-wrap justify-end gap-2">
                 <button onclick="closeFeedbackModal()" class="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 rounded-2xl text-sm">Close</button>
-                <button onclick="saveFeedbackDraft()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm">Save Draft</button>
                 <button onclick="copyFeedbackToClipboard()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm">Copy</button>
             </div>
 
@@ -519,7 +518,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         // It will be used unless you have saved a different key in Settings.
         // IMPORTANT: This is only for personal/testing use. Do not share builds containing real keys.
         const DEFAULT_GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
-        const APP_VERSION = "0.1.30";
+        const APP_VERSION = "0.1.31";
         const APP_PHASE = "Alpha";
         const FEEDBACK_EMAIL = "ClaimsClashFeedback@gmail.com";
         const MAILTO_BODY_URL_LIMIT = 1200;
@@ -991,7 +990,8 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         function closeAllModals() {
             closeSinglePlayerInterrogationHelp();
             closeCastHelp();
-            ['bookmark-modal', 'settings-modal', 'about-modal', 'rules-modal', 'feedback-modal'].forEach(id => {
+            closeFeedbackModal();
+            ['bookmark-modal', 'settings-modal', 'about-modal', 'rules-modal'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.classList.add('hidden');
             });
@@ -2360,16 +2360,13 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             el.classList.remove('hidden');
         }
 
-        function saveFeedbackDraft() {
-            localStorage.setItem(FEEDBACK_DRAFT_KEY, JSON.stringify(getFeedbackFieldValues()));
-            setFeedbackStatus('Draft saved on this computer. You can come back and finish later.', true);
-        }
-
-        function loadFeedbackDraft() {
-            try {
-                const saved = JSON.parse(localStorage.getItem(FEEDBACK_DRAFT_KEY) || 'null');
-                if (saved && typeof saved === 'object') setFeedbackFieldValues(saved);
-            } catch (e) {}
+        function clearFeedbackForm() {
+            FEEDBACK_FIELD_IDS.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.value = '';
+            });
+            try { localStorage.removeItem(FEEDBACK_DRAFT_KEY); } catch (e) {}
         }
 
         function getFeedbackEmailRecipient() {
@@ -2387,7 +2384,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
         function showFeedback() {
             closeAllModals();
-            loadFeedbackDraft();
+            clearFeedbackForm();
             updateFeedbackEmailHint();
             const status = document.getElementById('feedback-status');
             if (status) status.classList.add('hidden');
@@ -2395,7 +2392,11 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         }
 
         function closeFeedbackModal() {
-            document.getElementById('feedback-modal').classList.add('hidden');
+            const modal = document.getElementById('feedback-modal');
+            if (modal) modal.classList.add('hidden');
+            clearFeedbackForm();
+            const status = document.getElementById('feedback-status');
+            if (status) status.classList.add('hidden');
         }
 
         /** Opens a URL in the system browser (Tauri opener plugin, then window.open). */
@@ -2486,7 +2487,6 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
         /** Prepares subject/body for provider compose links; copies full report if truncated. */
         async function prepareFeedbackCompose(provider) {
-            saveFeedbackDraft();
             const report = compileFeedbackReport();
             const subject = 'Claim Clash ' + APP_PHASE + ' Feedback v' + APP_VERSION;
             const to = getFeedbackEmailRecipient();
@@ -2506,7 +2506,6 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             const report = compileFeedbackReport();
             try {
                 await navigator.clipboard.writeText(report);
-                saveFeedbackDraft();
                 setFeedbackStatus('Copied to clipboard.', true);
             } catch (e) {
                 setFeedbackStatus('Could not copy automatically. Use a Send with your email button instead.', false);
@@ -2524,11 +2523,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             const opened = await openExternalUrl(url);
 
             if (opened) {
-                if (to) {
-                    setFeedbackStatus(provider.label + ' opened with ' + to + ' in the To field. Review and click Send.', true);
-                } else {
-                    setFeedbackStatus(provider.label + ' opened. Add the developer email in the To field, then click Send.', true);
-                }
+                closeFeedbackModal();
             } else {
                 setFeedbackStatus('Could not open ' + provider.label + '. Allow pop-ups, or use Copy and paste into your email.', false);
                 try { await navigator.clipboard.writeText(report); } catch (e) {}
