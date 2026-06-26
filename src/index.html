@@ -28,12 +28,16 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             opacity: 0.55;
         }
         .cast-help-btn {
-            opacity: 0.45;
-            transition: opacity 0.15s ease;
+            opacity: 0.72;
+            background: rgba(39, 39, 42, 0.85);
+            border: 1px solid #52525b;
+            transition: opacity 0.15s ease, background 0.15s ease, border-color 0.15s ease;
         }
         .cast-help-btn:hover,
         .cast-help-btn:focus-visible {
-            opacity: 0.85;
+            opacity: 1;
+            background: rgba(63, 63, 70, 0.95);
+            border-color: #a78bfa;
         }
     </style>
 </head>
@@ -81,7 +85,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 <p class="text-zinc-600 text-xs mt-0.5">Rules v<span id="header-rules-version"></span> &bull; June 2026</p>
             </div>
             <div class="flex flex-wrap gap-2 justify-start xl:justify-end flex-shrink-0 max-w-full">
-                <div class="flex items-center gap-1">
+                <div class="flex items-center gap-1.5">
                     <button id="cast-button" class="toolbar-btn px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-2xl text-sm flex items-center gap-x-2">
                         <i class="fa-solid fa-tv"></i>
                         <span id="cast-button-label">Cast to TV</span>
@@ -89,10 +93,10 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     </button>
                     <div class="relative inline-flex items-center">
                         <button id="cast-help" type="button" onclick="toggleCastHelp(event)"
-                                class="cast-help-btn w-6 h-6 flex items-center justify-center rounded-full text-xs text-zinc-300 hover:text-white"
+                                class="cast-help-btn w-8 h-8 flex items-center justify-center rounded-full text-sm font-semibold text-zinc-200 hover:text-white"
                                 title="Where can I play?" aria-label="Cast help">?</button>
                         <div id="cast-help-popover" onclick="event.stopPropagation()"
-                             class="hidden absolute right-0 top-full mt-2 z-30 w-64 bg-zinc-950 border border-zinc-700 rounded-2xl px-4 py-3 text-sm text-zinc-300 shadow-lg text-left">
+                             class="hidden absolute left-full ml-2 top-1/2 -translate-y-1/2 z-30 w-64 bg-zinc-950 border border-zinc-700 rounded-2xl px-4 py-3 text-sm text-zinc-300 shadow-lg text-left">
                             You can cast this game to a smart TV, open it on your phone, or just play on your computer. TV and phone casting need the same Wi-Fi as this PC.
                         </div>
                     </div>
@@ -491,7 +495,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         // It will be used unless you have saved a different key in Settings.
         // IMPORTANT: This is only for personal/testing use. Do not share builds containing real keys.
         const DEFAULT_GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
-        const APP_VERSION = "0.1.28";
+        const APP_VERSION = "0.1.29";
         const APP_PHASE = "Alpha";
         const FEEDBACK_EMAIL = "";
         const RULES_VERSION = "3.0";
