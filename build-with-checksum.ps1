@@ -6,9 +6,10 @@
 #   .\build-with-checksum.ps1
 #
 # This script:
-#   1. Runs `npm run tauri build`
-#   2. Generates a SHA-256 checksum of the resulting portable exe
-#   3. Saves both the exe and a .sha256 file in the `dist/` folder for easy sharing/verification
+#   1. Bumps iteration and syncs version metadata
+#   2. Runs `npm run tauri build`
+#   3. Saves the portable exe and a .sha256 file in `dist/`
+#   4. Removes outdated Claim Clash builds from `dist/` and ClaimClash/
 #
 # IMPORTANT: This is for convenience. The official way to get the app is still "clone + build yourself".
 
@@ -61,6 +62,9 @@ Copy-Item $builtExe $finalPath -Force
 $hash = Get-FileHash -Algorithm SHA256 $finalPath
 $checksumPath = "$finalPath.sha256"
 "$($hash.Hash)  $finalName" | Out-File -Encoding UTF8 -FilePath $checksumPath
+
+Write-Host "`nCleaning up outdated build artifacts..." -ForegroundColor Yellow
+& (Join-Path $PSScriptRoot "scripts\clean-old-builds.ps1")
 
 Write-Host "`n=== Build Complete ===" -ForegroundColor Green
 Write-Host "Portable exe:     $finalPath"

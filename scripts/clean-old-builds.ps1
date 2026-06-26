@@ -1,6 +1,8 @@
 # Remove outdated Claim Clash build artifacts from dist/ and ClaimClash/.
 # Keeps the current version from version.json (exe, sha256, and Drive zip).
 #
+# Runs automatically at the end of build-with-checksum.ps1 after each iteration.
+#
 # Usage (from project root):
 #   .\scripts\clean-old-builds.ps1
 #   .\scripts\clean-old-builds.ps1 -ClaimClashDir "D:\Backups\ClaimClash"
