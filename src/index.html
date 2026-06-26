@@ -182,6 +182,19 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     <div class="panel-head mb-3">
                         <span id="primary-answer-label" class="text-sm font-medium text-zinc-400 min-w-0">PRIMARY AI ANSWER</span>
                         <div class="panel-head-actions">
+                            <button type="button" onclick="startNewSession()"
+                                    class="toolbar-btn px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-2xl text-sm">
+                                Start New Session
+                            </button>
+                            <div class="relative inline-flex items-center">
+                                <button id="session-help" type="button" onclick="toggleSessionHelp(event)"
+                                        class="cast-help-btn w-8 h-8 flex items-center justify-center rounded-full text-sm font-semibold text-zinc-200 hover:text-white"
+                                        title="How does AI memory work?" aria-label="Session memory help">?</button>
+                                <div id="session-help-popover" onclick="event.stopPropagation()"
+                                     class="hidden absolute right-0 top-full mt-2 z-30 w-72 bg-zinc-950 border border-zinc-700 rounded-2xl px-4 py-3 text-sm text-zinc-300 shadow-lg text-left">
+                                    Your primary AI remembers this entire conversation for the session. Each Ask builds on earlier questions and answers. Follow Up only passes the turn—it does not clear memory. Click <strong>Start New Session</strong> when you want a fresh topic with no prior context.
+                                </div>
+                            </div>
                             <button id="follow-up-btn" onclick="followUp()" 
                                     class="toolbar-btn px-4 py-1.5 rounded-2xl text-sm flex items-center gap-x-2">
                                 <i class="fa-solid fa-reply"></i> <span>Follow Up</span>
@@ -536,7 +549,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         // It will be used unless you have saved a different key in Settings.
         // IMPORTANT: This is only for personal/testing use. Do not share builds containing real keys.
         const DEFAULT_GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
-        const APP_VERSION = "0.1.34";
+        const APP_VERSION = "0.1.35";
         const APP_PHASE = "Alpha";
         const FEEDBACK_EMAIL = "ClaimsClashFeedback@gmail.com";
         const MAILTO_BODY_URL_LIMIT = 1200;
@@ -554,7 +567,8 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         if (geminiApiKey === "YOUR_GEMINI_API_KEY_HERE") {
             geminiApiKey = '';
         }
-        let conversationHistory = [];
+        /** Primary AI multi-turn memory: { role: 'user'|'assistant', text } */
+        let primarySessionMessages = [];
 
         const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.0-flash-exp"];
 
@@ -969,10 +983,61 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             document.getElementById("question-box").innerHTML = "Did the 2024 Riverdale infrastructure bill include the $2B rural broadband provision that critics claimed was cut?";
             document.getElementById("answer-box").innerHTML = "";
             currentPlayer = "Team A";
-            conversationHistory = [];
+            resetPrimarySession(false);
             updatePlayerBadge();
             scheduleCastPush();
         }
+
+        function sessionToGeminiContents(messages) {
+            return messages.map(m => ({
+                role: m.role === 'assistant' ? 'model' : 'user',
+                parts: [{ text: m.text }]
+            }));
+        }
+
+        function sessionToChatMessages(messages) {
+            return messages.map(m => ({
+                role: m.role === 'assistant' ? 'assistant' : 'user',
+                content: m.text
+            }));
+        }
+
+        function resetPrimarySession(clearUi) {
+            primarySessionMessages = [];
+            if (clearUi) {
+                const q = document.getElementById('question-box');
+                const a = document.getElementById('answer-box');
+                if (q) q.innerHTML = '';
+                if (a) a.innerHTML = '';
+            }
+        }
+
+        function startNewSession() {
+            const q = document.getElementById('question-box');
+            const a = document.getElementById('answer-box');
+            const hasContent = primarySessionMessages.length > 0 ||
+                (q && q.innerHTML.trim()) || (a && a.innerHTML.trim());
+            if (hasContent && !confirm('Start a new session? This clears your primary AI conversation memory for this round.')) {
+                return;
+            }
+            resetPrimarySession(true);
+            scheduleCastPush();
+        }
+
+        function closeSessionHelp() {
+            const popover = document.getElementById('session-help-popover');
+            if (popover) popover.classList.add('hidden');
+        }
+
+        function toggleSessionHelp(ev) {
+            if (ev) ev.stopPropagation();
+            const popover = document.getElementById('session-help-popover');
+            if (!popover) return;
+            popover.classList.toggle('hidden');
+        }
+
+        window.startNewSession = startNewSession;
+        window.toggleSessionHelp = toggleSessionHelp;
 
         function addBookmark() {
             const question = document.getElementById("question-box").innerHTML.trim();
@@ -1008,6 +1073,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         function closeAllModals() {
             closeSinglePlayerInterrogationHelp();
             closeCastHelp();
+            closeSessionHelp();
             closeFeedbackModal();
             ['bookmark-modal', 'settings-modal', 'about-modal', 'rules-modal'].forEach(id => {
                 const el = document.getElementById(id);
@@ -1130,21 +1196,28 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 pushCurrentContentToCast();
             };
 
+            primarySessionMessages.push({ role: 'user', text: question });
+
             if (primaryProviderId === 'gemini') {
-                conversationHistory = [];
-                conversationHistory.push({ role: "user", parts: [{ text: question }] });
-                callGemini(conversationHistory).then(result => {
+                callGemini(sessionToGeminiContents(primarySessionMessages)).then(result => {
                     if (result.success) {
-                        conversationHistory.push({ role: "model", parts: [{ text: result.text }] });
+                        primarySessionMessages.push({ role: 'assistant', text: result.text });
                         finishPrimary(result.text, result.modelUsed, false);
                     } else {
+                        primarySessionMessages.pop();
                         finishPrimary(result.error, null, true);
                     }
                 });
             } else {
-                callAIProvider(primaryProviderId, question)
-                    .then(result => finishPrimary(result.text, result.modelUsed, false))
-                    .catch(e => finishPrimary(e.message, null, true));
+                callAIProvider(primaryProviderId, question, primarySessionMessages)
+                    .then(result => {
+                        primarySessionMessages.push({ role: 'assistant', text: result.text });
+                        finishPrimary(result.text, result.modelUsed, false);
+                    })
+                    .catch(e => {
+                        primarySessionMessages.pop();
+                        finishPrimary(e.message, null, true);
+                    });
             }
         }
 
@@ -1312,11 +1385,13 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         }
 
         /** Routes a question to the given provider (OpenAI, Anthropic, Groq, OpenRouter, or Gemini). */
-        async function callAIProvider(providerId, question) {
+        async function callAIProvider(providerId, question, sessionMessages = null) {
             // Jailbreak injection removed. See JAILBREAK MODE ARCHIVE above.
 
             if (providerId === 'gemini') {
-                const contents = [{ role: "user", parts: [{ text: question }] }];
+                const contents = sessionMessages
+                    ? sessionToGeminiContents(sessionMessages)
+                    : [{ role: "user", parts: [{ text: question }] }];
 
                 for (let model of GEMINI_MODELS) {
                     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`;
@@ -1337,7 +1412,9 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
             if (providerId === 'openai') {
                 if (!openaiApiKey) throw new Error("OpenAI API key missing. Add it in Settings.");
-                const messages = [{ role: "user", content: question }];
+                const messages = sessionMessages
+                    ? sessionToChatMessages(sessionMessages)
+                    : [{ role: "user", content: question }];
 
                 const res = await fetch("https://api.openai.com/v1/chat/completions", {
                     method: "POST",
@@ -1358,7 +1435,9 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
             if (providerId === 'anthropic') {
                 if (!anthropicApiKey) throw new Error("Anthropic API key missing. Add it in Settings.");
-                const messages = [{ role: "user", content: question }];
+                const messages = sessionMessages
+                    ? sessionToChatMessages(sessionMessages)
+                    : [{ role: "user", content: question }];
 
                 const res = await fetch("https://api.anthropic.com/v1/messages", {
                     method: "POST",
@@ -1380,7 +1459,9 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
             if (providerId === 'groq') {
                 if (!groqApiKey) throw new Error("Groq API key missing. Add it in Settings.");
-                const messages = [{ role: "user", content: question }];
+                const messages = sessionMessages
+                    ? sessionToChatMessages(sessionMessages)
+                    : [{ role: "user", content: question }];
 
                 const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
@@ -1401,7 +1482,9 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
             if (providerId === 'openrouter') {
                 if (!openrouterApiKey) throw new Error("OpenRouter API key missing. Add it in Settings.");
-                const messages = [{ role: "user", content: question }];
+                const messages = sessionMessages
+                    ? sessionToChatMessages(sessionMessages)
+                    : [{ role: "user", content: question }];
 
                 const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                     method: "POST",
@@ -2224,6 +2307,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 document.addEventListener('click', () => {
                     closeSinglePlayerInterrogationHelp();
                     closeCastHelp();
+                    closeSessionHelp();
                 });
             }
 
@@ -2280,9 +2364,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         }
 
         function clearCurrent() {
-            document.getElementById("question-box").innerHTML = "";
-            document.getElementById("answer-box").innerHTML = "";
-            conversationHistory = [];
+            resetPrimarySession(true);
             scheduleCastPush();
         }
 
