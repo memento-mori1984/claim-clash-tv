@@ -47,10 +47,12 @@ if ($LASTEXITCODE -ne 0) {
 $outputDir = "dist"
 New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
 
-# Copy the exe with a clean name
+# Copy the exe with version and release-phase in the filename (e.g. Claim Clash 0.1.19 Alpha.exe)
 $pkg = Get-Content "package.json" -Raw | ConvertFrom-Json
+$verMeta = Get-Content "version.json" -Raw | ConvertFrom-Json
 $version = $pkg.version
-$finalName = "Claim Clash $version.exe"
+$phase = if ($verMeta.phase) { $verMeta.phase.Trim() } else { "" }
+$finalName = if ($phase) { "Claim Clash $version $phase.exe" } else { "Claim Clash $version.exe" }
 $finalPath = Join-Path $outputDir $finalName
 
 Copy-Item $builtExe $finalPath -Force

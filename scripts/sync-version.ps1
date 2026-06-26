@@ -1,5 +1,6 @@
 # Sync Claim Clash version from version.json across package metadata and UI.
-# Version format: {major}.{minor}.{iteration}  e.g. 0.1.18 -> "Claim Clash 0.1.18.exe"
+# Version format: {major}.{minor}.{iteration}  e.g. 0.1.19
+# Portable exe name: Claim Clash {version} {phase}.exe  e.g. Claim Clash 0.1.19 Alpha.exe
 #
 # Usage (from project root):
 #   .\scripts\sync-version.ps1              # sync only
