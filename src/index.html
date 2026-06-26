@@ -1287,15 +1287,15 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             try {
                 await tauriInvoke('update_cast_content', {
                     question: question,
-                    main_answer: mainAnswer,
-                    current_player: currentPlayer,
+                    mainAnswer: mainAnswer,
+                    currentPlayer: currentPlayer,
                     answers: answers,
                     bookmarks: bookmarkData,
-                    selected_ais: selectedAis,
-                    primary_provider: primaryName,
-                    jailbreak_mode: false, // ARCHIVED: was jailbreakMode — see JAILBREAK MODE ARCHIVE
-                    app_version: APP_VERSION,
-                    rules_version: RULES_VERSION
+                    selectedAis: selectedAis,
+                    primaryProvider: primaryName,
+                    jailbreakMode: false, // ARCHIVED: see JAILBREAK MODE ARCHIVE
+                    appVersion: APP_VERSION,
+                    rulesVersion: RULES_VERSION
                 });
                 updateCastSyncStatus(true);
             } catch (e) {
