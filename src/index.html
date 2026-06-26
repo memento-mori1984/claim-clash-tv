@@ -169,12 +169,12 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 <div class="section rounded-3xl p-5">
                     <div class="text-sm font-medium text-zinc-400 mb-2">Core Rules</div>
                     <div class="text-[11px] text-zinc-300 space-y-0.5 leading-snug">
-                        <div>â€¢ One focused question per turn.</div>
-                        <div>â€¢ Questions should seek evidence, clarification, or verification of specific claims, not judgments about a person's character.</div>
-                        <div>â€¢ Keep questions relevant to the current topic for coherent discussion.</div>
-                        <div>â€¢ Follow-up questions are encouraged when more detail or counter-evidence is needed.</div>
-                        <div>â€¢ Maintain respect and focus on the claims, not on each other.</div>
-                        <div>â€¢ Ask the AI to ground its responses in primary sources, investigations, and documented facts.</div>
+                        <div>- One focused question per turn.</div>
+                        <div>- Questions should seek evidence, clarification, or verification of specific claims, not judgments about a person's character.</div>
+                        <div>- Keep questions relevant to the current topic for coherent discussion.</div>
+                        <div>- Follow-up questions are encouraged when more detail or counter-evidence is needed.</div>
+                        <div>- Maintain respect and focus on the claims, not on each other.</div>
+                        <div>- Ask the AI to ground its responses in primary sources, investigations, and documented facts.</div>
                     </div>
                 </div>
 
@@ -257,10 +257,10 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     API keys are stored only in your browser's localStorage.
                 </div>
                 <div class="text-xs text-zinc-500">
-                    Open source â€¢ Build instructions and checksum verification in the repository README.
+                    Open source - Build instructions and checksum verification in the repository README.
                 </div>
                 <div class="pt-2 border-t border-zinc-800 text-xs">
-                    Copyright Â© 2026 Zachary H. Roberts. All rights reserved.<br>
+                    Copyright &copy; 2026 Zachary H. Roberts. All rights reserved.<br>
                     "Claim Clash" is a trademark of Zachary H. Roberts.
                 </div>
             </div>
@@ -417,7 +417,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         // It will be used unless you have saved a different key in Settings.
         // IMPORTANT: This is only for personal/testing use. Do not share builds containing real keys.
         const DEFAULT_GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
-        const APP_VERSION = "0.1.21";
+        const APP_VERSION = "0.1.22";
         const APP_PHASE = "Alpha";
         const FEEDBACK_EMAIL = "";
         const RULES_VERSION = "3.0";
@@ -597,12 +597,12 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             const upBtn = document.createElement('button');
             upBtn.type = 'button';
             upBtn.className = 'px-2 py-0.5 text-[10px] bg-zinc-800 hover:bg-zinc-700 rounded';
-            upBtn.textContent = 'â–²';
+            upBtn.textContent = '^';
             upBtn.onclick = () => moveProviderInOrder(provider.id, 'up');
             const downBtn = document.createElement('button');
             downBtn.type = 'button';
             downBtn.className = 'px-2 py-0.5 text-[10px] bg-zinc-800 hover:bg-zinc-700 rounded';
-            downBtn.textContent = 'â–¼';
+            downBtn.textContent = 'v';
             downBtn.onclick = () => moveProviderInOrder(provider.id, 'down');
             orderBtns.appendChild(upBtn);
             orderBtns.appendChild(downBtn);
@@ -725,7 +725,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             },
             core: {
                 title: "Core Rules",
-                content: "â€¢ One focused question per turn.\nâ€¢ Questions should seek evidence, clarification, or verification of specific claims, not judgments about a person's character.\nâ€¢ Keep questions relevant to the current topic for coherent discussion.\nâ€¢ Follow-up questions are encouraged when more detail or counter-evidence is needed.\nâ€¢ Maintain respect and focus on the claims, not on each other.\nâ€¢ Ask the AI to ground its responses in primary sources, investigations, and documented facts."
+                content: "- One focused question per turn.\n- Questions should seek evidence, clarification, or verification of specific claims, not judgments about a person's character.\n- Keep questions relevant to the current topic for coherent discussion.\n- Follow-up questions are encouraged when more detail or counter-evidence is needed.\n- Maintain respect and focus on the claims, not on each other.\n- Ask the AI to ground its responses in primary sources, investigations, and documented facts."
             },
             challenge: {
                 title: "Challenging an Answer",
@@ -737,7 +737,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             },
             ending: {
                 title: "Ending a Round",
-                content: "â€¢ Both players agree the topic has been sufficiently explored, or\nâ€¢ A turn limit is reached (10â€“12 exchanges is a reasonable default), or\nâ€¢ Either player calls for a break.\n\nThere is no winner. Success is a clearer shared picture of what the evidence does and doesn't show."
+                content: "- Both players agree the topic has been sufficiently explored, or\n- A turn limit is reached (10-12 exchanges is a reasonable default), or\n- Either player calls for a break.\n\nThere is no winner. Success is a clearer shared picture of what the evidence does and doesn't show."
             },
             examples: {
                 title: "Example Flow",
@@ -745,11 +745,11 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             },
             best: {
                 title: "Best Practices for Asking the AI",
-                content: "â€¢ Be specific: \"What are the top 5 most credible pieces of evidenceâ€¦\" or \"What do primary sources say about X?\"\nâ€¢ Use clear phrasing such as \"Did X happen?\" or \"I heard thatâ€¦\" when seeking verification.\nâ€¢ Request structure when helpful: \"Answer in bullet points with sources\" or \"Provide a pros and cons table.\"\nâ€¢ Follow up iteratively: \"Based on your last answer, please expand on Y.\"\nâ€¢ Add focus: \"Focus on primary sources\" or \"Note any uncertainties or unverified claims.\"\nâ€¢ Frame claims about people as claims about actions, policies, or events."
+                content: "- Be specific: \"What are the top 5 most credible pieces of evidence...\" or \"What do primary sources say about X?\"\n- Use clear phrasing such as \"Did X happen?\" or \"I heard that...\" when seeking verification.\n- Request structure when helpful: \"Answer in bullet points with sources\" or \"Provide a pros and cons table.\"\n- Follow up iteratively: \"Based on your last answer, please expand on Y.\"\n- Add focus: \"Focus on primary sources\" or \"Note any uncertainties or unverified claims.\"\n- Frame claims about people as claims about actions, policies, or events."
             },
             tips: {
                 title: "Tips for a Great Game",
-                content: "â€¢ Both perspectives are treated equally.\nâ€¢ Take breaks if emotions rise.\nâ€¢ If a question feels like it's targeting a person rather than a claim, pause and rephrase it around the underlying policy, event, or specific factual assertion.\nâ€¢ Success is measured by clearer shared understanding of what the evidence shows (or does not show).\n\nReady to begin? Either player can start. Type your first question and click Ask."
+                content: "- Both perspectives are treated equally.\n- Take breaks if emotions rise.\n- If a question feels like it's targeting a person rather than a claim, pause and rephrase it around the underlying policy, event, or specific factual assertion.\n- Success is measured by clearer shared understanding of what the evidence shows (or does not show).\n\nReady to begin? Either player can start. Type your first question and click Ask."
             }
         };
 
@@ -981,7 +981,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 const isOn = !!selectedAIs[provider.id];
                 const btn = document.createElement("button");
                 btn.className = `px-3 py-1 text-xs rounded-2xl border transition ${isOn ? 'bg-emerald-600 border-emerald-500 text-white' : 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-700'}`;
-                btn.innerHTML = `${provider.name} ${isOn ? 'âœ“' : ''}`;
+                btn.textContent = provider.name + (isOn ? ' (on)' : '');
                 btn.onclick = () => {
                     selectedAIs[provider.id] = !selectedAIs[provider.id];
                     renderAIToggles();
@@ -1011,7 +1011,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
                 let header = `<div class="panel-head mb-2"><span class="text-sm font-medium">${provider.name}</span><div class="panel-head-actions">`;
                 if (provider.isLink) {
-                    header += `<button onclick="openGrokWithQuery()" class="text-xs px-3 py-0.5 bg-blue-600 hover:bg-blue-700 rounded-xl">Open in Grok â†’</button>`;
+                    header += `<button onclick="openGrokWithQuery()" class="text-xs px-3 py-0.5 bg-blue-600 hover:bg-blue-700 rounded-xl">Open in Grok</button>`;
                 } else {
                     header += `<button onclick="querySingleAI('${provider.id}', this)" class="text-xs px-3 py-0.5 bg-emerald-600 hover:bg-emerald-700 rounded-xl">Ask</button>`;
                 }
