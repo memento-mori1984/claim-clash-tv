@@ -58,9 +58,10 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 <p class="text-zinc-600 text-xs mt-0.5">Rules v<span id="header-rules-version"></span> &bull; June 2026</p>
             </div>
             <div class="flex gap-x-3 flex-wrap justify-end">
-                <button id="cast-button" class="relative px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-2xl text-sm flex items-center gap-x-2">
-                    <span id="cast-status-dot" class="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-zinc-900" title="Not casting"></span>
-                    <i class="fa-solid fa-tv"></i> <span id="cast-button-label">Cast to TV</span>
+                <button id="cast-button" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-2xl text-sm flex items-center gap-x-2">
+                    <i class="fa-solid fa-tv"></i>
+                    <span id="cast-button-label">Cast to TV</span>
+                    <span id="cast-status-dot" class="inline-block w-2.5 h-2.5 rounded-full bg-red-500 ml-1.5 flex-shrink-0" title="Not casting" aria-label="Cast status"></span>
                 </button>
                 <button onclick="toggleFullScreen()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
                     <i class="fa-solid fa-expand"></i> <span>Full Screen</span>
@@ -1190,11 +1191,12 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         function updateCastIndicator(isLive) {
             const dot = document.getElementById('cast-status-dot');
             if (!dot) return;
+            const base = 'inline-block w-2.5 h-2.5 rounded-full ml-1.5 flex-shrink-0';
             if (isLive) {
-                dot.className = 'absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-400/60';
+                dot.className = base + ' bg-emerald-500 ring-2 ring-emerald-400/60';
                 dot.title = 'Cast live. TV connected';
             } else {
-                dot.className = 'absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-zinc-900';
+                dot.className = base + ' bg-red-500';
                 dot.title = isCasting ? 'Casting. Waiting for TV connection' : 'Not casting';
             }
         }
