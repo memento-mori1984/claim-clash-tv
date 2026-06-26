@@ -57,7 +57,10 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 <p class="text-zinc-500 text-sm">Structured Fact-Finding Between Opposing Perspectives &bull; Facilitated by an AI Assistant</p>
                 <p class="text-zinc-600 text-xs mt-0.5">Rules v<span id="header-rules-version"></span> &bull; June 2026</p>
             </div>
-            <div class="flex gap-x-3">
+            <div class="flex gap-x-3 flex-wrap justify-end">
+                <button id="cast-button" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-2xl text-sm flex items-center gap-x-2">
+                    <i class="fa-solid fa-tv"></i> <span>Cast to TV</span>
+                </button>
                 <button onclick="toggleFullScreen()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
                     <i class="fa-solid fa-expand"></i> <span>Full Screen</span>
                 </button>
@@ -126,7 +129,6 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                         </div>
                         <div class="flex items-center gap-x-2 flex-wrap">
                             <button onclick="querySelectedAIs()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-xs">Query Selected</button>
-                            <button id="cast-button" class="px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded-2xl text-xs">Cast to TV</button>
                         </div>
                     </div>
                     <div class="flex flex-wrap gap-2 mb-3" id="ai-toggles"></div>
@@ -1178,10 +1180,16 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             }
         }
 
+        function setCastButtonLabel(text) {
+            const btn = document.getElementById('cast-button');
+            if (!btn) return;
+            btn.innerHTML = `<i class="fa-solid fa-tv"></i> <span>${text}</span>`;
+        }
+
         function startCast() {
             const btn = document.getElementById('cast-button');
-            const originalText = btn ? btn.textContent : 'Cast to TV';
-            if (btn) btn.textContent = 'Starting cast...';
+            const originalText = btn ? (btn.querySelector('span')?.textContent || 'Cast to TV') : 'Cast to TV';
+            setCastButtonLabel('Starting cast...');
 
             (async () => {
                 try {
@@ -1217,13 +1225,13 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     await pushCurrentContentToCast();
                     if (castSyncInterval) clearInterval(castSyncInterval);
                     castSyncInterval = setInterval(pushCurrentContentToCast, 1000);
-                    if (btn) btn.textContent = 'Cast to TV (active)';
+                    setCastButtonLabel('Cast to TV (active)');
                 } catch (error) {
                     console.error('Cast start error:', error);
                     isCasting = false;
                     currentCastUrl = null;
                     alert("Failed to start cast server: " + (error && error.message ? error.message : error));
-                    if (btn) btn.textContent = originalText || 'Cast to TV';
+                    setCastButtonLabel(originalText || 'Cast to TV');
                 }
             })();
         }
@@ -1246,8 +1254,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 } catch (e) {}
                 currentCastUrl = null;
             }
-            const btn = document.getElementById('cast-button');
-            if (btn) btn.textContent = 'Cast to TV';
+            setCastButtonLabel('Cast to TV');
         }
 
         function stopCastAndClose() {
