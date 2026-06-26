@@ -70,6 +70,9 @@ pub struct CastStatus {
     pub port: u16,
 }
 
+/// Viewer is considered connected only while `/state` polls arrive within this window.
+const VIEWER_POLL_TIMEOUT_SECS: u64 = 4;
+
 /// Returns current Unix timestamp in seconds for cache-busting and sync markers.
 fn now_secs() -> u64 {
     SystemTime::now()
@@ -82,7 +85,8 @@ fn now_secs() -> u64 {
 struct CastState {
     content: Arc<Mutex<CastContent>>,
     running: bool,
-    tv_connected: Arc<Mutex<bool>>,
+    /// Unix seconds of the last `/state` poll from a TV/phone/browser mirror.
+    last_viewer_poll_at: Arc<Mutex<u64>>,
     cast_url: String,
     cast_ip: String,
     cast_port: u16,
@@ -93,12 +97,20 @@ impl Default for CastState {
         Self {
             content: Arc::new(Mutex::new(CastContent::default())),
             running: false,
-            tv_connected: Arc::new(Mutex::new(false)),
+            last_viewer_poll_at: Arc::new(Mutex::new(0)),
             cast_url: String::new(),
             cast_ip: String::new(),
             cast_port: 0,
         }
     }
+}
+
+/// True when a cast mirror has polled `/state` recently (browser still open).
+fn viewer_is_connected(running: bool, last_poll_at: u64) -> bool {
+    if !running || last_poll_at == 0 {
+        return false;
+    }
+    now_secs().saturating_sub(last_poll_at) <= VIEWER_POLL_TIMEOUT_SECS
 }
 
 /// Builds a scannable PNG QR code for the cast URL (served at `/qr.png`).
@@ -149,10 +161,13 @@ fn start_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<CastStartRes
     cast_state.cast_url = url.clone();
     cast_state.cast_ip = ip.clone();
     cast_state.cast_port = port;
-    *cast_state.tv_connected.lock().map_err(|e| e.to_string())? = false;
+    *cast_state
+        .last_viewer_poll_at
+        .lock()
+        .map_err(|e| e.to_string())? = 0;
 
     let content = cast_state.content.clone();
-    let tv_connected = cast_state.tv_connected.clone();
+    let last_viewer_poll_at = cast_state.last_viewer_poll_at.clone();
     let qr_url = url.clone();
 
     // Run HTTP server in a background thread
@@ -160,9 +175,9 @@ fn start_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<CastStartRes
         for request in server.incoming_requests() {
             let url_path = request.url().split('?').next().unwrap_or("/").to_string();
 
-            if url_path == "/" || url_path == "/index.html" || url_path == "/state" {
-                if let Ok(mut seen) = tv_connected.lock() {
-                    *seen = true;
+            if url_path == "/state" {
+                if let Ok(mut last_poll) = last_viewer_poll_at.lock() {
+                    *last_poll = now_secs();
                 }
             }
 
@@ -227,8 +242,8 @@ fn stop_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<(), String> {
     cast_state.cast_url.clear();
     cast_state.cast_ip.clear();
     cast_state.cast_port = 0;
-    if let Ok(mut seen) = cast_state.tv_connected.lock() {
-        *seen = false;
+    if let Ok(mut last_poll) = cast_state.last_viewer_poll_at.lock() {
+        *last_poll = 0;
     }
     // Clear content so the cast page shows nothing useful.
     let mut content = cast_state.content.lock().unwrap();
@@ -240,10 +255,13 @@ fn stop_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<(), String> {
 #[tauri::command]
 fn get_cast_status(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<CastStatus, String> {
     let cast_state = state.lock().map_err(|e| e.to_string())?;
-    let tv_connected = cast_state.tv_connected.lock().map_err(|e| e.to_string())?;
+    let last_poll_at = cast_state
+        .last_viewer_poll_at
+        .lock()
+        .map_err(|e| e.to_string())?;
     Ok(CastStatus {
         running: cast_state.running,
-        tv_connected: *tv_connected,
+        tv_connected: viewer_is_connected(cast_state.running, *last_poll_at),
         url: cast_state.cast_url.clone(),
         ip: cast_state.cast_ip.clone(),
         port: cast_state.cast_port,
