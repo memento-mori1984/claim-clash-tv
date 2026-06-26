@@ -22,6 +22,10 @@ if (-not (Test-Path "package.json")) {
     exit 1
 }
 
+# Bump iteration and sync version across package.json, Tauri config, Cargo.toml, and UI
+Write-Host "`nSyncing iteration-based version..." -ForegroundColor Yellow
+& (Join-Path $PSScriptRoot "scripts\sync-version.ps1") -Increment
+
 # Run the Tauri build
 Write-Host "`nRunning Tauri build..." -ForegroundColor Yellow
 npm run tauri build
