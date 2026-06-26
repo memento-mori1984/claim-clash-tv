@@ -192,7 +192,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                                         title="How does AI memory work?" aria-label="Session memory help">?</button>
                                 <div id="session-help-popover" onclick="event.stopPropagation()"
                                      class="hidden absolute right-0 top-full mt-2 z-30 w-72 bg-zinc-950 border border-zinc-700 rounded-2xl px-4 py-3 text-sm text-zinc-300 shadow-lg text-left">
-                                    Your primary AI remembers this entire conversation for the session. Each Ask builds on earlier questions and answers. Follow Up only passes the turn—it does not clear memory. Click <strong>Start New Session</strong> when you want a fresh topic with no prior context.
+                                    Your primary AI remembers this entire conversation for the session. Each Ask builds on earlier questions and answers. Follow Up only passes the turn. It does not clear memory. Click <strong>Start New Session</strong> when you want a fresh topic with no prior context.
                                 </div>
                             </div>
                             <button id="follow-up-btn" onclick="followUp()" 
@@ -549,7 +549,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         // It will be used unless you have saved a different key in Settings.
         // IMPORTANT: This is only for personal/testing use. Do not share builds containing real keys.
         const DEFAULT_GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
-        const APP_VERSION = "0.1.35";
+        const APP_VERSION = "0.1.36";
         const APP_PHASE = "Alpha";
         const FEEDBACK_EMAIL = "ClaimsClashFeedback@gmail.com";
         const MAILTO_BODY_URL_LIMIT = 1200;
@@ -851,7 +851,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         const RULE_SECTIONS = {
             intro: {
                 title: "Introduction & Objective",
-                content: "Claim Clash is a structured discussion game for exploring contentious factual claims through evidence-based questions to an AI assistant—with a partner or on your own. The goal is not to win, but to reach clearer shared understanding of what the evidence actually shows. The game also helps players develop stronger AI literacy by treating the AI as a thinking tool rather than an authority.\n\nYou can play on this computer only, or use Cast to TV to show the game on a TV or phone on the same Wi-Fi while you control questions here.\n\nNote: The AI assistant you use is not infallible and may update its answers as new information becomes available. Challenging or questioning its answers with evidence is valid and encouraged."
+                content: "Claim Clash is a structured discussion game for exploring contentious factual claims through evidence-based questions to an AI assistant, with a partner or on your own. The goal is not to win, but to reach clearer shared understanding of what the evidence actually shows. The game also helps players develop stronger AI literacy by treating the AI as a thinking tool rather than an authority.\n\nYou can play on this computer only, or use Cast to TV to show the game on a TV or phone on the same Wi-Fi while you control questions here.\n\nNote: The AI assistant you use is not infallible and may update its answers as new information becomes available. Challenging or questioning its answers with evidence is valid and encouraged."
             },
             how: {
                 title: "How to Play",
@@ -859,23 +859,23 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             },
             core: {
                 title: "Core Rules",
-                content: "1. Ask one focused question each time you click Ask (one question per turn in team play).\n2. Questions should seek evidence, clarification, or verification of specific claims—not judgments about a person's character.\n3. Keep questions relevant to the current topic for a coherent discussion.\n4. Follow-up questions are encouraged when more detail or contradicting evidence is needed.\n5. Maintain respect and focus on the claims, not on each other.\n6. Ask the AI to ground its responses in primary sources, investigations, and documented facts."
+                content: "1. Ask one focused question each time you click Ask (one question per turn in team play).\n2. Questions should seek evidence, clarification, or verification of specific claims, not judgments about a person's character.\n3. Keep questions relevant to the current topic for a coherent discussion.\n4. Follow-up questions are encouraged when more detail or contradicting evidence is needed.\n5. Maintain respect and focus on the claims, not on each other.\n6. Ask the AI to ground its responses in primary sources, investigations, and documented facts."
             },
             challenge: {
                 title: "Challenging an Answer",
-                content: "Either player may use a turn to ask the AI to re-examine its previous answer in light of new evidence or a contradicting source. You challenge by using your turn for that question—there is no separate Challenge button. It does not grant a free extra turn. This keeps the game's pacing fair while still encouraging pushback on weak or outdated answers."
+                content: "Either player may use a turn to ask the AI to re-examine its previous answer in light of new evidence or a contradicting source. You challenge by using your turn for that question. There is no separate Challenge button. It does not grant a free extra turn. This keeps the game's pacing fair while still encouraging pushback on weak or outdated answers."
             },
             focus: {
                 title: "Staying Focused During Play",
-                content: "Explore one question at a time. If you have several concerns about the AI's answer, bookmark the extras and ask about one at a time.\n\nTo bookmark: click Bookmark Concern in Quick Actions (or add Bookmark: [label one], [label two] in your question).\n\nTo return: click Manage, then Use on a saved bookmark—or type Returning to bookmark: [label] in your question.\n\nThis keeps the discussion productive and easy to follow."
+                content: "Explore one question at a time. If you have several concerns about the AI's answer, bookmark the extras and ask about one at a time.\n\nTo bookmark: click Bookmark Concern in Quick Actions (or add Bookmark: [label one], [label two] in your question).\n\nTo return: click Manage, then Use on a saved bookmark, or type Returning to bookmark: [label] in your question.\n\nThis keeps the discussion productive and easy to follow."
             },
             ending: {
                 title: "Ending a Round",
-                content: "End a round when:\n- Players agree the topic has been sufficiently explored, or\n- A turn limit is reached (10–12 questions is a reasonable default; each Ask counts, Follow Up does not), or\n- Anyone calls for a break.\n\nThere is no winner. Success is a clearer shared picture of what the evidence does and doesn't show."
+                content: "End a round when:\n- Players agree the topic has been sufficiently explored, or\n- A turn limit is reached (10 to 12 questions is a reasonable default; each Ask counts, Follow Up does not), or\n- Anyone calls for a break.\n\nThere is no winner. Success is a clearer shared picture of what the evidence does and doesn't show."
             },
             examples: {
                 title: "Example Flow",
-                content: "Sample scenario (fictional):\n\nTeam A: \"Did the 2024 Riverdale infrastructure bill include the $2B rural broadband provision that critics claimed was cut?\"\n\nThe AI answers.\n\nTeam B clicks Follow Up, then asks: \"Sources say the provision was reduced rather than cut entirely. What was the before-and-after funding figure?\"\n\nThe AI answers.\n\nTeam A clicks Follow Up and asks: \"Bookmark: [funding source], [timeline of the cut]. First, can you clarify who proposed the reduction?\"\n\nThe AI answers.\n\nTeam B clicks Follow Up and asks: \"Returning to bookmark: [funding source]\"—and the round continues."
+                content: "Sample scenario (fictional):\n\nTeam A: \"Did the 2024 Riverdale infrastructure bill include the $2B rural broadband provision that critics claimed was cut?\"\n\nThe AI answers.\n\nTeam B clicks Follow Up, then asks: \"Sources say the provision was reduced rather than cut entirely. What was the before-and-after funding figure?\"\n\nThe AI answers.\n\nTeam A clicks Follow Up and asks: \"Bookmark: [funding source], [timeline of the cut]. First, can you clarify who proposed the reduction?\"\n\nThe AI answers.\n\nTeam B clicks Follow Up and asks: \"Returning to bookmark: [funding source].\" And the round continues."
             },
             best: {
                 title: "Best Practices for Asking the AI",
@@ -883,7 +883,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             },
             tips: {
                 title: "Tips for a Great Game",
-                content: "- Both perspectives are treated equally in team play.\n- Take breaks if emotions rise.\n- If a question feels like it's targeting a person rather than a claim, pause and rephrase it around the underlying policy, event, or specific factual assertion.\n- Success is measured by clearer shared understanding of what the evidence shows (or does not show).\n\nReady to begin? In team play, either player can start—type your first question and click Ask. In solo play, click Ask when you are ready."
+                content: "- Both perspectives are treated equally in team play.\n- Take breaks if emotions rise.\n- If a question feels like it's targeting a person rather than a claim, pause and rephrase it around the underlying policy, event, or specific factual assertion.\n- Success is measured by clearer shared understanding of what the evidence shows (or does not show).\n\nReady to begin? In team play, either player can start. Type your first question and click Ask. In solo play, click Ask when you are ready."
             }
         };
 
@@ -1756,7 +1756,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             if (persistChoice) {
                 try { localStorage.setItem(CAST_TV_BRAND_KEY, brand.id); } catch (e) {}
             }
-            if (title) title.textContent = brand.name + ' — open the browser on your TV';
+            if (title) title.textContent = brand.name + ': open the browser on your TV';
             if (steps) {
                 steps.innerHTML = '';
                 brand.steps.forEach(step => {
