@@ -43,10 +43,26 @@ fn now_secs() -> u64 {
         .as_secs()
 }
 
-#[derive(Default)]
 struct CastState {
     content: Arc<Mutex<CastContent>>,
     running: bool,
+    tv_connected: Arc<Mutex<bool>>,
+}
+
+impl Default for CastState {
+    fn default() -> Self {
+        Self {
+            content: Arc::new(Mutex::new(CastContent::default())),
+            running: false,
+            tv_connected: Arc::new(Mutex::new(false)),
+        }
+    }
+}
+
+#[derive(serde::Serialize)]
+struct CastStatus {
+    running: bool,
+    tv_connected: bool,
 }
 
 #[tauri::command]
@@ -69,12 +85,21 @@ fn start_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<String, Stri
     let port = server.server_addr().to_ip().unwrap().port();
     let url = format!("http://{}:{}", local_ip, port);
 
+    *cast_state.tv_connected.lock().map_err(|e| e.to_string())? = false;
+
     let content = cast_state.content.clone();
+    let tv_connected = cast_state.tv_connected.clone();
 
     // Run HTTP server in a background thread
     std::thread::spawn(move || {
         for request in server.incoming_requests() {
             let url_path = request.url().split('?').next().unwrap_or("/").to_string();
+
+            if url_path == "/" || url_path == "/index.html" || url_path == "/state" {
+                if let Ok(mut seen) = tv_connected.lock() {
+                    *seen = true;
+                }
+            }
 
             if url_path == "/state" {
                 let content = content.lock().unwrap();
@@ -122,10 +147,23 @@ fn start_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<String, Stri
 fn stop_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<(), String> {
     let mut cast_state = state.lock().map_err(|e| e.to_string())?;
     cast_state.running = false;
+    if let Ok(mut seen) = cast_state.tv_connected.lock() {
+        *seen = false;
+    }
     // Clear content so the cast page shows nothing useful.
     let mut content = cast_state.content.lock().unwrap();
     *content = CastContent::default();
     Ok(())
+}
+
+#[tauri::command]
+fn get_cast_status(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<CastStatus, String> {
+    let cast_state = state.lock().map_err(|e| e.to_string())?;
+    let tv_connected = cast_state.tv_connected.lock().map_err(|e| e.to_string())?;
+    Ok(CastStatus {
+        running: cast_state.running,
+        tv_connected: *tv_connected,
+    })
 }
 
 #[tauri::command]
@@ -164,15 +202,12 @@ fn get_cast_receiver_html() -> String {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let cast_state = Arc::new(Mutex::new(CastState {
-        content: Arc::new(Mutex::new(CastContent::default())),
-        running: false,
-    }));
+    let cast_state = Arc::new(Mutex::new(CastState::default()));
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .manage(cast_state)
-        .invoke_handler(tauri::generate_handler![greet, start_cast, stop_cast, update_cast_content])
+        .invoke_handler(tauri::generate_handler![greet, start_cast, stop_cast, get_cast_status, update_cast_content])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
