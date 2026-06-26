@@ -50,7 +50,9 @@ Write-Utf8NoBom $cargoPath $cargo
 
 $indexPath = Join-Path $root "src\index.html"
 $index = [System.IO.File]::ReadAllText($indexPath)
+$phase = if ($ver.phase) { $ver.phase.Trim() } else { "Alpha" }
 $index = $index -replace 'const APP_VERSION = "[^"]+";', "const APP_VERSION = `"$version`";"
+$index = $index -replace 'const APP_PHASE = "[^"]+";', "const APP_PHASE = `"$phase`";"
 Write-Utf8NoBom $indexPath $index
 
 Write-Host "Version $version synced to package.json, tauri.conf.json, Cargo.toml, and index.html" -ForegroundColor Green

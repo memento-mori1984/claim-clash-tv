@@ -38,6 +38,9 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             <p class="text-xs text-zinc-500 mb-4">Add API keys in any order. Use the arrows to set display order. Star your primary AI. Its answers appear in the main box.</p>
             <div id="setup-provider-list" class="space-y-3"></div>
             <p class="text-[10px] text-zinc-600 mt-4">Grok uses a browser link (no API key). Keys are stored only in localStorage on this device.</p>
+            <button onclick="showFeedback()" class="mt-4 w-full px-4 py-2 bg-amber-800 hover:bg-amber-900 rounded-2xl text-sm flex items-center justify-center gap-x-2">
+                <i class="fa-solid fa-comment-dots"></i> <span>Send Alpha Tester Feedback</span>
+            </button>
         </div>
     </div>
 
@@ -55,6 +58,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                     <h1 class="text-4xl font-bold tracking-tight">Claim Clash</h1>
                     <span class="text-[10px] px-1.5 py-0.5 bg-zinc-800 border border-zinc-700 rounded text-zinc-400 flex-shrink-0">v<span id="header-version"></span></span>
+                    <span id="header-phase" class="text-[10px] px-1.5 py-0.5 bg-amber-900 border border-amber-700 rounded text-amber-300 flex-shrink-0">Alpha</span>
                 </div>
                 <p class="text-zinc-400">An Evidence-Based Discussion Game for Political Claims</p>
                 <p class="text-zinc-500 text-sm">Structured Fact-Finding Between Opposing Perspectives &bull; Facilitated by an AI Assistant</p>
@@ -77,6 +81,9 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 </button>
                 <button onclick="showAbout()" class="toolbar-btn px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
                     <i class="fa-solid fa-info-circle"></i> <span>About</span>
+                </button>
+                <button onclick="showFeedback()" class="toolbar-btn px-4 py-2 bg-amber-700 hover:bg-amber-800 rounded-2xl text-sm flex items-center gap-x-2">
+                    <i class="fa-solid fa-comment-dots"></i> <span>Feedback</span>
                 </button>
             </div>
         </div>
@@ -264,6 +271,76 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         </div>
     </div>
 
+    <!-- Alpha Tester Feedback Modal -->
+    <div id="feedback-modal" onclick="closeFeedbackModal()" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+        <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 border border-zinc-700 rounded-3xl p-6 w-full max-w-xl mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 class="text-xl font-semibold mb-1 flex items-center gap-x-2">
+                <i class="fa-solid fa-comment-dots"></i> Alpha Tester Feedback
+            </h3>
+            <p class="text-xs text-zinc-500 mb-4">Your notes help improve Claim Clash before release. Fill in what you can, then copy and send to Zach (text, email, etc.).</p>
+
+            <div class="space-y-3 text-sm">
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1" for="feedback-name">Your name (optional)</label>
+                    <input id="feedback-name" type="text" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-sm" placeholder="e.g. Jamie" />
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1" for="feedback-ease">How easy was it to get started? (1 = hard, 5 = easy)</label>
+                    <select id="feedback-ease" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-sm">
+                        <option value="">Select...</option>
+                        <option value="1">1 - Very hard</option>
+                        <option value="2">2 - Hard</option>
+                        <option value="3">3 - Okay</option>
+                        <option value="4">4 - Easy</option>
+                        <option value="5">5 - Very easy</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1" for="feedback-api-setup">API key setup</label>
+                    <textarea id="feedback-api-setup" rows="2" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-sm" placeholder="Was getting a Gemini key clear? Any steps confusing?"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1" for="feedback-smartscreen">Windows security warning (SmartScreen)</label>
+                    <select id="feedback-smartscreen" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-sm">
+                        <option value="">Select...</option>
+                        <option value="No warning appeared">No warning appeared</option>
+                        <option value="Saw warning, clicked through">Saw warning, clicked More info then Run anyway</option>
+                        <option value="Blocked">Got blocked and could not run the app</option>
+                        <option value="Did not try yet">Did not try yet</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1" for="feedback-confusing">What was confusing?</label>
+                    <textarea id="feedback-confusing" rows="2" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-sm" placeholder="Buttons, rules, layout, anything unclear..."></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1" for="feedback-bugs">Bugs, errors, or crashes</label>
+                    <textarea id="feedback-bugs" rows="2" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-sm" placeholder="What happened? Any error messages?"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1" for="feedback-cast">Cast to TV (optional)</label>
+                    <textarea id="feedback-cast" rows="2" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-sm" placeholder="Did not try / Worked / TV would not connect..."></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1" for="feedback-positive">What worked well?</label>
+                    <textarea id="feedback-positive" rows="2" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-sm" placeholder="What felt good or intuitive?"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1" for="feedback-other">Anything else?</label>
+                    <textarea id="feedback-other" rows="2" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-sm" placeholder="Other ideas or impressions..."></textarea>
+                </div>
+            </div>
+
+            <p id="feedback-status" class="hidden text-xs mt-3"></p>
+
+            <div class="mt-5 flex flex-wrap justify-end gap-2">
+                <button onclick="closeFeedbackModal()" class="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 rounded-2xl text-sm">Close</button>
+                <button onclick="saveFeedbackDraft()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm">Save Draft</button>
+                <button onclick="copyFeedbackToClipboard()" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 rounded-2xl text-sm">Copy for Zach</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Rules Reference Modal -->
     <div id="rules-modal" onclick="closeRulesModal()" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
         <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 border border-zinc-700 rounded-3xl p-6 w-full max-w-2xl mx-4">
@@ -305,6 +382,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
          *   5. AI providers       - askPrimaryAI(), callAIProvider(), comparison grid
          *   6. Cast to TV         - startCast(), pushCurrentContentToCast(), status dot
          *   7. Settings / About   - modals, API key persistence (localStorage)
+         *   8. Alpha feedback     - structured tester form, copy-to-clipboard report
          *
          * ARCHIVED: Jailbreak Mode is disabled in shipping builds. See JAILBREAK MODE ARCHIVE block.
          */
@@ -336,8 +414,10 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         // It will be used unless you have saved a different key in Settings.
         // IMPORTANT: This is only for personal/testing use. Do not share builds containing real keys.
         const DEFAULT_GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
-        const APP_VERSION = "0.1.19";
+        const APP_VERSION = "0.1.20";
+        const APP_PHASE = "Alpha";
         const RULES_VERSION = "3.0";
+        const FEEDBACK_DRAFT_KEY = "claimClashFeedbackDraft";
 
         // Clean build: remove any previously saved personal Gemini key (one-time clear)
         if (!localStorage.getItem('cleanBuildCleared')) {
@@ -735,7 +815,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
         /** Closes every overlay modal except the cast modal (cast has its own lifecycle). */
         function closeAllModals() {
-            ['bookmark-modal', 'settings-modal', 'about-modal', 'rules-modal'].forEach(id => {
+            ['bookmark-modal', 'settings-modal', 'about-modal', 'rules-modal', 'feedback-modal'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.classList.add('hidden');
             });
@@ -1499,11 +1579,126 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             document.getElementById("rules-modal").classList.add("hidden");
         }
 
+        // --- 8. Alpha tester feedback ---
+
+        const FEEDBACK_FIELD_IDS = [
+            'feedback-name', 'feedback-ease', 'feedback-api-setup', 'feedback-smartscreen',
+            'feedback-confusing', 'feedback-bugs', 'feedback-cast', 'feedback-positive', 'feedback-other'
+        ];
+
+        function getFeedbackFieldValues() {
+            const values = {};
+            FEEDBACK_FIELD_IDS.forEach(id => {
+                const el = document.getElementById(id);
+                values[id] = el ? el.value.trim() : '';
+            });
+            return values;
+        }
+
+        function setFeedbackFieldValues(values) {
+            FEEDBACK_FIELD_IDS.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && values && values[id] !== undefined) el.value = values[id];
+            });
+        }
+
+        function getConfiguredProviderSummary() {
+            return getOrderedProviders()
+                .filter(p => providerIsConfigured(p.id))
+                .map(p => p.name + (p.id === primaryProviderId ? ' (primary)' : ''))
+                .join(', ') || 'None configured yet';
+        }
+
+        /** Builds a plain-text feedback report with version metadata (no API keys). */
+        function compileFeedbackReport() {
+            const f = getFeedbackFieldValues();
+            const lines = [
+                'Claim Clash Alpha Tester Feedback',
+                '==================================',
+                'Version: ' + APP_VERSION + ' ' + APP_PHASE,
+                'Rules: v' + RULES_VERSION,
+                'Date: ' + new Date().toLocaleString(),
+                'Screen: ' + window.screen.width + 'x' + window.screen.height,
+                'Configured AIs: ' + getConfiguredProviderSummary(),
+                '',
+                'STARTUP EASE (1-5): ' + (f['feedback-ease'] || '(not answered)'),
+                '',
+                'API KEY SETUP:',
+                f['feedback-api-setup'] || '(not answered)',
+                '',
+                'WINDOWS SMARTSCREEN:',
+                f['feedback-smartscreen'] || '(not answered)',
+                '',
+                'WHAT WAS CONFUSING:',
+                f['feedback-confusing'] || '(not answered)',
+                '',
+                'BUGS / ERRORS / CRASHES:',
+                f['feedback-bugs'] || '(not answered)',
+                '',
+                'CAST TO TV:',
+                f['feedback-cast'] || '(not answered)',
+                '',
+                'WHAT WORKED WELL:',
+                f['feedback-positive'] || '(not answered)',
+                '',
+                'OTHER NOTES:',
+                f['feedback-other'] || '(not answered)',
+            ];
+            if (f['feedback-name']) {
+                lines.splice(5, 0, 'Tester: ' + f['feedback-name']);
+            }
+            return lines.join('\n');
+        }
+
+        function setFeedbackStatus(message, ok) {
+            const el = document.getElementById('feedback-status');
+            if (!el) return;
+            el.textContent = message;
+            el.className = 'text-xs mt-3 ' + (ok ? 'text-emerald-400' : 'text-red-400');
+            el.classList.remove('hidden');
+        }
+
+        function saveFeedbackDraft() {
+            localStorage.setItem(FEEDBACK_DRAFT_KEY, JSON.stringify(getFeedbackFieldValues()));
+            setFeedbackStatus('Draft saved on this computer. You can come back and finish later.', true);
+        }
+
+        function loadFeedbackDraft() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(FEEDBACK_DRAFT_KEY) || 'null');
+                if (saved && typeof saved === 'object') setFeedbackFieldValues(saved);
+            } catch (e) {}
+        }
+
+        function showFeedback() {
+            closeAllModals();
+            loadFeedbackDraft();
+            const status = document.getElementById('feedback-status');
+            if (status) status.classList.add('hidden');
+            document.getElementById('feedback-modal').classList.remove('hidden');
+        }
+
+        function closeFeedbackModal() {
+            document.getElementById('feedback-modal').classList.add('hidden');
+        }
+
+        async function copyFeedbackToClipboard() {
+            const report = compileFeedbackReport();
+            try {
+                await navigator.clipboard.writeText(report);
+                saveFeedbackDraft();
+                setFeedbackStatus('Copied! Paste into a text or email to Zach.', true);
+            } catch (e) {
+                setFeedbackStatus('Could not copy automatically. Select the text below and copy manually.', false);
+                prompt('Copy this feedback report:', report);
+            }
+        }
+
         function showAbout() {
             closeAllModals();
             const modal = document.getElementById("about-modal");
             const verEl = document.getElementById("about-version");
-            if (verEl) verEl.textContent = `${APP_VERSION} (Rules v${RULES_VERSION}, June 2026)`;
+            if (verEl) verEl.textContent = `${APP_VERSION} ${APP_PHASE} (Rules v${RULES_VERSION}, June 2026)`;
             if (modal) modal.classList.remove("hidden");
         }
 
@@ -1529,6 +1724,8 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             const ver = typeof APP_VERSION !== 'undefined' ? APP_VERSION : '0.1.0';
             const headerVer = document.getElementById("header-version");
             if (headerVer) headerVer.textContent = ver;
+            const headerPhase = document.getElementById("header-phase");
+            if (headerPhase && typeof APP_PHASE !== 'undefined') headerPhase.textContent = APP_PHASE;
             const rulesVer = document.getElementById("header-rules-version");
             if (rulesVer) rulesVer.textContent = typeof RULES_VERSION !== 'undefined' ? RULES_VERSION : '3.0';
 
