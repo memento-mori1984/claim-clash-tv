@@ -277,7 +277,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             <h3 class="text-xl font-semibold mb-1 flex items-center gap-x-2">
                 <i class="fa-solid fa-comment-dots"></i> Alpha Tester Feedback
             </h3>
-            <p class="text-xs text-zinc-500 mb-4">Your notes help improve Claim Clash before release. Fill in what you can, then copy and send to Zach (text, email, etc.).</p>
+            <p class="text-xs text-zinc-500 mb-4">Your notes help improve Claim Clash before release. Fill in what you can, then click <strong>Send via Gmail</strong> to open a pre-filled email in your browser.</p>
 
             <div class="space-y-3 text-sm">
                 <div>
@@ -336,7 +336,10 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             <div class="mt-5 flex flex-wrap justify-end gap-2">
                 <button onclick="closeFeedbackModal()" class="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 rounded-2xl text-sm">Close</button>
                 <button onclick="saveFeedbackDraft()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm">Save Draft</button>
-                <button onclick="copyFeedbackToClipboard()" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 rounded-2xl text-sm">Copy for Zach</button>
+                <button onclick="copyFeedbackToClipboard()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm">Copy</button>
+                <button onclick="sendFeedbackViaGmail()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm flex items-center gap-x-2">
+                    <i class="fa-solid fa-envelope"></i> <span>Send via Gmail</span>
+                </button>
             </div>
         </div>
     </div>
@@ -414,9 +417,11 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         // It will be used unless you have saved a different key in Settings.
         // IMPORTANT: This is only for personal/testing use. Do not share builds containing real keys.
         const DEFAULT_GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
-        const APP_VERSION = "0.1.20";
+        const APP_VERSION = "0.1.21";
         const APP_PHASE = "Alpha";
+        const FEEDBACK_EMAIL = "";
         const RULES_VERSION = "3.0";
+        const GMAIL_BODY_URL_LIMIT = 5500;
         const FEEDBACK_DRAFT_KEY = "claimClashFeedbackDraft";
 
         // Clean build: remove any previously saved personal Gemini key (one-time clear)
@@ -1682,15 +1687,78 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             document.getElementById('feedback-modal').classList.add('hidden');
         }
 
+        /** Opens a URL in the system browser (Tauri opener plugin, then window.open). */
+        async function openExternalUrl(url) {
+            try {
+                if (window.__TAURI__) {
+                    const opener = window.__TAURI__.opener;
+                    if (opener && typeof opener.openUrl === 'function') {
+                        await opener.openUrl(url);
+                        return true;
+                    }
+                    const invoke = window.__TAURI__.core?.invoke || window.__TAURI__.invoke;
+                    if (typeof invoke === 'function') {
+                        await invoke('plugin:opener|open_url', { url: url });
+                        return true;
+                    }
+                }
+            } catch (e) {
+                console.warn('Tauri opener failed, using window.open', e);
+            }
+            const opened = window.open(url, '_blank', 'noopener,noreferrer');
+            return !!opened;
+        }
+
+        /** Builds a Gmail compose URL with optional recipient, subject, and body. */
+        function buildGmailComposeUrl(to, subject, body) {
+            const params = ['view=cm', 'fs=1'];
+            if (to) params.push('to=' + encodeURIComponent(to));
+            if (subject) params.push('su=' + encodeURIComponent(subject));
+            if (body) params.push('body=' + encodeURIComponent(body));
+            return 'https://mail.google.com/mail/?' + params.join('&');
+        }
+
         async function copyFeedbackToClipboard() {
             const report = compileFeedbackReport();
             try {
                 await navigator.clipboard.writeText(report);
                 saveFeedbackDraft();
-                setFeedbackStatus('Copied! Paste into a text or email to Zach.', true);
+                setFeedbackStatus('Copied to clipboard.', true);
             } catch (e) {
-                setFeedbackStatus('Could not copy automatically. Select the text below and copy manually.', false);
+                setFeedbackStatus('Could not copy automatically. Use Send via Gmail instead.', false);
                 prompt('Copy this feedback report:', report);
+            }
+        }
+
+        /** Opens Gmail in the browser with feedback pre-filled for the developer. */
+        async function sendFeedbackViaGmail() {
+            saveFeedbackDraft();
+            const report = compileFeedbackReport();
+            const subject = 'Claim Clash ' + APP_PHASE + ' Feedback v' + APP_VERSION;
+            let body = report;
+            let clipboardNote = '';
+
+            if (body.length > GMAIL_BODY_URL_LIMIT) {
+                clipboardNote = '\n\n[Full feedback copied to your clipboard. Paste it here if the text below looks cut off.]';
+                body = report.slice(0, GMAIL_BODY_URL_LIMIT - clipboardNote.length) + clipboardNote;
+                try {
+                    await navigator.clipboard.writeText(report);
+                } catch (e) {}
+            }
+
+            const to = (typeof FEEDBACK_EMAIL === 'string') ? FEEDBACK_EMAIL.trim() : '';
+            const url = buildGmailComposeUrl(to, subject, body);
+            const opened = await openExternalUrl(url);
+
+            if (opened) {
+                if (to) {
+                    setFeedbackStatus('Gmail opened in your browser. Review the message and click Send.', true);
+                } else {
+                    setFeedbackStatus('Gmail opened. Add the developer email in the To field, then click Send.', true);
+                }
+            } else {
+                setFeedbackStatus('Could not open Gmail. Allow pop-ups, or use Copy and paste into Gmail yourself.', false);
+                try { await navigator.clipboard.writeText(report); } catch (e) {}
             }
         }
 

@@ -53,6 +53,8 @@ $index = [System.IO.File]::ReadAllText($indexPath)
 $phase = if ($ver.phase) { $ver.phase.Trim() } else { "Alpha" }
 $index = $index -replace 'const APP_VERSION = "[^"]+";', "const APP_VERSION = `"$version`";"
 $index = $index -replace 'const APP_PHASE = "[^"]+";', "const APP_PHASE = `"$phase`";"
+$feedbackEmail = if ($ver.feedbackEmail) { $ver.feedbackEmail.Trim() } else { "" }
+$index = $index -replace 'const FEEDBACK_EMAIL = "[^"]*";', "const FEEDBACK_EMAIL = `"$feedbackEmail`";"
 Write-Utf8NoBom $indexPath $index
 
 Write-Host "Version $version synced to package.json, tauri.conf.json, Cargo.toml, and index.html" -ForegroundColor Green
