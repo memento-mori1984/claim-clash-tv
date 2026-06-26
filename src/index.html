@@ -19,13 +19,22 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         .toolbar-btn { white-space: nowrap; flex-shrink: 0; }
         .panel-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; }
         .panel-head-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+        /* Hidden easter-egg hit target beside Single Player Interrogation Mode */
         .solo-help-btn {
-            opacity: 0.18;
-            transition: opacity 0.15s ease;
+            opacity: 0;
+            color: transparent;
+            background: transparent;
+            border: none;
+            cursor: default;
         }
         .solo-help-btn:hover,
+        .solo-help-btn:focus,
         .solo-help-btn:focus-visible {
-            opacity: 0.55;
+            opacity: 0;
+            color: transparent;
+            background: transparent;
+            outline: none;
+            box-shadow: none;
         }
         .cast-help-btn {
             opacity: 0.72;
@@ -124,8 +133,8 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             </button>
             <div class="relative inline-flex items-center">
                 <button id="solo-interrogation-help" type="button" onclick="toggleSinglePlayerInterrogationHelp(event)"
-                        class="solo-help-btn w-6 h-6 flex items-center justify-center rounded-full text-xs text-zinc-400 hover:text-zinc-200"
-                        title="What is this?" aria-label="Single Player Interrogation Mode help">?</button>
+                        class="solo-help-btn w-6 h-6 flex items-center justify-center rounded-full text-xs"
+                        tabindex="-1" aria-hidden="true">?</button>
                 <div id="solo-interrogation-help-popover" onclick="event.stopPropagation()"
                      class="hidden absolute left-1/2 -translate-x-1/2 top-full mt-2 z-20 w-56 bg-zinc-950 border border-zinc-700 rounded-2xl px-4 py-3 text-sm text-zinc-300 shadow-lg text-center">
                     This is where you play with yourself.
