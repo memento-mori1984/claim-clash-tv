@@ -1,23 +1,31 @@
 // Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 // "Claim Clash" is a trademark of Zachary H. Roberts.
 //
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
+//! Claim Clash Tauri backend: local HTTP server for Smart TV casting.
+//!
+//! The desktop app pushes live game state via [`update_cast_content`]. A TV browser
+//! opens the URL returned by [`start_cast`] and polls `/state` for JSON updates.
+//! The mirror page HTML is embedded from `src/cast-mirror.html` via [`get_cast_receiver_html`].
+
 use std::sync::{Arc, Mutex};
 use std::time::{SystemTime, UNIX_EPOCH};
 use tiny_http::{Header, Response, Server};
 
+/// A bookmarked concern shown on the TV mirror.
 #[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 pub struct CastBookmark {
     pub concern: String,
     pub player: String,
 }
 
+/// One secondary AI response entry for the TV mirror.
 #[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 pub struct CastAnswer {
     pub name: String,
     pub text: String,
 }
 
+/// Full game snapshot synced from the desktop app to the TV cast mirror.
 #[derive(Clone, Default, serde::Serialize, serde::Deserialize)]
 pub struct CastContent {
     pub question: String,
@@ -36,6 +44,7 @@ pub struct CastContent {
     pub updated_at: u64,
 }
 
+/// Returns current Unix timestamp in seconds for cache-busting and sync markers.
 fn now_secs() -> u64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -43,6 +52,7 @@ fn now_secs() -> u64 {
         .as_secs()
 }
 
+/// Shared cast server state managed by Tauri.
 struct CastState {
     content: Arc<Mutex<CastContent>>,
     running: bool,
@@ -59,6 +69,7 @@ impl Default for CastState {
     }
 }
 
+/// Status returned to the frontend for the cast button indicator dot.
 #[derive(serde::Serialize)]
 struct CastStatus {
     running: bool,
@@ -70,6 +81,12 @@ fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
+/// Starts a background HTTP server on a random local port and returns the TV URL.
+///
+/// Serves:
+/// - `/` and `/index.html`: embedded cast mirror HTML
+/// - `/state`: JSON snapshot of [`CastContent`]
+/// - `/claimsclash.png`: app logo asset
 #[tauri::command]
 fn start_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<String, String> {
     let mut cast_state = state.lock().map_err(|e| e.to_string())?;
@@ -143,6 +160,7 @@ fn start_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<String, Stri
     Ok(url)
 }
 
+/// Stops casting, clears synced content, and resets the TV-connected flag.
 #[tauri::command]
 fn stop_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<(), String> {
     let mut cast_state = state.lock().map_err(|e| e.to_string())?;
@@ -156,6 +174,7 @@ fn stop_cast(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<(), String> {
     Ok(())
 }
 
+/// Returns whether the cast server is running and whether a TV has loaded the mirror page.
 #[tauri::command]
 fn get_cast_status(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<CastStatus, String> {
     let cast_state = state.lock().map_err(|e| e.to_string())?;
@@ -166,6 +185,9 @@ fn get_cast_status(state: tauri::State<Arc<Mutex<CastState>>>) -> Result<CastSta
     })
 }
 
+/// Updates the in-memory cast snapshot pushed to TVs polling `/state`.
+///
+/// Tauri 2 maps Rust `snake_case` parameters to JavaScript `camelCase` invoke args.
 #[tauri::command]
 fn update_cast_content(
     state: tauri::State<Arc<Mutex<CastState>>>,
@@ -196,6 +218,7 @@ fn update_cast_content(
     Ok(())
 }
 
+/// Loads the TV mirror HTML bundled at compile time.
 fn get_cast_receiver_html() -> String {
     include_str!("../../src/cast-mirror.html").to_string()
 }

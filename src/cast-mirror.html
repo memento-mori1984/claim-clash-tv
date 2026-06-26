@@ -1,4 +1,15 @@
-<!-- Copyright (c) 2026 Zachary H. Roberts. All rights reserved. -->
+<!--
+  Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
+
+  Claim Clash TV Cast Mirror
+  --------------------------
+  Read-only mirror of the desktop game UI, served by the Rust cast HTTP server
+  (src-tauri/src/lib.rs). The desktop app pushes state via update_cast_content;
+  this page polls GET /state every second and renders question, answers, bookmarks,
+  and team indicators. Buttons are decorative (control stays on the PC).
+
+  Embedded at compile time via include_str! in get_cast_receiver_html().
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,13 +39,16 @@
         .muted { color: #a1a1aa; }
         .dim { color: #71717a; font-size: 0.9rem; }
         .tiny { color: #52525b; font-size: 0.75rem; }
-        .header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
-        .btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+        .header { display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px; }
+        @media (min-width: 1100px) {
+            .header { flex-direction: row; justify-content: space-between; align-items: flex-start; flex-wrap: nowrap; }
+        }
+        .btn-row { display: flex; flex-wrap: wrap; gap: 8px; flex-shrink: 0; max-width: 100%; }
         .btn {
             display: inline-flex; align-items: center; gap: 6px;
             padding: 8px 16px; border-radius: 16px; border: none;
             font-size: 0.9rem; font-weight: 500; color: #fff;
-            opacity: 0.95;
+            opacity: 0.95; white-space: nowrap; flex-shrink: 0;
         }
         .btn-zinc { background: #27272a; }
         .btn-blue { background: #2563eb; }
@@ -198,6 +212,12 @@
     </div>
 
     <script>
+        /**
+         * TV mirror client script.
+         * Polls /state, maps CastContent JSON fields to DOM, and updates team/answer UI.
+         */
+
+        /** Sets innerHTML on an element, applying an empty-state CSS class when blank. */
         function setText(id, html, emptyText) {
             const el = document.getElementById(id);
             if (!el) return;
@@ -211,6 +231,7 @@
             }
         }
 
+        /** Highlights the active team badge, follow-up button color, and team selector chips. */
         function updatePlayerUI(player) {
             const badge = document.getElementById('player-badge');
             const followUp = document.getElementById('follow-up-btn');
@@ -231,6 +252,7 @@
 
         let lastUpdatedAt = 0;
 
+        /** Applies a full CastContent snapshot from /state to the mirror DOM. */
         function renderState(data) {
             setText('question', data.question, 'No question yet');
             setText('main-answer', data.main_answer, 'Waiting for responses...');
@@ -289,6 +311,7 @@
             }
         }
 
+        /** Fetches /state with cache-busting; retries on the 1s poll interval. */
         async function fetchState() {
             try {
                 const res = await fetch('/state?t=' + Date.now(), { cache: 'no-store' });

@@ -15,7 +15,10 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
     <style>
         body { font-family: 'Inter', system_ui, sans-serif; background-color: #0a0a0a; }
         .section { background-color: #111113; border: 1px solid #27272a; }
-
+        /* Prevent toolbar buttons and panel controls from overlapping at narrow widths */
+        .toolbar-btn { white-space: nowrap; flex-shrink: 0; }
+        .panel-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; }
+        .panel-head-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; flex-shrink: 0; }
     </style>
 </head>
 <body class="text-zinc-200">
@@ -46,40 +49,40 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                  class="w-48 h-auto rounded-2xl border border-zinc-700 shadow-md" />
         </div>
 
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-6">
-            <div>
-                <div class="flex items-center gap-x-2">
+        <!-- Header: stacks title and toolbar on narrow widths so Settings/About never overlap -->
+        <div class="flex flex-col xl:flex-row xl:justify-between xl:items-start gap-4 mb-6">
+            <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                     <h1 class="text-4xl font-bold tracking-tight">Claim Clash</h1>
-                    <span class="text-[10px] px-1.5 py-0.5 bg-zinc-800 border border-zinc-700 rounded text-zinc-400">v<span id="header-version"></span></span>
+                    <span class="text-[10px] px-1.5 py-0.5 bg-zinc-800 border border-zinc-700 rounded text-zinc-400 flex-shrink-0">v<span id="header-version"></span></span>
                 </div>
                 <p class="text-zinc-400">An Evidence-Based Discussion Game for Political Claims</p>
                 <p class="text-zinc-500 text-sm">Structured Fact-Finding Between Opposing Perspectives &bull; Facilitated by an AI Assistant</p>
                 <p class="text-zinc-600 text-xs mt-0.5">Rules v<span id="header-rules-version"></span> &bull; June 2026</p>
             </div>
-            <div class="flex gap-x-3 flex-wrap justify-end">
-                <button id="cast-button" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-2xl text-sm flex items-center gap-x-2">
+            <div class="flex flex-wrap gap-2 justify-start xl:justify-end flex-shrink-0 max-w-full">
+                <button id="cast-button" class="toolbar-btn px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-2xl text-sm flex items-center gap-x-2">
                     <i class="fa-solid fa-tv"></i>
                     <span id="cast-button-label">Cast to TV</span>
                     <span id="cast-status-dot" class="inline-block w-2.5 h-2.5 rounded-full bg-red-500 ml-1.5 flex-shrink-0" title="Not casting" aria-label="Cast status"></span>
                 </button>
-                <button onclick="toggleFullScreen()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
+                <button onclick="toggleFullScreen()" class="toolbar-btn px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
                     <i class="fa-solid fa-expand"></i> <span>Full Screen</span>
                 </button>
-                <button onclick="showRuleSection('intro')" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
+                <button onclick="showRuleSection('intro')" class="toolbar-btn px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
                     <i class="fa-solid fa-book"></i> <span>Rules</span>
                 </button>
-                <button onclick="showSettings()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
+                <button onclick="showSettings()" class="toolbar-btn px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
                     <i class="fa-solid fa-cog"></i> <span>Settings</span>
                 </button>
-                <button onclick="showAbout()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
+                <button onclick="showAbout()" class="toolbar-btn px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
                     <i class="fa-solid fa-info-circle"></i> <span>About</span>
                 </button>
             </div>
         </div>
 
         <!-- Who Goes First -->
-        <div class="flex items-center gap-x-4 mb-6">
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mb-6">
             <span class="text-sm font-medium text-zinc-400">Who goes first?</span>
             <button onclick="setFirstPlayer('Team A')" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm">Team A</button>
             <button onclick="setFirstPlayer('Team B')" class="px-4 py-1.5 bg-red-600 hover:bg-red-700 rounded-2xl text-sm">Team B</button>
@@ -92,11 +95,11 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 
                 <!-- Question -->
                 <div class="section rounded-3xl p-6">
-                    <div class="flex justify-between items-center mb-3">
+                    <div class="panel-head mb-3">
                         <span class="text-sm font-medium text-zinc-400">CURRENT QUESTION</span>
-                        <div class="flex items-center gap-x-2">
-                            <div id="player-badge"></div>
-                            <button onclick="askPrimaryAI()" class="px-4 py-1 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm flex items-center gap-x-2">
+                        <div class="panel-head-actions">
+                            <div id="player-badge" class="flex-shrink-0"></div>
+                            <button onclick="askPrimaryAI()" class="toolbar-btn px-4 py-1 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm flex items-center gap-x-2">
                                 <i class="fa-solid fa-paper-plane"></i> <span>Ask</span>
                             </button>
                         </div>
@@ -108,11 +111,11 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
                 <!-- Primary AI Answer -->
                 <div class="section rounded-3xl p-6">
-                    <div class="flex justify-between items-center mb-3">
-                        <span id="primary-answer-label" class="text-sm font-medium text-zinc-400">PRIMARY AI ANSWER</span>
-                        <div>
+                    <div class="panel-head mb-3">
+                        <span id="primary-answer-label" class="text-sm font-medium text-zinc-400 min-w-0">PRIMARY AI ANSWER</span>
+                        <div class="panel-head-actions">
                             <button id="follow-up-btn" onclick="followUp()" 
-                                    class="px-4 py-1.5 rounded-2xl text-sm flex items-center gap-x-2">
+                                    class="toolbar-btn px-4 py-1.5 rounded-2xl text-sm flex items-center gap-x-2">
                                 <i class="fa-solid fa-reply"></i> <span>Follow Up</span>
                             </button>
                         </div>
@@ -187,9 +190,9 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
         <!-- Bookmarks -->
         <div class="mt-6 section rounded-3xl p-5">
-            <div class="flex justify-between items-center mb-3">
+            <div class="panel-head mb-3">
                 <span class="font-medium">Bookmarks</span>
-                <button onclick="showBookmarkModal()" class="text-xs px-3 py-1 bg-zinc-800 hover:bg-zinc-700 rounded-xl">Manage</button>
+                <button onclick="showBookmarkModal()" class="toolbar-btn text-xs px-3 py-1 bg-zinc-800 hover:bg-zinc-700 rounded-xl">Manage</button>
             </div>
             <div id="bookmarks-list" class="text-sm text-zinc-400"></div>
         </div>
@@ -291,7 +294,23 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
     </div>
 
     <script>
-        // Safe Tauri invoke helper (supports different global structures in Tauri 2, resolves at call time)
+        /**
+         * Claim Clash - Main application script (single-page vanilla JS).
+         *
+         * Sections:
+         *   1. Tauri bridge       - tauriInvoke()
+         *   2. Constants          - APP_VERSION, AI_PROVIDERS, RULE_SECTIONS
+         *   3. Onboarding         - setup screen, provider rows, enterMainGame()
+         *   4. Game flow          - turns, bookmarks, rules modals
+         *   5. AI providers       - askPrimaryAI(), callAIProvider(), comparison grid
+         *   6. Cast to TV         - startCast(), pushCurrentContentToCast(), status dot
+         *   7. Settings / About   - modals, API key persistence (localStorage)
+         *
+         * ARCHIVED: Jailbreak Mode is disabled in shipping builds. See JAILBREAK MODE ARCHIVE block.
+         */
+
+        // --- 1. Tauri bridge ---
+        /** Invokes a Tauri command; supports Tauri 2 global layouts (__TAURI__.invoke / core.invoke). */
         function tauriInvoke(cmd, args) {
             let invokeFn = null;
             if (window.__TAURI__) {
@@ -308,6 +327,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             }
             return invokeFn(cmd, args);
         }
+        // --- 2. Constants and global state ---
         let currentPlayer = "Team A";
         let bookmarks = [];
 
@@ -358,6 +378,9 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         let groqApiKey = localStorage.getItem('groqApiKey') || '';
         let openrouterApiKey = localStorage.getItem('openrouterApiKey') || '';
 
+        // --- 3. Onboarding and provider configuration ---
+
+        /** Loads saved provider display order from localStorage, merging any new providers. */
         function loadProviderOrder() {
             try {
                 const saved = JSON.parse(localStorage.getItem('providerOrder') || 'null');
@@ -478,9 +501,10 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             scheduleCastPush();
         }
 
+        /** Builds one provider row (order arrows, primary star, API key input) for setup or settings. */
         function buildProviderRow(provider, context) {
             const row = document.createElement('div');
-            row.className = 'flex items-center gap-2 p-3 bg-zinc-900 border border-zinc-700 rounded-2xl';
+            row.className = 'flex flex-wrap items-start sm:items-center gap-2 p-3 bg-zinc-900 border border-zinc-700 rounded-2xl';
             row.dataset.providerId = provider.id;
 
             const orderBtns = document.createElement('div');
@@ -506,7 +530,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             primaryBtn.onclick = () => setPrimaryProvider(provider.id);
 
             const body = document.createElement('div');
-            body.className = 'flex-1 min-w-0';
+            body.className = 'flex-1 min-w-0 w-full sm:w-auto basis-full sm:basis-auto';
             const label = document.createElement('label');
             label.className = 'block text-sm font-medium mb-1';
             label.textContent = provider.name + (primaryProviderId === provider.id ? ' (Primary)' : '');
@@ -588,6 +612,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             }
         }
 
+        /** Validates keys, hides setup screen, and initializes the main game UI. */
         function enterMainGame() {
             saveKeysFromInputs('#setup-screen');
             if (countConfiguredProviders() < 1) {
@@ -642,6 +667,8 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 content: "• Both perspectives are treated equally.\n• Take breaks if emotions rise.\n• If a question feels like it's targeting a person rather than a claim, pause and rephrase it around the underlying policy, event, or specific factual assertion.\n• Success is measured by clearer shared understanding of what the evidence shows (or does not show).\n\nReady to begin? Either player can start. Type your first question and click Ask."
             }
         };
+
+        // --- 4. Game flow (turns, bookmarks, rules) ---
 
         function updatePlayerBadge() {
             const badge = document.getElementById("player-badge");
@@ -706,7 +733,16 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             pushCurrentContentToCast();
         }
 
+        /** Closes every overlay modal except the cast modal (cast has its own lifecycle). */
+        function closeAllModals() {
+            ['bookmark-modal', 'settings-modal', 'about-modal', 'rules-modal'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+        }
+
         function showBookmarkModal() {
+            closeAllModals();
             const container = document.getElementById("bookmark-modal-list");
             container.innerHTML = "";
 
@@ -715,7 +751,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             } else {
                 bookmarks.forEach(b => {
                     const div = document.createElement("div");
-                    div.className = "flex justify-between items-center py-2 border-b border-zinc-800 last:border-none";
+                    div.className = "flex flex-wrap justify-between items-center gap-2 py-2 border-b border-zinc-800 last:border-none";
                     div.innerHTML = `
                         <div>
                             <span class="font-medium">${b.concern}</span>
@@ -748,6 +784,9 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             document.getElementById("bookmark-modal").classList.add("hidden");
         }
 
+        // --- 5. AI providers ---
+
+        /** Calls Gemini with fallback across GEMINI_MODELS until one succeeds. */
         async function callGemini(contents) {
             for (let model of GEMINI_MODELS) {
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`;
@@ -781,6 +820,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             return { success: false, error: "All models failed." };
         }
 
+        /** Sends the current question to the primary AI and fills #answer-box. */
         function askPrimaryAI() {
             if (!providerIsConfigured(primaryProviderId)) {
                 alert("Please configure your primary AI in Settings.");
@@ -844,8 +884,6 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             pushCurrentContentToCast();
         }
 
-        // ========== AI COMPARISON LOGIC ==========
-
         function renderAIToggles() {
             const container = document.getElementById("ai-toggles");
             if (!container) return;
@@ -886,13 +924,13 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 const box = document.createElement("div");
                 box.className = "bg-zinc-900/50 border border-zinc-700 rounded-2xl p-4 min-h-[100px] flex flex-col";
 
-                let header = `<div class="flex justify-between items-center mb-2"><span class="text-sm font-medium">${provider.name}</span>`;
+                let header = `<div class="panel-head mb-2"><span class="text-sm font-medium">${provider.name}</span><div class="panel-head-actions">`;
                 if (provider.isLink) {
                     header += `<button onclick="openGrokWithQuery()" class="text-xs px-3 py-0.5 bg-blue-600 hover:bg-blue-700 rounded-xl">Open in Grok →</button>`;
                 } else {
                     header += `<button onclick="querySingleAI('${provider.id}', this)" class="text-xs px-3 py-0.5 bg-emerald-600 hover:bg-emerald-700 rounded-xl">Ask</button>`;
                 }
-                header += `</div>`;
+                header += `</div></div>`;
 
                 box.innerHTML = `
                     ${header}
@@ -997,6 +1035,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             }
         }
 
+        /** Routes a question to the given provider (OpenAI, Anthropic, Groq, OpenRouter, or Gemini). */
         async function callAIProvider(providerId, question) {
             // Jailbreak injection removed. See JAILBREAK MODE ARCHIVE above.
 
@@ -1140,7 +1179,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             renderAIResponses();
         }
 
-        // ========== CAST TO SMART TV ==========
+        // --- 6. Cast to Smart TV (local HTTP server via Rust backend) ---
 
         let currentCastUrl = null;
         let isCasting = false;
@@ -1148,6 +1187,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         let castStatusPollInterval = null;
         let castPushDebounce = null;
 
+        /** Debounces cast state pushes while the user edits question/answer boxes. */
         function scheduleCastPush() {
             if (!isCasting) return;
             clearTimeout(castPushDebounce);
@@ -1320,6 +1360,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             closeCastModal();
         }
 
+        /** Pushes current game state to the Rust cast server (camelCase args for Tauri 2). */
         async function pushCurrentContentToCast() {
             if (!isCasting) return;
 
@@ -1410,7 +1451,10 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             }
         }
 
+        // --- 7. Settings, About, and fullscreen ---
+
         function showSettings() {
+            closeAllModals();
             renderSettingsProviders();
             document.getElementById("settings-modal").classList.remove("hidden");
         }
@@ -1445,6 +1489,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         function showRuleSection(key) {
             const section = RULE_SECTIONS[key];
             if (!section) return;
+            closeAllModals();
             document.getElementById("rules-modal-title").textContent = section.title;
             document.getElementById("rules-modal-content").textContent = section.content;
             document.getElementById("rules-modal").classList.remove("hidden");
@@ -1455,6 +1500,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         }
 
         function showAbout() {
+            closeAllModals();
             const modal = document.getElementById("about-modal");
             const verEl = document.getElementById("about-version");
             if (verEl) verEl.textContent = `${APP_VERSION} (Rules v${RULES_VERSION}, June 2026)`;
@@ -1474,6 +1520,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             }
         }
 
+        /** Bootstraps the app: version labels, setup screen, or resumes saved keys. */
         function init() {
             reloadApiKeysFromStorage();
             ensureValidPrimary();
