@@ -549,11 +549,11 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         // It will be used unless you have saved a different key in Settings.
         // IMPORTANT: This is only for personal/testing use. Do not share builds containing real keys.
         const DEFAULT_GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
-        const APP_VERSION = "0.1.36";
+        const APP_VERSION = "0.1.37";
         const APP_PHASE = "Alpha";
         const FEEDBACK_EMAIL = "ClaimsClashFeedback@gmail.com";
         const MAILTO_BODY_URL_LIMIT = 1200;
-        const RULES_VERSION = "3.1";
+        const RULES_VERSION = "3.2";
         const GMAIL_BODY_URL_LIMIT = 5500;
         const FEEDBACK_DRAFT_KEY = "claimClashFeedbackDraft";
 
@@ -851,7 +851,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         const RULE_SECTIONS = {
             intro: {
                 title: "Introduction & Objective",
-                content: "Claim Clash is a structured discussion game for exploring contentious factual claims through evidence-based questions to an AI assistant, with a partner or on your own. The goal is not to win, but to reach clearer shared understanding of what the evidence actually shows. The game also helps players develop stronger AI literacy by treating the AI as a thinking tool rather than an authority.\n\nYou can play on this computer only, or use Cast to TV to show the game on a TV or phone on the same Wi-Fi while you control questions here.\n\nNote: The AI assistant you use is not infallible and may update its answers as new information becomes available. Challenging or questioning its answers with evidence is valid and encouraged."
+                content: "Claim Clash is a structured discussion game for exploring polarizing topics through evidence-based questions to an AI assistant, with a partner or on your own.\n\nThe end goal is not to win an argument or change someone's mind on the spot. It is to foster a shared understanding of reality on topics that often divide people: a common picture of what the evidence actually shows, built carefully from facts rather than slogans.\n\nThe game also helps players develop stronger AI literacy by treating the AI as a thinking tool rather than an authority.\n\nYou can play on this computer only, or use Cast to TV to show the game on a TV or phone on the same Wi-Fi while you control questions here.\n\nNote: The AI assistant you use is not infallible and may update its answers as new information becomes available. Challenging or questioning its answers with evidence is valid and encouraged."
             },
             how: {
                 title: "How to Play",
@@ -2671,7 +2671,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             const headerPhase = document.getElementById("header-phase");
             if (headerPhase && typeof APP_PHASE !== 'undefined') headerPhase.textContent = APP_PHASE;
             const rulesVer = document.getElementById("header-rules-version");
-            if (rulesVer) rulesVer.textContent = typeof RULES_VERSION !== 'undefined' ? RULES_VERSION : '3.1';
+            if (rulesVer) rulesVer.textContent = typeof RULES_VERSION !== 'undefined' ? RULES_VERSION : '3.2';
 
             const qbox = document.getElementById("question-box");
             const abox = document.getElementById("answer-box");
