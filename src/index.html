@@ -73,9 +73,6 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 <button onclick="toggleFullScreen()" class="toolbar-btn px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
                     <i class="fa-solid fa-expand"></i> <span>Full Screen</span>
                 </button>
-                <button onclick="showRuleSection('intro')" class="toolbar-btn px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
-                    <i class="fa-solid fa-book"></i> <span>Rules</span>
-                </button>
                 <button onclick="showSettings()" class="toolbar-btn px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
                     <i class="fa-solid fa-cog"></i> <span>Settings</span>
                 </button>
@@ -167,19 +164,8 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 </div>
 
                 <div class="section rounded-3xl p-5">
-                    <div class="text-sm font-medium text-zinc-400 mb-2">Core Rules</div>
-                    <div class="text-[11px] text-zinc-300 space-y-0.5 leading-snug">
-                        <div>- One focused question per turn.</div>
-                        <div>- Questions should seek evidence, clarification, or verification of specific claims, not judgments about a person's character.</div>
-                        <div>- Keep questions relevant to the current topic for coherent discussion.</div>
-                        <div>- Follow-up questions are encouraged when more detail or counter-evidence is needed.</div>
-                        <div>- Maintain respect and focus on the claims, not on each other.</div>
-                        <div>- Ask the AI to ground its responses in primary sources, investigations, and documented facts.</div>
-                    </div>
-                </div>
-
-                <div class="section rounded-3xl p-5">
-                    <div class="text-sm font-medium text-zinc-400 mb-3">RULES REFERENCE</div>
+                    <div class="text-sm font-medium text-zinc-400 mb-3">RULES &amp; GUIDELINES</div>
+                    <p class="text-[11px] text-zinc-500 mb-3">Each topic opens once. Use Load Example Flow in Quick Actions to try a sample round.</p>
                     <div class="grid grid-cols-2 gap-2 text-xs">
                         <button onclick="showRuleSection('intro')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Introduction</button>
                         <button onclick="showRuleSection('how')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">How to Play</button>
@@ -190,7 +176,6 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                         <button onclick="showRuleSection('best')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Best Practices</button>
                         <button onclick="showRuleSection('tips')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Tips for a Great Game</button>
                     </div>
-                    <button onclick="showRuleSection('examples')" class="mt-2 w-full px-3 py-2 bg-amber-900 hover:bg-amber-800 rounded-xl text-xs text-left">Example Flow</button>
                 </div>
             </div>
         </div>
@@ -417,7 +402,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         // It will be used unless you have saved a different key in Settings.
         // IMPORTANT: This is only for personal/testing use. Do not share builds containing real keys.
         const DEFAULT_GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
-        const APP_VERSION = "0.1.22";
+        const APP_VERSION = "0.1.23";
         const APP_PHASE = "Alpha";
         const FEEDBACK_EMAIL = "";
         const RULES_VERSION = "3.0";
@@ -1558,10 +1543,6 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             closeSettingsModal();
             scheduleCastPush();
             alert("Settings saved!");
-        }
-
-        function showRules() {
-            showRuleSection('intro');
         }
 
         function clearCurrent() {
