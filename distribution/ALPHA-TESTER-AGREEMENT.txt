@@ -1,0 +1,118 @@
+Claim Clash - Alpha Tester Agreement
+====================================
+
+Version: {{VERSION}}
+Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
+
+Thank you for helping test Claim Clash before public release. Please read this
+file before you run the app. When you click Begin Testing in the app, you agree
+to the terms below.
+
+
+WHAT YOU ARE RECEIVING
+----------------------
+- A pre-release copy of Claim Clash for testing and feedback only.
+- This build is not a final product. It may crash, change, or stop working.
+- The app is unsigned. Windows may show a SmartScreen warning. That is expected.
+
+
+WHAT YOU MAY DO
+---------------
+- Install and run the app on your own Windows PC for personal testing.
+- Play with one partner at the same screen (the intended experience), or solo if no partner is available.
+- Send feedback, bug reports, and suggestions to the developer.
+- Tell the developer whether features are confusing, broken, or slow.
+
+
+WHAT YOU MAY NOT DO
+-------------------
+- Share, upload, forward, or redistribute this build or zip file to anyone else.
+- Post the build, screenshots of unreleased features, or download links online.
+- Copy, clone, tamper with, or recreate Claim Clash or its rules, branding, or idea.
+- Reverse engineer the app to extract source code or embedded materials.
+- Pitch, sell, license, or present this project or the same idea to any company as your own.
+- Use the Claim Clash name, logo, or branding for any other product or service.
+- Share, copy, post, or give anyone else the pre-filled alpha testing API keys in this build.
+
+
+WHEN YOU FINISH TESTING
+-----------------------
+- Before you delete anything, send feedback through the app (see Feedback below).
+- Delete this zip file, the extracted folder, and the app executable from your PC.
+- Do not keep, archive, or pass along copies after your testing is complete.
+- If you stop testing early, send feedback first, then delete the files.
+
+
+OWNERSHIP
+---------
+- Claim Clash, including its name, design, rules, code, and content, belongs to
+  Zachary H. Roberts.
+- This agreement does not give you any ownership, license, or commercial rights.
+- Any feedback you provide may be used to improve the product without payment or
+  credit unless the developer agrees otherwise in writing.
+
+
+CONFIDENTIALITY (KEEP IT IN THE ROOM)
+------------------------------------
+- Treat this alpha build as private unless the developer gives you written
+  permission to share it.
+- Do not describe unreleased details in public posts, streams, or workplace
+  pitches.
+- If you want a colleague to test, ask the developer first. Do not pass along
+  your copy.
+
+
+HOW TO TEST (PLEASE EXPLORE)
+----------------------------
+Menus and wording
+  - Read labels on the welcome screen, toolbar, Settings, About, and Rules.
+  - Note any text that is confusing, too small, or easy to misread.
+
+Core gameplay
+  - Try Team A / Team B turns, Ask, and Follow Up.
+  - Try Single Player Interrogation Mode and Start New Session.
+  - Use Load Example for a sample question.
+  - Try Bookmark Concern and Manage bookmarks.
+
+AI features
+  - Confirm your primary AI answers in the main box.
+  - Toggle other AIs and use Query Selected to compare responses.
+  - Note any provider errors or answers that are hard to read.
+
+Cast to TV (important)
+  - On the same Wi-Fi, click Cast to TV on the PC.
+  - Open the shown URL in a TV or phone web browser.
+  - Ask a question on the PC and confirm the mirror updates on the cast screen.
+  - Report connection problems, layout issues, or stale content.
+
+Feedback (please use the app)
+  - Prefer the built-in feedback form instead of writing a separate email from scratch.
+  - Use either path: Send Alpha Tester Feedback on the welcome screen, or the Feedback button on the main screen (same form).
+  - Fill in the form, then choose your email provider to send. The To field and subject are pre-filled.
+  - Send feedback when you finish testing or whenever something breaks.
+  - Say what you tried, what worked, and what broke.
+
+
+NO WARRANTY
+-----------
+- This alpha build is provided "as is" with no warranty of any kind.
+- The developer is not liable for any loss or damage from using this test build.
+
+
+NOT LEGAL ADVICE
+----------------
+- This is a plain-language tester agreement for an alpha program.
+- It is not a substitute for advice from a licensed attorney.
+
+
+QUESTIONS OR FEEDBACK
+---------------------
+Please use Send Alpha Tester Feedback on the welcome screen or the Feedback button on the main screen.
+That is the preferred way to report bugs and suggestions.
+
+If the in-app form will not open your email, you may email directly:
+{{FEEDBACK_EMAIL}}
+
+If you do not agree, please delete this zip and do not use the app.
+
+Thank you for supporting Claim Clash.

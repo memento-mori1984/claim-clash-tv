@@ -1,0 +1,78 @@
+Claim Clash - The app will not open (Windows)
+=============================================
+
+If you double-click the app and nothing happens, try these steps in order.
+You do not need to be good with computers. Just follow one step at a time.
+
+
+STEP 1: Did you extract the zip file?
+-------------------------------------
+You cannot run the app from inside the zip file.
+
+1. Right-click the zip file you received.
+2. Click Extract All.
+3. Pick a simple folder, such as Desktop\Claim Clash.
+4. Open that folder. You should see a file ending in .exe (not .zip, not .sha256).
+5. Double-click the .exe file in that folder.
+
+
+STEP 2: Windows SmartScreen warning
+------------------------------------
+Windows often blocks apps that are not signed. This is normal for alpha testing.
+
+1. Double-click the .exe.
+2. If you see "Windows protected your PC" or a blue SmartScreen box:
+   - Click More info (small link, easy to miss).
+   - Click Run anyway.
+3. Try opening the app again.
+
+
+STEP 3: Unblock the file
+------------------------
+1. Right-click the .exe file.
+2. Click Properties (at the bottom of the menu).
+3. On the General tab, if you see a checkbox that says Unblock, check it.
+4. Click OK.
+5. Double-click the .exe again.
+
+
+STEP 4: Install Microsoft WebView2 (required)
+---------------------------------------------
+Claim Clash needs a small Microsoft component called WebView2.
+Most Windows 11 PCs already have it. Some Windows 10 PCs do not.
+
+1. Open this link in your browser (Edge or Chrome):
+   https://go.microsoft.com/fwlink/p/?LinkId=2124703
+2. Download and run the installer.
+3. When it finishes, try Claim Clash again.
+
+
+STEP 5: Antivirus or security software
+---------------------------------------
+Some antivirus programs silently block or delete new .exe files.
+
+1. Open your antivirus app (Windows Security, Norton, McAfee, etc.).
+2. Look for Quarantine, Threat history, or Blocked apps.
+3. If Claim Clash is listed, restore it and allow it.
+4. Try running the .exe again.
+
+
+STEP 6: Cloud storage (OneDrive, Google Drive, Dropbox)
+-------------------------------------------------------
+If the zip or .exe lives only in the cloud, Windows may not run it.
+
+1. Move the extracted folder to your Desktop or Documents (on this PC).
+2. Wait until the files show as fully downloaded (not a cloud icon only).
+3. Try again.
+
+
+STEP 7: Still nothing?
+----------------------
+Please email the developer with:
+  - Your Windows version (press Windows key, type winver, press Enter).
+  - What happened when you double-clicked (nothing, error message, SmartScreen, etc.).
+  - Whether Steps 1 through 6 were tried.
+
+Feedback email: ClaimsClashFeedback@gmail.com
+
+Version: {{VERSION}}

@@ -1,0 +1,39 @@
+Claim Clash: MSIX local testing checklist
+==========================================
+
+Build (Release, no embedded API keys):
+  .\scripts\build-msix-store.ps1 -NoIncrement
+
+First-time certificate trust (admin PowerShell):
+  .\scripts\build-msix-store.ps1 -InstallDevCert
+
+Install the package:
+  dist\Claim Clash {version}.0 Store.msix
+  (double-click, or: Add-AppxPackage -Path "full\path\to\file.msix")
+
+Run with identity without installing MSIX:
+  .\scripts\build-msix-store.ps1 -RunWithIdentity
+
+VERIFY BEFORE MICROSOFT STORE SUBMISSION
+----------------------------------------
+[ ] App opens from Start Menu after MSIX install
+[ ] Get started screen: API keys, rules walkthrough, enter game
+[ ] Ask + Follow Up (two-player flow)
+[ ] Load Example (preloaded questions)
+[ ] Save & Quit writes to Documents\Claim Clash\
+[ ] Quit without saving closes cleanly
+[ ] Past Sessions lists saved backups
+[ ] Export Session (Markdown / Word / PDF)
+[ ] Cast to TV: start Cast, open URL on phone/TV on same Wi-Fi, mirror updates
+[ ] Settings: Grade Level, provider keys
+
+UNINSTALL
+---------
+Settings → Apps → Claim Clash → Uninstall
+Or: Get-AppxPackage *ClaimClash* | Remove-AppxPackage
+
+NOTES
+-----
+- Dev MSIX uses devcert.pfx (CN=Ranzh). Store submission uses Partner Center; Microsoft re-signs MSIX after certification.
+- Publisher in Package.appxmanifest must match your Store identity before submission.
+- Alpha zip/portable builds are unchanged; this path is for Store release testing.

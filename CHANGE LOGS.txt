@@ -1,0 +1,342 @@
+Claim Clash Alpha - Change Logs
+================================
+Last updated: June 30, 2026
+Current source version: 0.1.86 Beta
+Current packaged build in dist: 0.1.82 Alpha
+
+Thank you for testing. Below is everything that changed in recent iterations.
+
+
+HOUSEKEEPING (June 27, 2026)
+----------------------------
+- Renamed UPDATE-NOTES.txt to CHANGE LOGS.txt.
+- CHANGE LOGS auto-updates on each iteration bump (build-with-checksum.ps1).
+- Tester zip packages now include TROUBLESHOOTING.txt for exe launch issues.
+
+
+
+VERSION 0.1.71
+--------------
+The Brain (hidden background AI)
+  - Background system fetches today's headlines and generates a daily controversial-topic question.
+  - Load Example Flow alternates: random static question, then daily Brain question, then random, and so on.
+  - Rapid clicks on the Brain turn wait silently until the daily question is ready.
+  - Brain questions persist in a 300-item pool (oldest removed when full).
+  - Brain uses Primary AI with free-tier fallback; separate hidden session from the main answer box.
+
+Brain security
+  - Every Brain session opens with a creator-authority security rule (no legal name in prompt).
+  - Every Brain API call reinforces a short non-negotiable security prefix.
+  - User game input is never passed to The Brain as instructions.
+
+Setup screen
+  - API key / plan link button beside each key field (setup screen only).
+  - Red/green dot on the Primary AI row shows API availability (checked on launch).
+
+
+VERSION 0.1.72
+--------------
+Security: separate Alpha vs Release build profiles
+  - API keys removed from index.html source.
+  - Alpha builds: scripts/set-build-profile.ps1 -Profile Alpha (used by build-with-checksum.ps1).
+  - Release/Store builds: scripts/build-release.ps1 sets Release profile with no embedded keys.
+  - Default committed build-profile.js is Release (empty keys).
+  - Alpha agreement and pre-filled key UI hidden on Release builds.
+
+
+VERSION 0.1.73
+--------------
+Security: Cast-to-TV XSS hardening
+  - Question text on the TV mirror is plain text only (strips pasted HTML).
+  - Primary and comparison AI answers use a sanitized HTML allowlist (formatting tags only).
+  - AI names and bookmarks use textContent, not raw innerHTML concatenation.
+
+
+VERSION 0.1.74
+--------------
+Security: plain-text API payloads and recall sanitization
+  - All AI API calls now read the question box as plain text (getQuestionPlainText), not HTML.
+  - Grok browser, comparison queries, bookmarks, and primary Ask use plain text payloads.
+  - Past session recall strips HTML and drops injection-like lines from saved export excerpts.
+  - Recall context includes an explicit untrusted-data security preamble for the primary AI.
+  - Past Sessions "Use in question" sets textContent instead of innerHTML.
+
+
+VERSION 0.1.75
+--------------
+Security: Cast-to-TV pairing and LAN-only bind
+  - Cast server binds to your LAN IP only (not 0.0.0.0 / all interfaces).
+  - Each cast session gets a random 8-character pairing code in the URL.
+  - /state, mirror page, QR, and assets require a valid token (403 otherwise).
+  - TVs that open IP:Port only see a pairing code entry screen (cast-pairing.html).
+  - Cast modal shows the pairing code and updated connection instructions.
+  - Removed wildcard CORS headers from cast responses.
+
+
+VERSION 0.1.76
+--------------
+Security: Brain localStorage validation
+  - Integrity hash checked on raw load before sanitization (tampered data is wiped).
+  - Question pool, daily question, and session messages sanitized on load and save.
+  - Pool entries and daily questions must pass length, injection-pattern, and HTML-stripping checks.
+  - AI-generated daily questions and pool additions run through the same sanitizer before persisting.
+  - Load Example Flow re-validates the daily Brain question before showing it in the question box.
+  - Brain example questions use textContent (not innerHTML) in the question box.
+  - Stale daily-date rollover now updates integrity hash via saveDaily().
+
+
+VERSION 0.1.77
+--------------
+Security: Microsoft Store MSIX prep and privacy policy
+  - Added PRIVACY-POLICY.md (required for Store listing and AI network use).
+  - distribution/PRIVACY-POLICY.txt for offline reference and tester packages.
+  - About modal Privacy Policy link opens the configured HTTPS URL.
+  - privacyPolicyUrl in version.json syncs to the app via sync-version.ps1.
+  - Fixed tauri.store.conf.json: MSI + offline WebView2 (Tauri does not bundle native MSIX).
+  - scripts/build-store.ps1 builds Release Store MSI to dist/.
+  - MICROSOFT_STORE.md updated with enrollment, capabilities, and silent-install steps.
+
+
+VERSION 0.1.78
+--------------
+Security: server-side Brain (creator-only control)
+  - Daily Brain questions now come only from a creator-signed HTTPS JSON feed.
+  - Rust verifies Ed25519 signatures before the app accepts any Brain content.
+  - Removed client-side RSS + user-API Brain generation (users cannot author Brain tasks locally).
+  - brain-feed/ folder: draft.json, signed feed.json, public.key.hex, README.
+  - scripts/generate-brain-keys.mjs and scripts/sign-brain-feed.mjs for creator publishing.
+  - version.json brainFeedUrl + brainVerifyPublicKeyHex sync to src-tauri/src/brain_config.rs.
+  - Load Example Flow Brain turn uses signed feed only; skips silently if feed unavailable.
+  - Private signing key gitignored; only public key ships in the app.
+
+CREATOR SETUP (required for Brain daily questions)
+  1. Set brainFeedUrl in version.json to your hosted feed.json URL and push brain-feed/feed.json to GitHub.
+  2. Run node scripts/sign-brain-feed.mjs after editing brain-feed/draft.json each day.
+  3. Rebuild or sync-version after URL/key changes.
+
+
+VERSION 0.1.79
+--------------
+Export filename format (ClaimsClash)
+  - New pattern: ClaimsClash [version] [date] [convo] [topic].ext
+  - Example: ClaimsClash v1 2026-06-27 01 Panama Canal Treaties.pdf
+  - Re-export same session bumps version (v2, v3...) for same date + convo + topic.
+  - New session same day gets next convo number (01, 02, 03...).
+  - Version and convo auto-detected from existing files in Documents\Claim Clash Sessions\.
+  - Save As pre-fills suggested topic; edit the topic segment before saving.
+  - Email attach and Markdown backup use the same naming. Legacy conv N files still parse for recall.
+
+
+VERSION 0.1.80
+--------------
+Setup: API status dot
+  - Primary AI row shows a live status dot (green / red / amber / blue for browser-only Grok).
+  - Dot waits until the provider row is in the DOM before rendering (fixes missing dot on launch).
+  - Legend on the setup screen explains each color.
+
+Load Example Flow: rule of 4
+  - Clicks 1, 2, and 3 load stock example questions; click 4 tries the daily Brain question.
+  - If the Brain feed is unavailable on click 4, a stock question is used instead.
+
+Steelman rules
+  - Rules walkthrough includes a Steelman vs Strawman section.
+  - Hidden steelman directive augments primary AI calls to encourage strongest-counterargument framing.
+
+
+VERSION 0.1.81
+--------------
+Built for two (positioning and UI)
+  - Welcome, rules, main game, About, and feedback copy emphasize two players at one screen.
+  - Solo mode remains available but is clearly optional for testing alone.
+  - HOW-TO-TEST and alpha agreement updated for partner-first play.
+  - Short description: "Built for two: evidence-based questions with a shared AI".
+
+Grade level (academic use)
+  - Setup and Settings let you pick a US grade band or map international grades to US bands.
+  - Hidden directive adjusts reading level and inquiry framing (no IQ gate).
+  - See GRADE-LEVEL-NOTES.txt (creator file, not in tester zip).
+
+Primary AI: paid-plan guidance
+  - Amber banners on setup, settings, and game screen recommend paid API plans for primary AI.
+  - OpenRouter primary defaults to paid models first when primary is starred.
+  - Session help text updated for two-player quota realities.
+
+Email provider freeze fix
+  - Feedback modal stays open when switching email providers.
+  - Native attach uses a detached PowerShell path (no blocking Outlook COM freeze).
+  - Saved attachment file is reused when you switch providers mid-send.
+
+
+VERSION 0.1.83
+--------------
+Installation program - Step 2: NSIS setup installer
+  - Root cause: NSIS cannot read scripts under C:\Windows\System32 (WoW64 path rules).
+  - Added scripts/build-nsis-installer.ps1 - stages to ClaimClash\claim-clash-tv-build, bundles NSIS, copies setup to dist/.
+  - build-with-checksum.ps1 auto-uses staging when source is under System32.
+  - Drive zip now includes Claim Clash {version} - Setup.exe.
+  - HOW-TO-INSTALL.txt: Option A is NSIS setup; PowerShell script is Option B.
+  - Verified: dist\Claim Clash 0.1.82 Alpha - Setup.exe
+
+
+VERSION 0.1.82
+--------------
+Installation program ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¾ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â Step 1: stabilized portable build
+  - Documented 0.1.80 and 0.1.81 changes in this changelog (were missing at package time).
+  - Rebuilt portable exe + SHA-256 checksum in dist/.
+  - Tester Drive zip repackaged with HOW-TO-TEST, TROUBLESHOOTING, agreement, and changelog.
+  - NSIS installer fixed in Step 2 via staging build (see 0.1.83 notes).
+  - Portable exe verified: dist\Claim Clash 0.1.82 Alpha.exe
+
+Build pipeline (scratch rebuild)
+  - Added build-from-scratch.ps1: cargo clean, sync without bump, portable-only (--no-bundle).
+  - build-with-checksum.ps1 now supports -Clean, -NoIncrement, and -PortableOnly flags.
+  - Scratch builds use -PortableOnly; full NSIS via scripts/build-nsis-installer.ps1.
+
+
+VERSION 0.1.85
+--------------
+(Document changes before packaging.)
+
+
+VERSION 0.1.86
+--------------
+(Document changes before packaging.)
+
+FILENAME FORMAT (0.1.79 and later)
+----------------------------------
+All exports use: ClaimsClash [version] [date] [convo] [topic].ext
+
+Examples:
+  ClaimsClash v1 2026-06-27 01 [topic].pdf
+  ClaimsClash v1 2026-06-27 02 AI Ethics Debate.md
+  ClaimsClash v2 2026-06-27 01 Panama Canal Treaties.pdf   (re-export)
+  ClaimsClash v1 2026-06-27 01 [topic] part 2 of 3.pdf   (multi-part email)
+
+version = export version for this convo/topic (v1, v2, v3...).
+date = YYYY-MM-DD (export date).
+convo = sequential conversation number for that date (01, 02, 03...).
+topic = suggested from first question, or [topic] to edit on Save As.
+
+
+VERSION 0.1.58
+--------------
+Rules walkthrough
+  - After the welcome screen, Next walks through 8 rules topics before you enter the game.
+  - Checkbox to skip the walkthrough on future launches.
+  - Start Claim Clash appears after the final rules screen.
+
+
+VERSION 0.1.59
+--------------
+Export Session
+  - New Export Session button in Quick Actions.
+  - Choose Markdown (.md), Word (.docx), or PDF (.pdf).
+  - Exports include primary AI conversation, bookmarks, and comparison responses on screen.
+
+
+VERSION 0.1.60 through 0.1.63
+-----------------------------
+Email export
+  - Email this export from the Export Session modal.
+  - Attach file or Text only (full summary in email body; large sessions split into parts).
+  - Gmail, Outlook, Yahoo, iCloud, and Default app buttons.
+
+PDF and email stability
+  - Fixed hangs and crashes when exporting long sessions as PDF for email.
+  - Safer PDF generation with timeout and Markdown fallback when needed.
+  - Large sessions split into multiple attachment parts automatically.
+
+
+VERSION 0.1.64
+--------------
+Automatic Markdown backup
+  - Save File also saves a Markdown backup to Documents\Claim Clash Sessions\.
+  - Backup uses the same session content as your export.
+
+
+VERSION 0.1.65
+--------------
+Export filenames and email attach
+  - Files use conv N - [topic] naming (see format above).
+  - Email attach tries Outlook or Thunderbird with the file attached.
+  - Quieter status messages: Saved. and Email opened.
+  - Silent Markdown backup in the background on Save File.
+
+
+VERSION 0.1.66
+--------------
+Past session recall
+  - New Past Sessions button in Quick Actions.
+  - Browse and search saved exports in Documents\Claim Clash Sessions\.
+  - View a session preview or Use in question to ask the primary AI about a past round.
+
+Automatic recall on Ask
+  - Questions like "Didn't we ask about inflation the other day?" search saved sessions automatically.
+  - Matching context is sent to the primary AI (your question text stays the same in the box).
+
+Better export indexing
+  - Exports include YAML metadata (conv, topic, date, bookmarks) for faster search.
+  - Markdown backup also runs when you email an export, not only on Save File.
+
+
+VERSION 0.1.67
+--------------
+Save File naming fix
+  - Save dialog pre-fills conv number and [topic] for Markdown, Word, and PDF.
+  - Topic text is stripped of HTML from the question box.
+  - Windows save dialog fix for PDF, Word, and Markdown filters.
+
+
+VERSION 0.1.68
+--------------
+Naming in all export content
+  - conv N - [topic] used in file names and inside the document (title and metadata).
+  - Export modal preview shows the file name before you save.
+
+
+VERSION 0.1.69
+--------------
+Save File for all three formats
+  - Save dialog pre-fills conv N - [topic] for Markdown, Word, and PDF Save File options.
+  - Preview shows: Save as: filename when you click Save File.
+
+
+VERSION 0.1.70
+--------------
+Email attach: Save to Documents first
+  - Web Gmail, Yahoo, and similar browsers cannot auto-attach files (platform limit).
+  - Attach file opens Save As in Documents\Claim Clash Sessions first.
+  - Default name: conv N - [topic].ext (edit [topic] in the file name before saving).
+  - After save, Outlook or Thunderbird opens with the file attached when installed.
+  - Otherwise your email provider opens and the file is already in Documents to attach manually.
+
+
+WHERE FILES ARE SAVED
+---------------------
+Automatic session backups (Save File and Email):
+  %USERPROFILE%\Documents\Claim Clash Sessions\
+
+Save File (your chosen location):
+  Wherever you pick in the save dialog (any folder).
+
+Email attach (Attach file option):
+  Documents\Claim Clash Sessions\ first (Save As), then your mail app.
+
+
+CLEANUP DONE (June 27)
+----------------------
+Removed older alpha builds 0.1.61, 0.1.62, and 0.1.63 from alpha-dev.
+Kept 0.1.64 build in dist until next rebuild.
+
+
+WHAT TO TEST
+------------
+1. Save File: try Markdown, Word, and PDF. Confirm conv N - [topic] in the save dialog.
+2. Email attach: confirm Save As to Documents, then Outlook attaches (if installed).
+3. Past Sessions: search for a saved export and Use in question.
+4. Ask a recall question about a topic you exported earlier.
+
+
+FEEDBACK
+--------
+Use the in-app Feedback button or email: ClaimsClashFeedback@gmail.com

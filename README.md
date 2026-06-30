@@ -39,7 +39,7 @@ rustup update
 
 ```powershell
 # 1. Clone the repo
-git clone https://github.com/YOUR_USERNAME/claim-clash-tv.git
+git clone https://github.com/user/claim-clash-tv.git
 cd claim-clash-tv
 
 # 2. Install dependencies
@@ -112,7 +112,7 @@ Most of the application logic is in the single HTML file, making it relatively e
 
 ## Version
 
-Current version: see `package.json` and `src-tauri/tauri.conf.json` (currently 0.1.0).
+Current version: see `package.json` and `version.json` (currently 0.1.86 Beta).
 
 ## License
 

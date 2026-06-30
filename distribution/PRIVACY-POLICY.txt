@@ -1,0 +1,44 @@
+Claim Clash Privacy Policy
+==========================
+
+Effective date: June 27, 2026
+Last updated: June 27, 2026
+
+Operator: Zachary H. Roberts
+
+SUMMARY
+-------
+- No developer servers receive your API keys, conversations, or game content.
+- API keys and settings stay on your device (localStorage).
+- AI requests go directly from your device to the provider you configure.
+- Session exports save locally unless you email or upload them yourself.
+- No developer analytics, ads, or crash telemetry.
+
+STORE LISTING URL
+-----------------
+Host PRIVACY-POLICY.md from the repository at a public HTTPS URL and enter
+that URL in Microsoft Partner Center. Update privacyPolicyUrl in version.json
+to match before building a Store release.
+
+DATA ON YOUR DEVICE
+-------------------
+- API keys and preferences (localStorage)
+- Brain question pool / daily question (localStorage)
+- Exported sessions (Documents\Claim Clash\)
+
+NETWORK USE
+-----------
+- AI providers: your questions/context sent with YOUR API key to THAT provider
+- Brain: may fetch creator-signed daily question feed (HTTPS; verified in app)
+- Cast to TV: local LAN HTTP server with pairing token
+- Feedback: only if YOU send email via your mail provider
+
+WE DO NOT COLLECT
+-----------------
+Accounts, automatic uploads of keys/conversations, telemetry, or ad tracking.
+
+CONTACT
+-------
+ClaimsClashFeedback@gmail.com
+
+Full policy: see PRIVACY-POLICY.md in the repository root.

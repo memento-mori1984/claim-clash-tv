@@ -1,0 +1,73 @@
+Claim Clash: How to Install (Windows)
+======================================
+Version: {{VERSION}}
+
+Three ways to run Claim Clash on Windows:
+
+OPTION A: NSIS SETUP INSTALLER (RECOMMENDED)
+-----------------------------------------------
+Use this for a normal Windows app experience with Start Menu entry and uninstaller.
+
+1. Extract the full zip to a normal folder (e.g. Desktop\Claim Clash). Do not run from inside the zip.
+   Never run the setup from C:\Windows\System32 (NSIS will show "error launching installer").
+2. Double-click: Claim Clash {{VERSION}} - Setup.exe
+3. If SmartScreen appears (unsigned app): More info → Run anyway.
+4. Follow the installer wizard. WebView2 bootstrap may download if missing.
+5. Launch from Start Menu → Claim Clash.
+6. First launch: accept the alpha tester agreement, then play.
+
+Silent install (advanced):
+  Claim Clash {{VERSION}} - Setup.exe /S
+
+Uninstall:
+  Windows Settings → Apps → Claim Clash → Uninstall
+  (or Apps & features in Control Panel)
+
+
+OPTION B: POWERSHELL INSTALL SCRIPT
+--------------------------------------
+Copies the portable exe to a fixed folder and creates shortcuts.
+
+1. Extract the full zip to a folder (e.g. Desktop\Claim Clash). Do not run from inside the zip.
+2. Right-click Install Claim Clash.ps1 and choose "Run with PowerShell".
+   If Windows blocks the script: open PowerShell in this folder and run:
+     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+     .\Install` Claim` Clash.ps1
+3. Optional desktop icon:
+     .\Install` Claim` Clash.ps1 -DesktopShortcut
+4. Launch from Start Menu → Claim Clash, or the desktop shortcut.
+
+Install location:
+  %LOCALAPPDATA%\Programs\Claim Clash\
+
+Uninstall:
+  Right-click Uninstall Claim Clash.ps1 → Run with PowerShell
+
+
+OPTION C: PORTABLE (NO INSTALL)
+--------------------------------
+1. Extract the zip anywhere.
+2. Double-click: Claim Clash {{VERSION}}.exe
+3. SmartScreen unsigned warning: More info → Run anyway.
+4. Sessions auto-save to Documents\Claim Clash\ when you use Save & Quit or close the window.
+
+
+SAVE & QUIT
+-----------
+- Toolbar: Save & Quit: saves your session to Documents\Claim Clash\, stops Cast to TV, then closes.
+- Window X button: same behavior (save if needed, then close).
+- Protected Brain material is never written to session files.
+
+
+REQUIREMENTS
+------------
+- Windows 10 or 11 (64-bit)
+- Microsoft WebView2 (installer offers bootstrap if missing)
+- Internet for AI services
+
+
+TROUBLESHOOTING
+---------------
+See TROUBLESHOOTING.txt in this package.
+
+Feedback: ClaimsClashFeedback@gmail.com

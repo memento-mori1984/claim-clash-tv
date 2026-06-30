@@ -33,3 +33,22 @@ dist/
 *.wix
 *.msi
 bundle/
+
+# Brain feed signing key (creator-only; never commit)
+brain-feed/private.key.pem
+brain-feed/private.key*
+
+# Alpha tester API keys (creator-only; never commit)
+scripts/alpha-keys.local.json
+
+# MSIX local packaging (generated)
+msix/dist/
+msix/devcert.pfx
+msix/*.msix
+
+# Editor / internal creator files (not for public repo)
+.cursor/
+OUTREACH-EMAILS.txt
+MARKETING-NOTES.txt
+GRADE-LEVEL-NOTES.txt
+copyright-deposit/

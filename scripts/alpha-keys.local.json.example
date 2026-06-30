@@ -1,0 +1,6 @@
+{
+  "geminiApiKey": "YOUR_GEMINI_KEY",
+  "groqApiKey": "YOUR_GROQ_KEY",
+  "openrouterApiKey": "YOUR_OPENROUTER_KEY",
+  "xaiApiKey": "YOUR_XAI_KEY"
+}

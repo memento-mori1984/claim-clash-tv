@@ -1,0 +1,14 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "search.exclude": {
+      "**/src-tauri/target": true,
+      "**/node_modules": true,
+      "**/dist": true
+    }
+  }
+}

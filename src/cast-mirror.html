@@ -89,6 +89,15 @@
         .ai-card { background: #18181b; border: 1px solid #3f3f46; border-radius: 16px; padding: 14px; min-height: 120px; }
         .ai-name { font-size: 0.85rem; font-weight: 600; color: #34d399; margin-bottom: 8px; }
         .ai-text { font-size: 0.95rem; line-height: 1.45; white-space: pre-wrap; }
+        .ai-answer-body { white-space: normal; word-break: break-word; }
+        .ai-answer-body p.ai-answer-para { margin: 0.55rem 0; line-height: 1.6; }
+        .ai-answer-body p.ai-answer-label,
+        .ai-answer-body .ai-answer-heading { margin: 0.75rem 0 0.3rem; font-weight: 600; color: #f4f4f5; }
+        .ai-answer-body ul.ai-answer-list,
+        .ai-answer-body ol.ai-answer-list { margin: 0.45rem 0 0.65rem 1.2rem; padding: 0; }
+        .ai-answer-body li { margin: 0.3rem 0; line-height: 1.5; }
+        .ai-answer-meta { margin-top: 0.65rem; color: #71717a; font-size: 0.8rem; }
+        .box .ai-answer-body { white-space: normal; }
         .toggle-chip { display: inline-block; padding: 4px 10px; border-radius: 14px; font-size: 0.75rem; margin: 2px; background: #27272a; border: 1px solid #3f3f46; }
         .toggle-chip.on { background: #059669; border-color: #10b981; }
         .cast-banner {
@@ -162,7 +171,7 @@
                 <div class="section">
                     <div class="label">Quick Actions</div>
                     <div class="stack">
-                        <span class="btn btn-amber" style="width:100%;justify-content:center;">Load Example Flow</span>
+                        <span class="btn btn-amber" style="width:100%;justify-content:center;">Load Example</span>
                         <span class="btn btn-amber" style="width:100%;justify-content:center;">🔖 Bookmark Concern</span>
                         <!-- ARCHIVED: JAILBREAK MODE TV mirror (disabled). See src/jailbreak-mode.archive.js -->
                         <span class="btn btn-zinc" style="width:100%;justify-content:center;">Clear Current</span>
@@ -207,16 +216,73 @@
          * Polls /state, maps CastContent JSON fields to DOM, and updates team/answer UI.
          */
 
-        /** Sets innerHTML on an element, applying an empty-state CSS class when blank. */
-        function setText(id, html, emptyText) {
+        function escapeHtml(text) {
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        /** Strip tags; use for user question text that may contain pasted HTML. */
+        function stripHtml(html) {
+            const tmp = document.createElement('div');
+            tmp.innerHTML = String(html || '');
+            return (tmp.textContent || '').replace(/\s+/g, ' ').trim();
+        }
+
+        const CAST_ALLOWED_TAGS = new Set(['P', 'STRONG', 'EM', 'BR', 'UL', 'OL', 'LI', 'DIV', 'SPAN']);
+
+        /** Allow only safe formatting tags from Claim Clash AI answer rendering. */
+        function sanitizeCastHtml(html) {
+            const template = document.createElement('template');
+            template.innerHTML = String(html || '');
+
+            function sanitizeNode(node) {
+                const children = Array.from(node.childNodes);
+                children.forEach(child => {
+                    if (child.nodeType !== Node.ELEMENT_NODE) return;
+                    const el = child;
+                    if (!CAST_ALLOWED_TAGS.has(el.tagName)) {
+                        el.replaceWith(document.createTextNode(el.textContent || ''));
+                        return;
+                    }
+                    Array.from(el.attributes).forEach(attr => {
+                        if (attr.name === 'class' && /^ai-answer/.test(attr.value)) return;
+                        el.removeAttribute(attr.name);
+                    });
+                    sanitizeNode(el);
+                });
+            }
+
+            sanitizeNode(template.content);
+            return template.innerHTML;
+        }
+
+        /** Plain text only (no HTML execution). */
+        function setPlainText(id, raw, emptyText) {
             const el = document.getElementById(id);
             if (!el) return;
-            const val = (html || '').trim();
+            const val = stripHtml(raw);
             if (!val) {
-                el.innerHTML = emptyText || '';
+                el.textContent = emptyText || '';
                 el.classList.add('empty');
             } else {
-                el.innerHTML = val;
+                el.textContent = val;
+                el.classList.remove('empty');
+            }
+        }
+
+        /** Sanitized HTML for AI-formatted answers. */
+        function setSafeHtml(id, html, emptyText) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const sanitized = sanitizeCastHtml(html).trim();
+            if (!sanitized) {
+                el.textContent = emptyText || '';
+                el.classList.add('empty');
+            } else {
+                el.innerHTML = sanitized;
                 el.classList.remove('empty');
             }
         }
@@ -267,11 +333,11 @@
 
         /** Applies a full CastContent snapshot from /state to the mirror DOM. */
         function renderState(data) {
-            setText('question', data.question, 'No question yet');
-            setText('main-answer', data.main_answer, 'Waiting for responses...');
+            setPlainText('question', data.question, 'No question yet');
+            setSafeHtml('main-answer', data.main_answer, 'Waiting for responses...');
             if (data.primary_provider) {
                 const pl = document.getElementById('primary-answer-label');
-                if (pl) pl.textContent = data.primary_provider.toUpperCase() + ' ANSWER (PRIMARY)';
+                if (pl) pl.textContent = String(data.primary_provider).toUpperCase() + ' ANSWER (PRIMARY)';
             }
             updatePlayerUI(data.current_player || 'Team A');
 
@@ -304,7 +370,14 @@
                     answers.forEach(a => {
                         const card = document.createElement('div');
                         card.className = 'ai-card';
-                        card.innerHTML = '<div class="ai-name">' + (a.name || 'AI') + '</div><div class="ai-text">' + (a.text || '') + '</div>';
+                        const nameEl = document.createElement('div');
+                        nameEl.className = 'ai-name';
+                        nameEl.textContent = a.name || 'AI';
+                        const textEl = document.createElement('div');
+                        textEl.className = 'ai-text';
+                        textEl.innerHTML = sanitizeCastHtml(a.text || '');
+                        card.appendChild(nameEl);
+                        card.appendChild(textEl);
                         aiGrid.appendChild(card);
                     });
                 }
@@ -316,20 +389,39 @@
                 if (bookmarks.length === 0) {
                     bookmarksEl.innerHTML = 'No bookmarks yet.';
                 } else {
-                    bookmarksEl.innerHTML = bookmarks.map(b =>
-                        '<div style="padding:4px 0;border-bottom:1px solid #27272a;">' +
-                        (b.concern || 'Concern') + ' <span class="tiny">(' + (b.player || '') + ')</span></div>'
-                    ).join('');
+                    bookmarksEl.innerHTML = '';
+                    bookmarks.forEach(b => {
+                        const row = document.createElement('div');
+                        row.style.padding = '4px 0';
+                        row.style.borderBottom = '1px solid #27272a';
+                        row.textContent = (b.concern || 'Concern') + ' (' + (b.player || '') + ')';
+                        bookmarksEl.appendChild(row);
+                    });
                 }
             }
 
             applyScrollState(data);
         }
 
+        function getCastToken() {
+            return new URLSearchParams(window.location.search).get('token') || '';
+        }
+
         /** Fetches /state with cache-busting; retries on the 1s poll interval. */
         async function fetchState() {
+            const token = getCastToken();
+            if (!token) {
+                const syncEl = document.getElementById('sync-status');
+                if (syncEl) syncEl.textContent = 'Pairing code required. Reload with the full URL from your PC.';
+                return;
+            }
             try {
-                const res = await fetch('/state?t=' + Date.now(), { cache: 'no-store' });
+                const res = await fetch('/state?t=' + Date.now() + '&token=' + encodeURIComponent(token), { cache: 'no-store' });
+                if (res.status === 403) {
+                    const syncEl = document.getElementById('sync-status');
+                    if (syncEl) syncEl.textContent = 'Invalid pairing code. Check the code on your PC and reload.';
+                    return;
+                }
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 const data = await res.json();
                 renderState(data);
