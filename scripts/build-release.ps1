@@ -5,7 +5,8 @@
 #   .\scripts\build-release.ps1 -Increment
 
 param(
-    [switch]$Increment
+    [switch]$Increment,
+    [switch]$SkipVersionSync
 )
 
 $ErrorActionPreference = "Stop"
@@ -18,10 +19,12 @@ Write-Host "=== Claim Clash Release Build (no embedded keys) ===" -ForegroundCol
 
 & (Join-Path $PSScriptRoot "set-build-profile.ps1") -Profile Release
 
-if ($Increment) {
-    & (Join-Path $PSScriptRoot "sync-version.ps1") -Increment
-} else {
-    & (Join-Path $PSScriptRoot "sync-version.ps1")
+if (-not $SkipVersionSync) {
+    if ($Increment) {
+        & (Join-Path $PSScriptRoot "sync-version.ps1") -Increment
+    } else {
+        & (Join-Path $PSScriptRoot "sync-version.ps1")
+    }
 }
 
 Write-Host "`nRunning Tauri build..." -ForegroundColor Yellow
@@ -47,7 +50,7 @@ $hash = Get-FileHash -Algorithm SHA256 $finalPath
 "$($hash.Hash)  $finalName" | Out-File -Encoding UTF8 -FilePath "$finalPath.sha256"
 
 Write-Host "`nCleaning up outdated build artifacts..." -ForegroundColor Yellow
-& (Join-Path $PSScriptRoot "clean-old-builds.ps1")
+& (Join-Path $PSScriptRoot "clean-old-builds.ps1") -Target Release
 
 Write-Host "`nRelease build complete (no embedded API keys):" -ForegroundColor Green
 Write-Host "  $finalPath"

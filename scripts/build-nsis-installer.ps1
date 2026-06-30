@@ -167,7 +167,7 @@ if (Test-Path $changeLogs) {
 }
 
 Write-Host "`nCleaning up outdated build artifacts..." -ForegroundColor Yellow
-& (Join-Path $sourceRoot "scripts\clean-old-builds.ps1")
+& (Join-Path $sourceRoot "scripts\clean-old-builds.ps1") -Target Release
 
 $channels = & (Join-Path $sourceRoot "scripts\resolve-alpha-channels.ps1")
 $safeDir = $channels.ActiveClaimClashDir

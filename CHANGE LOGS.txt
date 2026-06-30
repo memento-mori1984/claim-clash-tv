@@ -1,7 +1,7 @@
 Claim Clash Alpha - Change Logs
 ================================
 Last updated: June 30, 2026
-Current source version: 0.1.90 Beta
+Current source version: 0.1.91 Beta
 Current packaged build in dist: 0.1.89 Beta
 
 Thank you for testing. Below is everything that changed in recent iterations.
@@ -211,6 +211,15 @@ VERSION 0.1.87
 VERSION 0.1.88
 --------------
 (Document changes before packaging.)
+
+
+VERSION 0.1.91
+--------------
+Release vs developer testing builds
+  - Main build (dist/): Release profile — no embedded API keys, rules walkthrough "do not show again" resets when switching from Dev, free-tier comparison AIs only by default (Gemini, Groq, OpenRouter, Grok).
+  - Dev build (ClaimClash/beta-dev/): Dev profile — pre-filled keys from alpha-keys.local.json, keeps your saved settings.
+  - Scripts: build-release.ps1 (main), build-dev.ps1 (beta-dev), build-both.ps1 (both).
+  - build-with-checksum.ps1 now produces Release builds in dist/ (was Alpha).
 
 
 VERSION 0.1.90

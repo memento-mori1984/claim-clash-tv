@@ -31,9 +31,9 @@ if (-not (Test-Path "package.json")) {
     exit 1
 }
 
-# Alpha tester builds include pre-filled keys (never use this script for Store/public release).
-Write-Host "`nSetting Alpha build profile (embedded tester keys)..." -ForegroundColor Yellow
-& (Join-Path $PSScriptRoot "scripts\set-build-profile.ps1") -Profile Alpha
+# Main portable build uses Release profile (no embedded keys). Use scripts/build-dev.ps1 for beta-dev testing.
+Write-Host "`nSetting Release build profile (no embedded keys)..." -ForegroundColor Yellow
+& (Join-Path $PSScriptRoot "scripts\set-build-profile.ps1") -Profile Release
 
 if ($Clean) {
     Write-Host "`nCleaning Rust target (full rebuild from scratch)..." -ForegroundColor Yellow
@@ -162,7 +162,7 @@ if ($useNsisStaging) {
     }
 
     Write-Host "`nCleaning up outdated build artifacts..." -ForegroundColor Yellow
-    & (Join-Path $PSScriptRoot "scripts\clean-old-builds.ps1")
+    & (Join-Path $PSScriptRoot "scripts\clean-old-builds.ps1") -Target Release
 
     Write-Host "`n=== Build Complete ===" -ForegroundColor Green
     Write-Host "Portable exe:     $finalPath"

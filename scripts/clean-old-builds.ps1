@@ -1,14 +1,16 @@
 # Remove outdated Claim Clash build artifacts so only the current iteration remains.
-# Keeps the current version from version.json (exe, sha256, and Drive zip).
-# Active channel: beta-dev (Beta phase) or alpha-dev (post-baseline Alpha). alpha-baseline/ is never touched.
-#
-# Runs automatically at the end of build-with-checksum.ps1 after each iteration.
+# Release builds: dist/ only (main portable exe).
+# Dev builds: beta-dev/ only (developer testing exe with embedded keys).
+# alpha-baseline/ is never touched.
 #
 # Usage (from project root):
-#   .\scripts\clean-old-builds.ps1
+#   .\scripts\clean-old-builds.ps1 -Target Release
+#   .\scripts\clean-old-builds.ps1 -Target Dev
 #   .\scripts\clean-old-builds.ps1 -ClaimClashDir "D:\Backups\ClaimClash"
 
 param(
+    [ValidateSet('Release', 'Dev', 'All')]
+    [string]$Target = 'Release',
     [string]$ClaimClashDir = "C:\Users\Ranzh\ClaimClash"
 )
 
@@ -21,12 +23,15 @@ $version = $channels.Version
 $suffix = $channels.Suffix
 $activeDir = $channels.ActiveClaimClashDir
 
-$keepExe = "Claim Clash $version$suffix.exe"
-$keepSha = "$keepExe.sha256"
+$keepReleaseExe = "Claim Clash $version$suffix.exe"
+$keepReleaseSha = "$keepReleaseExe.sha256"
+$keepDevExe = "Claim Clash $version$suffix Dev.exe"
+$keepDevSha = "$keepDevExe.sha256"
 $keepSetup = "Claim Clash $version$suffix - Setup.exe"
 $keepSetupSha = "$keepSetup.sha256"
 $keepZip = "Claim Clash $version$suffix - Drive.zip"
 $distDir = Join-Path $root "dist"
+$devDir = Join-Path $ClaimClashDir "beta-dev"
 $releaseDir = Join-Path $root "src-tauri\target\release"
 $removed = @()
 
@@ -37,23 +42,25 @@ function Remove-IfOld([string]$Path, [string]$Reason) {
     }
 }
 
-function Prune-ClaimClashFiles([string]$Dir, [string]$Reason) {
+function Prune-ClaimClashFiles([string]$Dir, [string]$Reason, [string]$KeepExe, [string]$KeepSha) {
     if (-not (Test-Path $Dir)) { return }
     Get-ChildItem $Dir -File | Where-Object {
-        ($_.Name -like 'Claim Clash*' -and $_.Name -ne $keepExe -and $_.Name -ne $keepSha -and $_.Name -ne $keepSetup -and $_.Name -ne $keepSetupSha -and $_.Name -ne $keepZip) -or
+        ($_.Name -like 'Claim Clash*' -and $_.Name -ne $KeepExe -and $_.Name -ne $KeepSha -and $_.Name -ne $keepSetup -and $_.Name -ne $keepSetupSha -and $_.Name -ne $keepZip) -or
         ($_.Name -like 'ClaimClash_*') -or
         ($_.Name -eq 'Claim Clash.exe')
     } | ForEach-Object { Remove-IfOld $_.FullName $Reason }
 }
 
-if (Test-Path $distDir) {
-    Get-ChildItem $distDir -File | Where-Object {
-        ($_.Name -like 'Claim Clash*' -and $_.Name -ne $keepExe -and $_.Name -ne $keepSha -and $_.Name -ne $keepSetup -and $_.Name -ne $keepSetupSha -and $_.Name -ne $keepZip) -or
-        ($_.Name -like 'ClaimClash_*')
-    } | ForEach-Object { Remove-IfOld $_.FullName "dist file" }
+if ($Target -eq 'Release' -or $Target -eq 'All') {
+    if (Test-Path $distDir) {
+        Get-ChildItem $distDir -File | Where-Object {
+            ($_.Name -like 'Claim Clash*' -and $_.Name -ne $keepReleaseExe -and $_.Name -ne $keepReleaseSha -and $_.Name -ne $keepSetup -and $_.Name -ne $keepSetupSha -and $_.Name -ne $keepZip) -or
+            ($_.Name -like 'ClaimClash_*')
+        } | ForEach-Object { Remove-IfOld $_.FullName "dist file" }
 
-    @('tester-package', 'email-package', 'tester-package-v20') | ForEach-Object {
-        Remove-IfOld (Join-Path $distDir $_) "staging folder"
+        @('tester-package', 'email-package', 'tester-package-v20') | ForEach-Object {
+            Remove-IfOld (Join-Path $distDir $_) "staging folder"
+        }
     }
 }
 
@@ -61,59 +68,41 @@ Remove-IfOld (Join-Path $root "old-builds") "old-builds folder"
 
 if (Test-Path $releaseDir) {
     Get-ChildItem $releaseDir -File | Where-Object {
-        $_.Name -like 'Claim Clash*' -and $_.Name -ne $keepExe
+        $_.Name -like 'Claim Clash*' -and $_.Name -ne $keepReleaseExe -and $_.Name -ne $keepDevExe
     } | ForEach-Object { Remove-IfOld $_.FullName "release stray" }
 }
 
-# Dev channel (beta-dev or alpha-dev): prune old builds; also clear stray files from ClaimClash root.
-if ($channels.UseDevChannel) {
-    Prune-ClaimClashFiles $channels.DevDir "$($channels.ChannelName) file"
-    Prune-ClaimClashFiles $ClaimClashDir "ClaimClash root stray"
-} else {
-    Prune-ClaimClashFiles $ClaimClashDir "ClaimClash file"
+if ($Target -eq 'Dev' -or $Target -eq 'All') {
+    Prune-ClaimClashFiles $devDir "beta-dev file" $keepDevExe $keepDevSha
+}
+
+if ($Target -eq 'Release' -or $Target -eq 'All') {
+    Prune-ClaimClashFiles $ClaimClashDir "ClaimClash root stray" $keepReleaseExe $keepReleaseSha
 }
 
 $oneDriveDir = "C:\Users\Ranzh\OneDrive"
 if (Test-Path $oneDriveDir) {
-    if ($channels.UseDevChannel) {
-        $oneDriveDev = $channels.OneDriveDevDir
+    $oneDriveDev = Join-Path $oneDriveDir "Claim Clash beta-dev"
+    if ($Target -eq 'Dev' -or $Target -eq 'All') {
         New-Item -ItemType Directory -Path $oneDriveDev -Force | Out-Null
-        Prune-ClaimClashFiles $oneDriveDev "OneDrive $($channels.ChannelName) file"
-        Get-ChildItem $oneDriveDir -File | Where-Object {
-            ($_.Name -like 'Claim Clash*') -or ($_.Name -like 'ClaimClash_*')
-        } | ForEach-Object { Remove-IfOld $_.FullName "OneDrive root stray" }
-    } else {
+        Prune-ClaimClashFiles $oneDriveDev "OneDrive beta-dev file" $keepDevExe $keepDevSha
+    }
+    if ($Target -eq 'Release' -or $Target -eq 'All') {
         Get-ChildItem $oneDriveDir -File | Where-Object {
             ($_.Name -like 'Claim Clash*' -and $_.Name -ne $keepZip) -or
             ($_.Name -like 'ClaimClash_*')
-        } | ForEach-Object { Remove-IfOld $_.FullName "OneDrive file" }
+        } | ForEach-Object { Remove-IfOld $_.FullName "OneDrive root stray" }
     }
 }
 
-$currentExe = Join-Path $distDir $keepExe
-$currentSha = Join-Path $distDir $keepSha
-$currentSetup = Join-Path $distDir $keepSetup
-$currentSetupSha = Join-Path $distDir $keepSetupSha
-if (Test-Path $currentExe) {
-    New-Item -ItemType Directory -Path $activeDir -Force | Out-Null
-    Copy-Item $currentExe (Join-Path $activeDir $keepExe) -Force
-    if (Test-Path $currentSha) {
-        Copy-Item $currentSha (Join-Path $activeDir $keepSha) -Force
-    }
-    if (Test-Path $currentSetup) {
-        Copy-Item $currentSetup (Join-Path $activeDir $keepSetup) -Force
-    }
-    if (Test-Path $currentSetupSha) {
-        Copy-Item $currentSetupSha (Join-Path $activeDir $keepSetupSha) -Force
-    }
+if ($Target -eq 'Release' -or $Target -eq 'All') {
+    Write-Host "Keeping (release): $keepReleaseExe" -ForegroundColor Green
 }
-
-Write-Host "Keeping: $keepExe" -ForegroundColor Green
-if ($channels.UseDevChannel) {
-    $extra = if ($channels.Phase -eq "Beta") { "" } else { " (baseline frozen at iteration $($channels.BaselineIteration))" }
-    Write-Host "Channel: $($channels.ChannelName)$extra" -ForegroundColor Cyan
+if ($Target -eq 'Dev' -or $Target -eq 'All') {
+    Write-Host "Keeping (dev): $keepDevExe" -ForegroundColor Green
+    Write-Host "Dev folder: $devDir" -ForegroundColor Cyan
 }
-if (Test-Path (Join-Path $activeDir $keepZip)) {
+if (Test-Path (Join-Path $devDir $keepZip)) {
     Write-Host "Keeping: $keepZip" -ForegroundColor Green
 }
 Write-Host "Removed $($removed.Count) outdated item(s):" -ForegroundColor Yellow

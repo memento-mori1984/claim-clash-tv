@@ -146,6 +146,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     </div>
                 </details>
                 <p id="setup-alpha-keys-note" class="text-[10px] text-zinc-600 mt-4 hidden">Gemini, Groq, OpenRouter, and Grok (xAI) are pre-filled for alpha testing. Saved keys stay on this device only.</p>
+                <p id="setup-dev-keys-note" class="text-[10px] text-zinc-600 mt-4 hidden">Developer testing build: API keys are pre-filled for your convenience. Saved keys stay on this device only.</p>
                 <p id="setup-release-keys-note" class="text-[10px] text-zinc-600 mt-4 hidden">Add your own API keys. They stay on this device only and are never embedded in the app.</p>
             </div>
 
@@ -903,14 +904,32 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         const SOLO_INTERROGATION_KEY = 'claimClashSoloInterrogation';
         let bookmarks = [];
 
-        /** True when built with scripts/set-build-profile.ps1 -Profile Alpha (tester keys). */
-        function isAlphaBuildProfile() {
-            return window.CLAIM_CLASH_BUILD_PROFILE === 'alpha';
+        const BUILD_PROFILE_STORAGE_KEY = 'claimClashLastBuildProfile';
+        const API_KEY_STORAGE_KEYS = ['geminiApiKey', 'openaiApiKey', 'anthropicApiKey', 'groqApiKey', 'openrouterApiKey', 'xaiApiKey'];
+        const FREE_TIER_PROVIDER_IDS = ['gemini', 'groq', 'openrouter', 'grok'];
+
+        function getBuildProfile() {
+            return window.CLAIM_CLASH_BUILD_PROFILE || 'release';
         }
 
-        /** Pre-filled tester keys exist only in Alpha profile builds (see scripts/set-build-profile.ps1). */
+        /** True when built with scripts/set-build-profile.ps1 -Profile Alpha (legacy tester zip). */
+        function isAlphaBuildProfile() {
+            return getBuildProfile() === 'alpha';
+        }
+
+        /** True for Dev or Alpha builds (pre-filled tester keys). */
+        function isDevBuildProfile() {
+            const profile = getBuildProfile();
+            return profile === 'dev' || profile === 'alpha';
+        }
+
+        function isReleaseBuildProfile() {
+            return getBuildProfile() === 'release';
+        }
+
+        /** Pre-filled tester keys exist only in Dev/Alpha profile builds (see scripts/set-build-profile.ps1). */
         function getTestingDefaultKey(storage) {
-            if (!isAlphaBuildProfile()) return '';
+            if (!isDevBuildProfile()) return '';
             const keys = window.ALPHA_TESTING_KEYS || {};
             return (keys[storage] || '').trim();
         }
@@ -920,7 +939,27 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             if (stored && stored !== 'YOUR_GEMINI_API_KEY_HERE') return stored;
             return getTestingDefaultKey(storage);
         }
-        const APP_VERSION = "0.1.90";
+
+        /** Release builds start clean; Dev builds keep saved settings and embedded keys. */
+        function applyBuildProfileStoragePolicy() {
+            const current = getBuildProfile();
+            let previous = '';
+            try { previous = localStorage.getItem(BUILD_PROFILE_STORAGE_KEY) || ''; } catch (e) {}
+
+            if (previous === current) return;
+
+            if (current === 'release') {
+                API_KEY_STORAGE_KEYS.forEach(key => {
+                    try { localStorage.removeItem(key); } catch (e) {}
+                });
+                try { localStorage.removeItem(RULES_WALKTHROUGH_SKIP_KEY); } catch (e) {}
+                try { localStorage.removeItem('primaryProviderId'); } catch (e) {}
+            }
+
+            try { localStorage.setItem(BUILD_PROFILE_STORAGE_KEY, current); } catch (e) {}
+        }
+
+        const APP_VERSION = "0.1.91";
         const APP_PHASE = "Beta";
         const FEEDBACK_EMAIL = "ClaimsClashFeedback@gmail.com";
         const PRIVACY_POLICY_URL = "https://github.com/memento-mori1984/claim-clash-tv/blob/master/PRIVACY-POLICY.md";
@@ -929,6 +968,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         const FEEDBACK_DRAFT_KEY = "claimClashFeedbackDraft";
         const ALPHA_AGREEMENT_KEY = "claimClashAlphaTesterAgreedVersion";
         const RULES_WALKTHROUGH_SKIP_KEY = "claimClashSkipRulesWalkthrough";
+        applyBuildProfileStoragePolicy();
         const EXPORT_FORMAT_KEY = "claimClashExportFormat";
         const EXPORT_DELIVERY_KEY = "claimClashExportDelivery";
 
@@ -954,12 +994,6 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 content: "BEST PRACTICES\n- Be specific and ask for sources when possible.\n- Use clear verification phrasing: \"Did X happen?\" or \"What do primary sources say?\"\n- Request structure when helpful: bullet points with sources.\n- Follow up iteratively on the last answer.\n\nTIPS\n- Bring a partner when you can.\n- Steelman before pressing on weaknesses.\n- Rephrase questions that target a person instead of a claim.\n- Preloaded example questions are perfectly fine to explore anytime via Load Example. They are updated regularly.\n\nReady? Grab a partner, pick who goes first, and click Ask. Load Example is a great way to start."
             }
         };
-
-        // Clean build: remove any previously saved personal Gemini key (one-time clear)
-        if (!localStorage.getItem('cleanBuildCleared')) {
-            localStorage.removeItem("geminiApiKey");
-            localStorage.setItem('cleanBuildCleared', 'true');
-        }
 
         let geminiApiKey = getStoredOrDefaultKey('geminiApiKey');
         /** Primary AI multi-turn memory: { role: 'user'|'assistant', text } */
@@ -1096,8 +1130,10 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
         function loadPrimaryProviderId() {
             const saved = localStorage.getItem('primaryProviderId');
-            if (saved && AI_PROVIDERS.some(p => p.id === saved)) return saved;
-            return DEFAULT_PROVIDER_ORDER[0];
+            if (saved && AI_PROVIDERS.some(p => p.id === saved)) {
+                if (!isReleaseBuildProfile() || FREE_TIER_PROVIDER_IDS.includes(saved)) return saved;
+            }
+            return FREE_TIER_PROVIDER_IDS[0];
         }
 
         function savePrimaryProviderId() {
@@ -1158,9 +1194,9 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         function syncSelectedAIsFromKeys() {
             selectedAIs = {};
             getOrderedProviders().forEach(p => {
-                if (p.id !== primaryProviderId && providerIsConfigured(p.id)) {
-                    selectedAIs[p.id] = true;
-                }
+                if (p.id === primaryProviderId || !providerIsConfigured(p.id)) return;
+                if (isReleaseBuildProfile() && !FREE_TIER_PROVIDER_IDS.includes(p.id)) return;
+                selectedAIs[p.id] = true;
             });
         }
 
@@ -1401,7 +1437,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 } else {
                     body.appendChild(input);
                 }
-                if (provider.optionalKey && isAlphaBuildProfile()) {
+                if (provider.optionalKey && isDevBuildProfile()) {
                     const note = document.createElement('p');
                     note.className = 'text-xs text-zinc-500 mt-1';
                     note.textContent = 'Pre-filled for alpha testing. Clear this field to use Open in Grok in the browser instead.';
@@ -1985,7 +2021,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         function buildStaticErrorExplanation(rawError, failedName) {
             const err = String(rawError).toLowerCase();
             if (err.includes('quota') || err.includes('resource_exhausted') || err.includes('429') || err.includes('rate limit') || err.includes('exceeded')) {
-                const fallbackHint = isAlphaBuildProfile()
+                const fallbackHint = isDevBuildProfile()
                     ? ' Switch primary AI in Settings to a provider on a paid plan (OpenAI, Anthropic, or paid Gemini/OpenRouter credits).'
                     : ' Switch primary AI in Settings to another provider with paid billing enabled.';
                 return `${failedName} hit a usage limit for now. That is often per-minute (wait 1 to 2 minutes) or per-day (resets around midnight Pacific time).${fallbackHint}`;
@@ -4863,10 +4899,14 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
         function applyBuildProfileUi() {
             const alpha = isAlphaBuildProfile();
+            const dev = isDevBuildProfile() && !alpha;
+            const release = isReleaseBuildProfile();
             const alphaNote = document.getElementById('setup-alpha-keys-note');
+            const devNote = document.getElementById('setup-dev-keys-note');
             const releaseNote = document.getElementById('setup-release-keys-note');
             if (alphaNote) alphaNote.classList.toggle('hidden', !alpha);
-            if (releaseNote) releaseNote.classList.toggle('hidden', alpha);
+            if (devNote) devNote.classList.toggle('hidden', !dev);
+            if (releaseNote) releaseNote.classList.toggle('hidden', !release);
             const keysAgreementItem = document.getElementById('alpha-agreement-keys-item');
             if (keysAgreementItem) keysAgreementItem.classList.toggle('hidden', !alpha);
         }
