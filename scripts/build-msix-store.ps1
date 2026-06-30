@@ -52,6 +52,28 @@ function Update-ManifestVersion([string]$ManifestPath, [string]$MsixVersion) {
     }
 }
 
+function Get-StoreIdentity([string]$MsixDir) {
+    $identityPath = Join-Path $MsixDir "store-identity.json"
+    if (-not (Test-Path $identityPath)) {
+        Write-Error "Missing $identityPath (Partner Center package identity)."
+    }
+    return Get-Content $identityPath -Raw | ConvertFrom-Json
+}
+
+function Update-ManifestIdentity([string]$ManifestPath, $Identity) {
+    $lines = Get-Content $ManifestPath
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        if ($lines[$i] -match '^\s*Name="') {
+            $lines[$i] = "    Name=""$($Identity.packageIdentityName)"""
+        } elseif ($lines[$i] -match '^\s*Publisher="') {
+            $lines[$i] = "    Publisher=""$($Identity.publisher)"""
+        } elseif ($lines[$i] -match '<PublisherDisplayName>') {
+            $lines[$i] = "    <PublisherDisplayName>$($Identity.publisherDisplayName)</PublisherDisplayName>"
+        }
+    }
+    Set-Content -Path $ManifestPath -Value $lines -Encoding UTF8
+}
+
 function Ensure-WinAppCli {
     if (-not (Get-Command winapp -ErrorAction SilentlyContinue)) {
         Write-Error "winapp CLI not found. Install with: winget install Microsoft.WinAppCli"
@@ -137,6 +159,8 @@ try {
         Write-Error "Missing $manifestPath. Run winapp manifest generate in msix/ first (see msix/MSIX-TESTING.txt)."
     }
 
+    $storeIdentity = Get-StoreIdentity $msixDir
+    Update-ManifestIdentity $manifestPath $storeIdentity
     Update-ManifestVersion $manifestPath $msixVersion
 
     $packDist = Join-Path $msixDir "dist"
@@ -157,9 +181,10 @@ try {
         }
 
         $certPath = Join-Path $msixDir "devcert.pfx"
+        $publisher = $storeIdentity.publisher
         if (-not (Test-Path $certPath)) {
-            Write-Host "`nGenerating development signing certificate..." -ForegroundColor Yellow
-            winapp cert generate --if-exists skip --publisher "CN=Ranzh"
+            Write-Host "`nGenerating development signing certificate ($publisher)..." -ForegroundColor Yellow
+            winapp cert generate --if-exists skip --publisher $publisher
         }
 
         if ($InstallDevCert) {

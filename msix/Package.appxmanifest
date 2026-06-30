@@ -12,13 +12,13 @@
   IgnorableNamespaces="uap uap2 uap3 uap10 desktop desktop6 rescap">
 
   <Identity
-    Name="ClaimClash"
-    Publisher="CN=Ranzh"
-    Version="0.1.82.0" />
+    Name="memento-mori1984.ClaimClash"
+    Publisher="CN=1A36C25D-F425-4410-92AF-C753F008067B"
+    Version="0.1.86.0" />
 
   <Properties>
     <DisplayName>Claim Clash</DisplayName>
-    <PublisherDisplayName>Zachary H. Roberts</PublisherDisplayName>
+    <PublisherDisplayName>memento-mori1984</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 

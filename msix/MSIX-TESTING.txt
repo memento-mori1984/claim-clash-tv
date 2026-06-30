@@ -34,6 +34,7 @@ Or: Get-AppxPackage *ClaimClash* | Remove-AppxPackage
 
 NOTES
 -----
-- Dev MSIX uses devcert.pfx (CN=Ranzh). Store submission uses Partner Center; Microsoft re-signs MSIX after certification.
-- Publisher in Package.appxmanifest must match your Store identity before submission.
+- Dev MSIX uses devcert.pfx signed with Partner Center Publisher ID (see msix/store-identity.json).
+- Package identity: memento-mori1984.ClaimClash / Publisher CN=1A36C25D-F425-4410-92AF-C753F008067B.
+- Store submission: Microsoft re-signs MSIX after certification.
 - Alpha zip/portable builds are unchanged; this path is for Store release testing.

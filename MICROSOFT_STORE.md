@@ -9,8 +9,8 @@ This document tracks publishing Claim Clash to the Microsoft Store.
 ## Current Status
 
 - [x] Step 0: MSIX manifest + `scripts/build-msix-store.ps1` scaffolded (`msix/`)
-- [ ] Step 1: Enroll as Microsoft Developer
-- [ ] Step 2: Reserve app name in Partner Center (MSIX product)
+- [x] Step 1: Enroll as Microsoft Developer
+- [x] Step 2: Reserve app name in Partner Center (MSIX product)
 - [x] Step 3: Host privacy policy at a public HTTPS URL
 - [ ] Step 4: Build Release MSIX and verify locally (`msix/MSIX-TESTING.txt`)
 - [ ] Step 5: Declare capabilities in Partner Center
@@ -36,9 +36,26 @@ This document tracks publishing Claim Clash to the Microsoft Store.
 
 ## Step 2 — Reserve the app name
 
-1. Click **New product** → **EXE or MSI app**.
-2. Reserve a unique name (for example **Claim Clash**).
-3. Note your **Package/Identity Name** and **Publisher** display name for manifest fields.
+In Partner Center (**Apps & games** overview):
+
+1. Click **+ New product** (or **Create a new app**).
+2. Choose **MSIX or PWA app** if offered (preferred for our `winapp` MSIX build).  
+   If that option is not shown, choose **EXE or MSI app** (MSI fallback path).
+3. **Reserve name:** `Claim Clash` (must match `DisplayName` in `msix/Package.appxmanifest`).
+4. Complete the product creation wizard (you can leave listing details for Step 6).
+5. Open the new product → **Product identity** (or **App identity**) and copy:
+
+| Field | Example / ours | Used in |
+|-------|----------------|---------|
+| **Package/Identity name** | `memento-mori1984.ClaimClash` | `msix/Package.appxmanifest` → `Identity Name` |
+| **Publisher display name** | `memento-mori1984` | `PublisherDisplayName` |
+| **Publisher ID** | `CN=1A36C25D-F425-4410-92AF-C753F008067B` | `Identity Publisher` |
+
+6. Values saved in `msix/store-identity.json`; `build-msix-store.ps1` syncs them into the manifest on each build.
+
+**Privacy policy (can do now):** In the product, go to **Product declarations** → **Privacy policy** and enter:
+
+`https://github.com/memento-mori1984/claim-clash-tv/blob/main/PRIVACY-POLICY.md`
 
 ## Step 3 — Privacy policy (required)
 
