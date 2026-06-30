@@ -1,13 +1,12 @@
 {
   "v": 1,
   "date": "2026-06-30",
-  "daily": "As the Supreme Court closed its 2025–26 term in late June 2026, how many major rulings related to President Trump went against him versus in his favor, and what were the vote counts in the FTC Rebecca Slaughter and Federal Reserve Lisa Cook cases?",
-  "headline_seed": "Supreme Court final opinions June 2026 — Trump 3-1 on FTC firing, Lisa Cook, mail-in ballots, E. Jean Carroll",
+  "daily": "Did the Supreme Court strike down President Trump's executive order ending birthright citizenship today, and what was the vote?",
+  "headline_seed": "SCOTUS birthright citizenship ruling — Trump EO struck down 6-3, June 30 2026",
   "pool": [
     {
-      "text": "As the Supreme Court closed its 2025–26 term in late June 2026, how many major rulings related to President Trump went against him versus in his favor, and what were the vote counts in the FTC Rebecca Slaughter and Federal Reserve Lisa Cook cases?",
+      "text": "Did the Supreme Court strike down President Trump's executive order ending birthright citizenship today, and what was the vote?",
       "date": "2026-06-30"
     }
-  ],
-  "issued_at": 1751241600
+  ]
 }
