@@ -5,8 +5,8 @@
 #   .\build-from-scratch.ps1
 #   .\build-from-scratch.ps1 -SkipPackage
 #
-# Runs cargo clean, syncs version metadata without incrementing, builds portable exe
-# only (--no-bundle, skips NSIS), writes dist/ checksum, and repackages the Drive zip.
+# Runs cargo clean, syncs version metadata without incrementing, builds portable release
+# and beta-dev Dev exe together (--no-bundle, skips NSIS), then repackages the Drive zip.
 
 param(
     [switch]$SkipPackage

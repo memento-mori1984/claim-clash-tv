@@ -65,6 +65,11 @@ Install that build with scripts\install-claim-clash.ps1 -SourceDir dist
 "@
 $readme | Out-File -Encoding UTF8 -FilePath (Join-Path $devDir "DEV-BUILD.txt")
 
+$changeLogs = Join-Path (Split-Path $PSScriptRoot -Parent) "CHANGE LOGS.txt"
+if (Test-Path $changeLogs) {
+    Copy-Item $changeLogs (Join-Path $devDir "CHANGE LOGS.txt") -Force
+}
+
 Write-Host "`nCleaning up outdated beta-dev artifacts..." -ForegroundColor Yellow
 & (Join-Path $PSScriptRoot "clean-old-builds.ps1") -Target Dev -ClaimClashDir $ClaimClashDir
 

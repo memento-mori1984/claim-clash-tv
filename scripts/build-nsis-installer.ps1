@@ -12,6 +12,7 @@
 param(
     [switch]$NoIncrement,
     [switch]$Clean,
+    [switch]$SkipDev,
     [string]$StagingRoot = ""
 )
 
@@ -50,8 +51,8 @@ if (Test-IsSystem32Path $sourceRoot) {
     Write-Host "`nSource is outside System32; staging still used for reproducible NSIS builds." -ForegroundColor DarkGray
 }
 
-Write-Host "`nSetting Alpha build profile..." -ForegroundColor Yellow
-& (Join-Path $sourceRoot "scripts\set-build-profile.ps1") -Profile Alpha
+Write-Host "`nSetting Release build profile..." -ForegroundColor Yellow
+& (Join-Path $sourceRoot "scripts\set-build-profile.ps1") -Profile Release
 
 Write-Host "`nSyncing version metadata..." -ForegroundColor Yellow
 if ($NoIncrement) {
@@ -175,6 +176,17 @@ New-Item -ItemType Directory -Path $safeDir -Force | Out-Null
 $safeSetupDest = Join-Path $safeDir $setupBundleName
 Copy-Item $setupDest $safeSetupDest -Force
 Copy-Item "$setupDest.sha256" "$safeSetupDest.sha256" -Force
+
+if (-not $SkipDev) {
+    Write-Host "`n=== Packaging developer testing build (beta-dev) ===" -ForegroundColor Cyan
+    Push-Location $sourceRoot
+    try {
+        & (Join-Path $sourceRoot "scripts\build-dev.ps1") -SkipVersionSync
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } finally {
+        Pop-Location
+    }
+}
 
 Write-Host "`n=== NSIS Build Complete ===" -ForegroundColor Green
 Write-Host "Portable exe:  $portableDest"

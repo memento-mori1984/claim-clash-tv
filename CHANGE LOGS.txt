@@ -218,8 +218,8 @@ VERSION 0.1.91
 Release vs developer testing builds
   - Main build (dist/): Release profile — no embedded API keys, rules walkthrough "do not show again" resets when switching from Dev, free-tier comparison AIs only by default (Gemini, Groq, OpenRouter, Grok).
   - Dev build (ClaimClash/beta-dev/): Dev profile — pre-filled keys from alpha-keys.local.json, keeps your saved settings.
-  - Scripts: build-release.ps1 (main), build-dev.ps1 (beta-dev), build-both.ps1 (both).
-  - build-with-checksum.ps1 now produces Release builds in dist/ (was Alpha).
+  - Every normal build updates BOTH together: build-with-checksum.ps1, build-release.ps1, build-both.ps1, build-from-scratch.ps1 (use -SkipDev only to skip beta-dev).
+  - beta-dev also receives CHANGE LOGS.txt alongside the Dev exe.
 
 
 VERSION 0.1.90
