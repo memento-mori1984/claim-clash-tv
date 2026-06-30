@@ -1,12 +1,13 @@
 {
   "v": 1,
   "date": "2026-06-30",
-  "daily": "How many classified documents did the January 2024 special counsel report say were recovered from Mar-a-Lago, and which statutes did it cite as most directly implicated?",
+  "daily": "As the Supreme Court closed its 2025–26 term in late June 2026, how many major rulings related to President Trump went against him versus in his favor, and what were the vote counts in the FTC Rebecca Slaughter and Federal Reserve Lisa Cook cases?",
+  "headline_seed": "Supreme Court final opinions June 2026 — Trump 3-1 on FTC firing, Lisa Cook, mail-in ballots, E. Jean Carroll",
   "pool": [
     {
-      "text": "How many classified documents did the January 2024 special counsel report say were recovered from Mar-a-Lago, and which statutes did it cite as most directly implicated?",
+      "text": "As the Supreme Court closed its 2025–26 term in late June 2026, how many major rulings related to President Trump went against him versus in his favor, and what were the vote counts in the FTC Rebecca Slaughter and Federal Reserve Lisa Cook cases?",
       "date": "2026-06-30"
     }
   ],
-  "issued_at": 1751270400
+  "issued_at": 1751241600
 }

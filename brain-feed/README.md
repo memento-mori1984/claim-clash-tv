@@ -27,6 +27,20 @@ Run `.\scripts\sync-version.ps1` to regenerate `src-tauri/src/brain_config.rs`.
 
 ## Publish a daily feed
 
+### Option A — craft from today's headlines (recommended)
+
+The click-2 **current events question** should track the largest story across news and social media.
+
+```powershell
+# Requires GEMINI_API_KEY or scripts/alpha-keys.local.json
+node scripts/craft-current-events-question.mjs
+node scripts/sign-brain-feed.mjs
+```
+
+Review `draft.json` before signing. `headline_seed` is creator metadata only (not signed into `feed.json`).
+
+### Option B — edit by hand
+
 1. Edit `brain-feed/draft.json` (`date`, `daily`, optional `pool` array).
 2. Sign:
 

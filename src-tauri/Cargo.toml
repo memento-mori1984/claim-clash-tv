@@ -1,6 +1,6 @@
 [package]
 name = "claim-clash-tv"
-version = "0.1.86"
+version = "0.1.90"
 description = "Claim Clash - Structured Fact-Finding Between Opposing Perspectives"
 authors = ["Zachary H. Roberts"]
 license = "MIT"

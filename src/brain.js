@@ -30,10 +30,11 @@
     ];
     const FALLBACK_ORDER = ['gemini', 'groq', 'openrouter', 'grok'];
 
-    const EXAMPLE_FLOW_BRAIN_INTERVAL = 4;
+    const EXAMPLE_FLOW_BRAIN_INTERVAL = 2;
 
     let brainAvailable = false;
     let exampleFlowClickCount = 0;
+    let exampleFlowTimelyServedThisSession = false;
     let exampleFlowStockQueue = [];
     let dailyFetchInFlight = false;
     let brainQuestionPool = [];
@@ -343,9 +344,10 @@
         }
     }
 
-    async function fetchDailyControversy() {
+    async function fetchDailyControversy(options) {
+        const force = !!(options && options.force);
         const today = todayYmd();
-        if (brainDailyDate === today && brainDailyQuestion) return brainDailyQuestion;
+        if (!force && brainDailyDate === today && brainDailyQuestion) return brainDailyQuestion;
         if (dailyFetchInFlight) {
             while (dailyFetchInFlight) {
                 await new Promise(resolve => setTimeout(resolve, 120));
@@ -379,23 +381,34 @@
         return null;
     }
 
-    function updateLoadExampleHint(positionInCycle, usedBrain) {
+    function updateLoadExampleHint(meta) {
         const hint = document.getElementById('load-example-hint');
         const btn = document.getElementById('load-example-btn');
+        const clickNumber = meta && meta.clickNumber ? meta.clickNumber : 0;
+        const usedDaily = !!(meta && meta.usedDaily);
+        const timelyAvailable = !!(meta && meta.timelyAvailable);
+
         if (hint) {
-            if (positionInCycle === EXAMPLE_FLOW_BRAIN_INTERVAL) {
-                hint.textContent = usedBrain
-                    ? 'Click 4: loaded today\'s Brain question.'
-                    : 'Click 4: Brain daily not ready yet, used a stock example.';
+            if (usedDaily) {
+                hint.textContent = 'Click 2: loaded today\'s current events question.';
+            } else if (clickNumber === EXAMPLE_FLOW_BRAIN_INTERVAL && !usedDaily) {
+                hint.textContent = 'Click 2: current events question not ready yet, used a stock example.';
+            } else if (!timelyAvailable) {
+                hint.textContent = 'Preloaded examples only (current events question already used this session).';
             } else {
-                hint.textContent = 'Preloaded questions are fine to explore. Clicks 1–3: examples. Click 4: daily Brain question.';
+                hint.textContent = 'Rule of 2: click 1 = example; click 2 = today\'s current events question (once per session).';
             }
         }
-        if (btn && positionInCycle === EXAMPLE_FLOW_BRAIN_INTERVAL) {
-            btn.textContent = usedBrain ? 'Load Example (Brain)' : 'Load Example';
-        } else if (btn) {
-            btn.textContent = 'Load Example';
+        if (btn) {
+            btn.textContent = usedDaily ? 'Load Example (current events)' : 'Load Example';
         }
+    }
+
+    function resetExampleFlowSession() {
+        exampleFlowClickCount = 0;
+        exampleFlowTimelyServedThisSession = false;
+        exampleFlowStockQueue = [];
+        updateLoadExampleHint({ clickNumber: 0, usedDaily: false, timelyAvailable: true });
     }
 
     function applyExampleQuestion(question) {
@@ -464,20 +477,25 @@
     async function handleLoadExampleFlow() {
         try {
             exampleFlowClickCount++;
-            const positionInCycle = ((exampleFlowClickCount - 1) % EXAMPLE_FLOW_BRAIN_INTERVAL) + 1;
+            const clickNumber = exampleFlowClickCount;
             let question = '';
-            let usedBrain = false;
+            let usedDaily = false;
+            const timelySlot = !exampleFlowTimelyServedThisSession && clickNumber === EXAMPLE_FLOW_BRAIN_INTERVAL;
 
-            // Rule of 4: clicks 1, 2, and 3 = stock questions; click 4 = Brain daily.
-            if (positionInCycle === EXAMPLE_FLOW_BRAIN_INTERVAL) {
+            // Rule of 2 (once per session): click 1 = stock; click 2 = today's current events question; then stock only.
+            if (timelySlot) {
+                exampleFlowTimelyServedThisSession = true;
                 let daily = sanitizeBrainQuestion(brainDailyQuestion);
                 if (!daily || brainDailyDate !== todayYmd()) {
-                    daily = await waitForBrainDaily(4500);
+                    daily = sanitizeBrainQuestion(await fetchDailyControversy({ force: true }));
+                }
+                if (!daily) {
+                    daily = await waitForBrainDaily(6000);
                 }
                 if (daily) {
                     resetExampleFlowStockQueue();
                     question = daily;
-                    usedBrain = true;
+                    usedDaily = true;
                 } else {
                     question = pickStockExampleQuestion();
                 }
@@ -488,7 +506,11 @@
             if (!question) {
                 question = staticExamplePool()[0];
             }
-            updateLoadExampleHint(positionInCycle, usedBrain);
+            updateLoadExampleHint({
+                clickNumber,
+                usedDaily,
+                timelyAvailable: !exampleFlowTimelyServedThisSession
+            });
             applyExampleQuestion(question);
         } catch (e) {
             console.warn('Load Example Flow failed', e);
@@ -519,6 +541,7 @@
         refreshSetupApiStatus,
         fetchDailyControversy,
         handleLoadExampleFlow,
+        resetExampleFlowSession,
         resolveProviderId,
         updateStatusDot
     };

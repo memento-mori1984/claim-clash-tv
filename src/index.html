@@ -399,8 +399,8 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 <div class="section rounded-3xl p-5">
                     <div class="text-sm font-medium text-zinc-400 mb-3">QUICK ACTIONS</div>
                     <div class="space-y-3">
-                        <button id="load-example-btn" onclick="loadExampleFlow()" class="w-full bg-amber-700 hover:bg-amber-800 px-4 py-3 rounded-2xl text-sm" title="Clicks 1–3: stock examples. Click 4: signed daily Brain question when available.">Load Example</button>
-                        <p id="load-example-hint" class="text-[10px] text-zinc-500 leading-snug">Preloaded questions are fine to explore. Clicks 1–3: examples. Click 4: daily Brain question.</p>
+                        <button id="load-example-btn" onclick="loadExampleFlow()" class="w-full bg-amber-700 hover:bg-amber-800 px-4 py-3 rounded-2xl text-sm" title="Rule of 2: click 1 loads an example; click 2 loads today's current events question once per session.">Load Example</button>
+                        <p id="load-example-hint" class="text-[10px] text-zinc-500 leading-snug">Rule of 2: click 1 = example; click 2 = today's current events question (once per session).</p>
                         <button onclick="addBookmark()" class="w-full bg-amber-600 hover:bg-amber-700 px-4 py-3 rounded-2xl text-sm flex items-center justify-center gap-x-2">
                             <i class="fa-solid fa-bookmark"></i> <span>Bookmark Concern</span>
                         </button>
@@ -847,7 +847,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         <div class="text-center max-w-md">
             <i class="fa-solid fa-circle-notch fa-spin text-3xl text-emerald-400 mb-4" aria-hidden="true"></i>
             <p id="quit-overlay-text" class="text-lg text-zinc-200">Saving your session...</p>
-            <p class="text-xs text-zinc-500 mt-2">Player session only, protected Brain data is never saved.</p>
+            <p class="text-xs text-zinc-500 mt-2">Player session only. Protected daily-question data is never saved.</p>
         </div>
     </div>
 
@@ -920,10 +920,10 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             if (stored && stored !== 'YOUR_GEMINI_API_KEY_HERE') return stored;
             return getTestingDefaultKey(storage);
         }
-        const APP_VERSION = "0.1.86";
+        const APP_VERSION = "0.1.90";
         const APP_PHASE = "Beta";
         const FEEDBACK_EMAIL = "ClaimsClashFeedback@gmail.com";
-        const PRIVACY_POLICY_URL = "https://github.com/memento-mori1984/claim-clash-tv/blob/main/PRIVACY-POLICY.md";
+        const PRIVACY_POLICY_URL = "https://github.com/memento-mori1984/claim-clash-tv/blob/master/PRIVACY-POLICY.md";
         const RULES_VERSION = "3.4";
         const FEEDBACK_BODY_URL_LIMIT = 5500;
         const FEEDBACK_DRAFT_KEY = "claimClashFeedbackDraft";
@@ -939,7 +939,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         const RULES_WALKTHROUGH_SECTIONS = {
             welcome_play: {
                 title: 'Welcome to play',
-                content: "Claim Clash is built for two people at one screen exploring real topics through evidence-based questions to a shared AI. Team A (Blue) and Team B (Red) alternate turns. The goal is a clearer shared picture, not a debate win.\n\nTWO-PLAYER FLOW\nStep 1: One player types a question and clicks Ask.\nStep 2: The AI responds.\nStep 3: The other player clicks Follow Up to take their turn.\nStep 4: Continue alternating on the same topic. Steelman the other side's strongest argument when you can.\n\nSOLO PLAY (OPTIONAL): Turn on Single Player Interrogation Mode above the question box when no partner is present.\n\nCASTING: Use Cast to TV to mirror the game on a bigger screen (same Wi-Fi).\n\nPRELOADED QUESTIONS: It is perfectly fine to explore preloaded example questions. Use Load Example in Quick Actions. Questions are updated regularly, including the daily Brain prompt when available.\n\nTreat your primary AI as a thinking tool, not an oracle. You can compare multiple assistants on the same question."
+                content: "Claim Clash is built for two people at one screen exploring real topics through evidence-based questions to a shared AI. Team A (Blue) and Team B (Red) alternate turns. The goal is a clearer shared picture, not a debate win.\n\nTWO-PLAYER FLOW\nStep 1: One player types a question and clicks Ask.\nStep 2: The AI responds.\nStep 3: The other player clicks Follow Up to take their turn.\nStep 4: Continue alternating on the same topic. Steelman the other side's strongest argument when you can.\n\nSOLO PLAY (OPTIONAL): Turn on Single Player Interrogation Mode above the question box when no partner is present.\n\nCASTING: Use Cast to TV to mirror the game on a bigger screen (same Wi-Fi).\n\nPRELOADED QUESTIONS: It is perfectly fine to explore preloaded example questions. Use Load Example in Quick Actions (rule of 2: click 1 is an example; click 2 is today's current events question, once per session).\n\nTreat your primary AI as a thinking tool, not an oracle. You can compare multiple assistants on the same question."
             },
             steelman_core: {
                 title: 'Steelman & core rules',
@@ -2076,6 +2076,9 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             await autoSaveSessionRecord('new-session');
             lastSessionAutoSaveFingerprint = null;
             resetPrimarySession(true);
+            if (window.Brain && typeof Brain.resetExampleFlowSession === 'function') {
+                Brain.resetExampleFlowSession();
+            }
             scheduleCastPush();
         }
 
@@ -5257,8 +5260,37 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             await setAppFullscreen(!active);
         }
 
+        async function ensureAppWindowVisible() {
+            try {
+                const appWindow = await getAppWindow();
+                if (!appWindow) return;
+                if (typeof appWindow.unminimize === 'function') {
+                    await appWindow.unminimize();
+                }
+                if (typeof appWindow.show === 'function') {
+                    await appWindow.show();
+                }
+                if (typeof appWindow.center === 'function') {
+                    await appWindow.center();
+                }
+                if (typeof appWindow.setFocus === 'function') {
+                    await appWindow.setFocus();
+                }
+                if (typeof appWindow.setAlwaysOnTop === 'function') {
+                    await appWindow.setAlwaysOnTop(true);
+                    setTimeout(function () {
+                        appWindow.setAlwaysOnTop(false).catch(function () {});
+                    }, 1200);
+                }
+            } catch (e) {
+                console.warn('Could not show/focus window', e);
+            }
+        }
+
         async function enterFullscreenOnLaunch() {
-            await setAppFullscreen(true);
+            // Stay windowed on launch so the app is visible on all monitor setups.
+            // Use the toolbar Full Screen button when you want fullscreen.
+            await ensureAppWindowVisible();
         }
 
         /** Bootstraps the app: version labels, setup screen, or resumes saved keys. */
