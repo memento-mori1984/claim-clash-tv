@@ -531,7 +531,7 @@
         }
 
         scheduleCheckAvailability();
-        fetchDailyControversy();
+        fetchDailyControversy({ force: true });
     }
 
     window.Brain = {
