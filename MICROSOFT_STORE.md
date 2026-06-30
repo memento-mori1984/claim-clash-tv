@@ -11,7 +11,7 @@ This document tracks publishing Claim Clash to the Microsoft Store.
 - [x] Step 0: MSIX manifest + `scripts/build-msix-store.ps1` scaffolded (`msix/`)
 - [ ] Step 1: Enroll as Microsoft Developer
 - [ ] Step 2: Reserve app name in Partner Center (MSIX product)
-- [ ] Step 3: Host privacy policy at a public HTTPS URL
+- [x] Step 3: Host privacy policy at a public HTTPS URL
 - [ ] Step 4: Build Release MSIX and verify locally (`msix/MSIX-TESTING.txt`)
 - [ ] Step 5: Declare capabilities in Partner Center
 - [ ] Step 6: Prepare Store listing (screenshots, description)
@@ -19,9 +19,20 @@ This document tracks publishing Claim Clash to the Microsoft Store.
 
 ## Step 1 — Developer enrollment
 
-1. Sign in with a Microsoft account at [Microsoft Store developer enrollment](https://developer.microsoft.com/en-us/microsoft-store/register).
-2. Complete identity verification and pay the one-time registration fee (if applicable).
-3. Open [Partner Center — Apps and games](https://partner.microsoft.com/dashboard/apps-and-games/overview).
+**Use the 2026 free onboarding flow** (no registration fee for Individual or Company accounts).
+
+1. Go to [storedeveloper.microsoft.com](https://storedeveloper.microsoft.com) (required entry point; do not start from legacy Partner Center links).
+2. Click **Get started for free**.
+3. Select **Individual developer** (publishing as Zachary H. Roberts; matches `PublisherDisplayName` in `msix/Package.appxmanifest`).
+4. Sign in with a **personal Microsoft account (MSA)** — e.g. RanZhiSen@gmail.com if that is your MSA, or create one.
+5. Complete **identity verification** (government ID + selfie; mobile capture in good lighting).
+6. Review profile details (name, country) and finish setup.
+7. Click **Go to Partner Center dashboard** (or wait ~5 minutes, then open [Apps and games](https://aka.ms/submitwindowsapp)).
+8. Confirm you land on **Apps & Games overview** with permission to create a new product.
+
+**Account type note:** Choose **Company** only if you are publishing under a registered business (LLC, corp, etc.) with DUNS or business documents. Individual cannot be changed to Company later.
+
+**After enrollment:** Reply here or check off Step 1 in this file so we can proceed to Step 2 (reserve **Claim Clash**).
 
 ## Step 2 — Reserve the app name
 
