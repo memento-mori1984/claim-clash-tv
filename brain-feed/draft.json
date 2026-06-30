@@ -1,12 +1,12 @@
 {
   "v": 1,
-  "date": "2026-06-27",
-  "daily": "Did the Federal Reserve raise its policy rate above 5% in 2023, and what did official FOMC statements cite as the primary inflation concern at the time?",
+  "date": "2026-06-30",
+  "daily": "How many classified documents did the January 2024 special counsel report say were recovered from Mar-a-Lago, and which statutes did it cite as most directly implicated?",
   "pool": [
     {
-      "text": "Did the Federal Reserve raise its policy rate above 5% in 2023, and what did official FOMC statements cite as the primary inflation concern at the time?",
-      "date": "2026-06-27"
+      "text": "How many classified documents did the January 2024 special counsel report say were recovered from Mar-a-Lago, and which statutes did it cite as most directly implicated?",
+      "date": "2026-06-30"
     }
   ],
-  "issued_at": 1750982400
+  "issued_at": 1751270400
 }

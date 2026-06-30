@@ -126,9 +126,9 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 <h2 class="text-lg font-semibold mb-1 flex items-center gap-2">
                     <i class="fa-solid fa-robot text-violet-400"></i> Choose Your AI Assistants
                 </h2>
-                <p class="text-xs text-zinc-500 mb-4">Add API keys in any order. Use the arrows to set display order. Star your primary AI. Its answers appear in the main box. <strong class="text-amber-400/90">Your primary AI should use a paid API plan</strong>, not a free tier.</p>
+                <p class="text-xs text-zinc-500 mb-4">Add API keys in any order. Use the arrows to set display order. Star your primary AI. Its answers appear in the main box.</p>
                 <div id="setup-provider-list" class="space-y-3"></div>
-                <div id="setup-primary-paid-guidance" class="hidden mt-3 p-3 rounded-2xl border border-amber-700/50 bg-amber-950/30 text-[11px] text-amber-100/90 leading-relaxed"></div>
+                <div id="setup-primary-paid-guidance" class="hidden mt-2"></div>
                 <details id="setup-api-status-legend" class="hidden mt-3 pt-3 border-t border-zinc-800 text-[10px] text-zinc-500">
                     <summary class="cursor-pointer text-zinc-400 hover:text-zinc-300 font-medium text-[11px] mb-2">What do the colored dots mean?</summary>
                     <p class="font-medium text-zinc-400 mb-2 mt-2">Primary AI status (dot beside the starred provider)</p>
@@ -350,7 +350,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     <div class="panel-head mb-3">
                         <div class="min-w-0 flex-1">
                             <span id="primary-answer-label" class="text-sm font-medium text-zinc-400 min-w-0">PRIMARY AI ANSWER</span>
-                            <p id="game-primary-paid-guidance" class="hidden text-[10px] text-amber-400/90 mt-1 leading-snug max-w-xl"></p>
+                            <span id="game-primary-paid-guidance" class="hidden relative inline-flex items-center ml-1"></span>
                         </div>
                         <div class="panel-head-actions">
                             <button type="button" onclick="startNewSession()"
@@ -363,7 +363,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                                         title="How does AI memory work?" aria-label="Session memory help">?</button>
                                 <div id="session-help-popover" onclick="event.stopPropagation()"
                                      class="hidden absolute right-0 top-full mt-2 z-30 w-72 bg-zinc-950 border border-zinc-700 rounded-2xl px-4 py-3 text-sm text-zinc-300 shadow-lg text-left">
-                                    Your primary AI remembers this entire conversation for the session. Each Ask builds on earlier questions and answers. Follow Up only passes the turn. It does not clear memory. Click <strong>Start New Session</strong> when you want a fresh topic with no prior context.<br><br><strong>Save &amp; Quit</strong> (toolbar) opens the export menu so you can pick Markdown, Word, or PDF, then save and close. The window X button does the same. Use <strong>Quit without saving</strong> in the toolbar (or in that menu) to close with no file.<br><br><strong class="text-amber-400/90">Use a paid API plan</strong> for your starred primary AI, free tiers throttle and weaken long evidence sessions.
+                                    Your primary AI remembers this entire conversation for the session. Each Ask builds on earlier questions and answers. Follow Up only passes the turn. It does not clear memory. Click <strong>Start New Session</strong> when you want a fresh topic with no prior context.<br><br><strong>Save &amp; Quit</strong> (toolbar) opens the export menu so you can pick Markdown, Word, or PDF, then save and close. The window X button does the same. Use <strong>Quit without saving</strong> in the toolbar (or in that menu) to close with no file.<br><br>Tap the <strong>Plan tip</strong> notice beside the answer label if you want billing guidance for your primary AI.
                                 </div>
                             </div>
                             <button id="follow-up-btn" onclick="followUp()" 
@@ -399,8 +399,8 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 <div class="section rounded-3xl p-5">
                     <div class="text-sm font-medium text-zinc-400 mb-3">QUICK ACTIONS</div>
                     <div class="space-y-3">
-                        <button onclick="loadExampleFlow()" class="w-full bg-amber-700 hover:bg-amber-800 px-4 py-3 rounded-2xl text-sm">Load Example</button>
-                        <p class="text-[10px] text-zinc-500 leading-snug">Preloaded questions are fine to explore. They are updated regularly.</p>
+                        <button id="load-example-btn" onclick="loadExampleFlow()" class="w-full bg-amber-700 hover:bg-amber-800 px-4 py-3 rounded-2xl text-sm" title="Clicks 1–3: stock examples. Click 4: signed daily Brain question when available.">Load Example</button>
+                        <p id="load-example-hint" class="text-[10px] text-zinc-500 leading-snug">Preloaded questions are fine to explore. Clicks 1–3: examples. Click 4: daily Brain question.</p>
                         <button onclick="addBookmark()" class="w-full bg-amber-600 hover:bg-amber-700 px-4 py-3 rounded-2xl text-sm flex items-center justify-center gap-x-2">
                             <i class="fa-solid fa-bookmark"></i> <span>Bookmark Concern</span>
                         </button>
@@ -473,7 +473,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 <h4 class="text-sm font-medium text-zinc-300 mb-2 flex items-center gap-2"><i class="fa-solid fa-graduation-cap text-violet-400"></i> Grade level (academic)</h4>
                 <div id="settings-grade-level-host"></div>
             </div>
-            <div id="settings-primary-paid-guidance" class="hidden mb-3 p-3 rounded-2xl border border-amber-700/50 bg-amber-950/30 text-[11px] text-amber-100/90 leading-relaxed"></div>
+            <div id="settings-primary-paid-guidance" class="hidden mb-3"></div>
             <div id="settings-provider-list" class="space-y-3 max-h-[360px] overflow-auto pr-1"></div>
 
             <div class="mt-6 flex justify-end gap-x-3">
@@ -981,30 +981,30 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         const OPENROUTER_MODELS = OPENROUTER_MODELS_FREE;
         const XAI_MODELS = ["grok-4.3", "grok-3-fast"];
 
-        /** Strong recommendation: primary AI should run on a paid plan, not free tiers. */
+        /** Optional plan tip for starred primary AI (shown behind Plan tip notice, not inline banners). */
         const PRIMARY_PAID_GUIDANCE = {
             gemini: {
-                message: 'We strongly recommend a paid Gemini API plan for your primary AI. Free quotas exhaust quickly during two-player sessions.',
+                message: 'Free Gemini quotas exhaust quickly during two-player sessions. A paid API plan is recommended for your primary AI.',
                 planUrl: 'https://ai.google.dev/gemini-api/docs/pricing'
             },
             openai: {
-                message: 'OpenAI API billing is pay-as-you-go, which is suited for primary AI. Avoid shared free trial keys for main play.',
+                message: 'OpenAI is pay-as-you-go and works well as primary AI. Avoid exhausted or shared trial keys for main play.',
                 planUrl: 'https://platform.openai.com/settings/organization/billing'
             },
             anthropic: {
-                message: 'Anthropic API access is paid and recommended for dependable primary AI answers.',
+                message: 'Anthropic API access is paid and suited to dependable primary AI answers.',
                 planUrl: 'https://console.anthropic.com/settings/billing'
             },
             groq: {
-                message: 'We strongly recommend a paid Groq Developer plan for primary AI. Free tiers rate-limit fast.',
+                message: 'Free Groq tiers rate-limit fast. A paid Developer plan is recommended for primary AI.',
                 planUrl: 'https://console.groq.com/settings/billing'
             },
             openrouter: {
-                message: 'We strongly recommend paid OpenRouter credits for primary AI. Free models are comparison-only, not for your starred primary.',
+                message: 'Use paid OpenRouter credits for primary AI. Free models are best for comparison toggles only.',
                 planUrl: 'https://openrouter.ai/credits'
             },
             grok: {
-                message: 'We recommend a paid xAI API key for primary AI. Browser-only Grok is not recommended for your main answer box.',
+                message: 'Browser-only Grok is not reliable as primary AI. Add a paid xAI API key or star another provider.',
                 planUrl: 'https://console.x.ai/'
             }
         };
@@ -1189,6 +1189,21 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             };
         }
 
+        function closePrimaryPaidNotices() {
+            document.querySelectorAll('[id$="-guidance-popover"]').forEach(pop => {
+                pop.classList.add('hidden');
+            });
+        }
+
+        function togglePrimaryPaidNotice(ev, elementId) {
+            if (ev) ev.stopPropagation();
+            const popover = document.getElementById(elementId + '-popover');
+            if (!popover) return;
+            const willShow = popover.classList.contains('hidden');
+            closePrimaryPaidNotices();
+            if (willShow) popover.classList.remove('hidden');
+        }
+
         function renderPrimaryPaidGuidanceElement(elementId) {
             const el = document.getElementById(elementId);
             if (!el) return;
@@ -1198,17 +1213,28 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 el.innerHTML = '';
                 return;
             }
-            const planLink = guidance.planUrl
-                ? ' <button type="button" class="underline text-amber-300 hover:text-amber-200 ml-1" data-paid-plan-url="' +
-                    escapeHtml(guidance.planUrl) + '">View paid plan / billing</button>'
+            const popoverId = elementId + '-popover';
+            const planBtn = guidance.planUrl
+                ? '<button type="button" class="mt-2 text-amber-300 hover:text-amber-200 underline text-left" data-paid-plan-url="' +
+                    escapeHtml(guidance.planUrl) + '">View billing / plan page</button>'
                 : '';
+            const compactBtn = elementId === 'game-primary-paid-guidance'
+                ? '<button type="button" onclick="togglePrimaryPaidNotice(event, \'' + elementId + '\')" class="cast-help-btn w-6 h-6 flex items-center justify-center rounded-full text-[10px] font-semibold text-amber-200 hover:text-white" title="Plan tip for primary AI" aria-label="Plan tip for primary AI">i</button>'
+                : '<button type="button" onclick="togglePrimaryPaidNotice(event, \'' + elementId + '\')" class="text-[10px] text-amber-400/90 hover:text-amber-300 underline">Plan tip (' + escapeHtml(guidance.name) + ')</button>';
+            const popoverClass = elementId === 'game-primary-paid-guidance'
+                ? 'hidden absolute left-0 top-full mt-2 z-30 w-72 bg-zinc-950 border border-amber-700/50 rounded-2xl px-4 py-3 text-xs text-zinc-300 shadow-lg text-left'
+                : 'hidden mt-2 p-3 rounded-2xl border border-amber-700/50 bg-amber-950/30 text-[11px] text-amber-100/90 leading-relaxed max-w-xl';
             el.classList.remove('hidden');
-            el.innerHTML =
-                '<strong class="text-amber-300">Primary AI: we recommend a paid plan:</strong> ' +
-                escapeHtml(guidance.name) + ': ' + escapeHtml(guidance.message) + planLink;
-            el.querySelectorAll('[data-paid-plan-url]').forEach(btn => {
-                btn.onclick = () => openExternalUrl(btn.getAttribute('data-paid-plan-url'));
-            });
+            el.innerHTML = compactBtn +
+                '<div id="' + popoverId + '" class="' + popoverClass + '">' +
+                escapeHtml(guidance.message) + planBtn + '</div>';
+            const planLink = el.querySelector('[data-paid-plan-url]');
+            if (planLink) {
+                planLink.onclick = (e) => {
+                    e.stopPropagation();
+                    openExternalUrl(planLink.getAttribute('data-paid-plan-url'));
+                };
+            }
         }
 
         function updatePrimaryPaidSuggestion() {
@@ -1216,6 +1242,8 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             renderPrimaryPaidGuidanceElement('settings-primary-paid-guidance');
             renderPrimaryPaidGuidanceElement('game-primary-paid-guidance');
         }
+
+        window.togglePrimaryPaidNotice = togglePrimaryPaidNotice;
 
         function updatePrimaryAnswerLabel() {
             const el = document.getElementById('primary-answer-label');
@@ -1326,7 +1354,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             const primaryBtn = document.createElement('button');
             primaryBtn.type = 'button';
             primaryBtn.className = 'px-2 py-1 text-sm rounded-xl ' + (primaryProviderId === provider.id ? 'bg-amber-600 text-white' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-400');
-            primaryBtn.title = 'Set as primary AI (main answer box). We recommend a paid API plan for your primary, not a free tier.';
+            primaryBtn.title = 'Set as primary AI (main answer box). Open Plan tip for billing guidance.';
             primaryBtn.innerHTML = '<i class="fa-solid fa-star"></i>';
             primaryBtn.onclick = () => setPrimaryProvider(provider.id);
 
@@ -1379,15 +1407,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     note.textContent = 'Pre-filled for alpha testing. Clear this field to use Open in Grok in the browser instead.';
                     body.appendChild(note);
                 }
-                if (primaryProviderId === provider.id) {
-                    const paidNote = document.createElement('p');
-                    paidNote.className = 'text-[10px] text-amber-400/90 mt-1.5 leading-snug';
-                    const g = PRIMARY_PAID_GUIDANCE[provider.id];
-                    paidNote.textContent = g
-                        ? '⭐ Primary: we recommend a paid plan: ' + g.message
-                        : '⭐ Primary: we recommend a paid API plan for main answers.';
-                    body.appendChild(paidNote);
-                }
+
             }
 
             row.appendChild(orderBtns);
@@ -1764,12 +1784,12 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             updatePlayerBadge();
         }
 
-        function loadExampleFlow() {
+        async function loadExampleFlow() {
             try {
                 if (window.Brain) {
                     if (typeof Brain.init === 'function') Brain.init();
                     if (typeof Brain.handleLoadExampleFlow === 'function') {
-                        Brain.handleLoadExampleFlow();
+                        await Brain.handleLoadExampleFlow();
                         return;
                     }
                 }
@@ -2290,7 +2310,15 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         // Follow Up = Switch turn + clear question box (no Gemini call)
         function followUp() {
             if (singlePlayerInterrogationMode) return;
-            document.getElementById("question-box").innerHTML = "";
+            if (typeof setQuestionBoxText === 'function') {
+                setQuestionBoxText('');
+            } else {
+                const qbox = document.getElementById('question-box');
+                if (qbox) {
+                    qbox.innerHTML = '';
+                    qbox.textContent = '';
+                }
+            }
             switchPlayer();
             pushCurrentContentToCast();
         }
@@ -3832,6 +3860,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     closeSinglePlayerInterrogationHelp();
                     closeCastHelp();
                     closeSessionHelp();
+                    closePrimaryPaidNotices();
                 });
             }
 

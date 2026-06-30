@@ -346,7 +346,13 @@
     async function fetchDailyControversy() {
         const today = todayYmd();
         if (brainDailyDate === today && brainDailyQuestion) return brainDailyQuestion;
-        if (dailyFetchInFlight) return null;
+        if (dailyFetchInFlight) {
+            while (dailyFetchInFlight) {
+                await new Promise(resolve => setTimeout(resolve, 120));
+            }
+            if (brainDailyDate === today && brainDailyQuestion) return brainDailyQuestion;
+            return null;
+        }
         dailyFetchInFlight = true;
 
         try {
@@ -359,6 +365,36 @@
             return null;
         } finally {
             dailyFetchInFlight = false;
+        }
+    }
+
+    async function waitForBrainDaily(maxMs) {
+        const deadline = Date.now() + (maxMs || 4500);
+        while (Date.now() < deadline) {
+            await fetchDailyControversy();
+            const daily = sanitizeBrainQuestion(brainDailyQuestion);
+            if (daily && brainDailyDate === todayYmd()) return daily;
+            await new Promise(resolve => setTimeout(resolve, 350));
+        }
+        return null;
+    }
+
+    function updateLoadExampleHint(positionInCycle, usedBrain) {
+        const hint = document.getElementById('load-example-hint');
+        const btn = document.getElementById('load-example-btn');
+        if (hint) {
+            if (positionInCycle === EXAMPLE_FLOW_BRAIN_INTERVAL) {
+                hint.textContent = usedBrain
+                    ? 'Click 4: loaded today\'s Brain question.'
+                    : 'Click 4: Brain daily not ready yet, used a stock example.';
+            } else {
+                hint.textContent = 'Preloaded questions are fine to explore. Clicks 1–3: examples. Click 4: daily Brain question.';
+            }
+        }
+        if (btn && positionInCycle === EXAMPLE_FLOW_BRAIN_INTERVAL) {
+            btn.textContent = usedBrain ? 'Load Example (Brain)' : 'Load Example';
+        } else if (btn) {
+            btn.textContent = 'Load Example';
         }
     }
 
@@ -425,18 +461,23 @@
         return pool[Math.floor(Math.random() * pool.length)];
     }
 
-    function handleLoadExampleFlow() {
+    async function handleLoadExampleFlow() {
         try {
             exampleFlowClickCount++;
             const positionInCycle = ((exampleFlowClickCount - 1) % EXAMPLE_FLOW_BRAIN_INTERVAL) + 1;
             let question = '';
+            let usedBrain = false;
 
             // Rule of 4: clicks 1, 2, and 3 = stock questions; click 4 = Brain daily.
             if (positionInCycle === EXAMPLE_FLOW_BRAIN_INTERVAL) {
-                const daily = sanitizeBrainQuestion(brainDailyQuestion);
+                let daily = sanitizeBrainQuestion(brainDailyQuestion);
+                if (!daily || brainDailyDate !== todayYmd()) {
+                    daily = await waitForBrainDaily(4500);
+                }
                 if (daily) {
                     resetExampleFlowStockQueue();
                     question = daily;
+                    usedBrain = true;
                 } else {
                     question = pickStockExampleQuestion();
                 }
@@ -447,6 +488,7 @@
             if (!question) {
                 question = staticExamplePool()[0];
             }
+            updateLoadExampleHint(positionInCycle, usedBrain);
             applyExampleQuestion(question);
         } catch (e) {
             console.warn('Load Example Flow failed', e);
