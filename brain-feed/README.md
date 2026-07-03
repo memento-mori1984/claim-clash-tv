@@ -29,7 +29,11 @@ Run `.\scripts\sync-version.ps1` to regenerate `src-tauri/src/brain_config.rs`.
 
 ### Option A — craft from today's headlines (recommended)
 
-The click-2 **current events question** should track the largest story across news and social media.
+The click-2 **current events question** must feel like a push alert from the **last 24 to 48 hours**: breaking news, or a **new development** in an ongoing case (filing, ruling, vote, arrest, etc.).
+
+On a **slow news day** (few fresh headlines), the craft script falls back to an **obviously ridiculous** claim no player would seriously believe (still fact-checkable and playful).
+
+After click 2 (Rule of 2), **Load Example** shuffles stock examples together with **past** current-events questions from the signed `pool` array (today's question is excluded). Each daily craft run **accumulates** prior `pool` entries from `feed.json` (up to 300).
 
 ```powershell
 # Requires GEMINI_API_KEY or scripts/alpha-keys.local.json

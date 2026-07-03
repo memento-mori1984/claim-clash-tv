@@ -1,13 +1,17 @@
 {
   "v": 1,
-  "date": "2026-06-30",
-  "daily": "Did the Supreme Court strike down President Trump's executive order ending birthright citizenship today, and what was the vote?",
+  "date": "2026-07-02",
+  "daily": "Today, were the Empire State Building climbers granted supervised release until their next court date?",
   "pool": [
+    {
+      "text": "Today, were the Empire State Building climbers granted supervised release until their next court date?",
+      "date": "2026-07-02"
+    },
     {
       "text": "Did the Supreme Court strike down President Trump's executive order ending birthright citizenship today, and what was the vote?",
       "date": "2026-06-30"
     }
   ],
-  "issued_at": 1782844540,
-  "sig": "GocJizvGr0o9fxzdR5ccF6Ube3hHe1ODa+e6rcJreDI9yGMsTWuHDlolxHhFHpNINN58A4g82WtD+9OpV0clDg=="
+  "issued_at": 1782950400,
+  "sig": "g+EZ7n0XTijqhP4ojQERxbnZ/bZ2g4zkLK7aFRflzcvHmzo9y+fVTASoSilrNpxS23tWdsg6gQiuui7eRYQWCw=="
 }
