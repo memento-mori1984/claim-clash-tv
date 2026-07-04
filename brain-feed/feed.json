@@ -1,8 +1,12 @@
 {
   "v": 1,
-  "date": "2026-07-02",
-  "daily": "Today, were the Empire State Building climbers granted supervised release until their next court date?",
+  "date": "2026-07-03",
+  "daily": "Did the Eastern US power grid operator today order emergency curbs as electricity use nears record levels?",
   "pool": [
+    {
+      "text": "Did the Eastern US power grid operator today order emergency curbs as electricity use nears record levels?",
+      "date": "2026-07-03"
+    },
     {
       "text": "Today, were the Empire State Building climbers granted supervised release until their next court date?",
       "date": "2026-07-02"
@@ -12,6 +16,6 @@
       "date": "2026-06-30"
     }
   ],
-  "issued_at": 1782950400,
-  "sig": "g+EZ7n0XTijqhP4ojQERxbnZ/bZ2g4zkLK7aFRflzcvHmzo9y+fVTASoSilrNpxS23tWdsg6gQiuui7eRYQWCw=="
+  "issued_at": 1783036800,
+  "sig": "glPkTRsxgpuQCrYLEsLtWgzI/w8mlvHH2TWMgexAXG+9cCV+I0qYAI+qjxwVEmP49UrSpvN2HiMlC+ZCGMxXDA=="
 }
