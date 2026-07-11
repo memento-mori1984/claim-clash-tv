@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 
 <Package
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
@@ -14,7 +14,7 @@
   <Identity
     Name="memento-mori1984.ClaimClash"
     Publisher="CN=1A36C25D-F425-4410-92AF-C753F008067B"
-    Version="0.1.86.0" />
+    Version="0.1.93.0" />
 
   <Properties>
     <DisplayName>Claim Clash</DisplayName>
@@ -48,7 +48,8 @@
   </Applications>
 
   <Capabilities>
-    <rescap:Capability Name="privateNetworkClientServer" />
+    <Capability Name="internetClient" />
+    <Capability Name="privateNetworkClientServer" />
     <rescap:Capability Name="runFullTrust" />
   </Capabilities>
 </Package>

@@ -1,5 +1,5 @@
-// Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
-// "Claim Clash" is a trademark of Zachary H. Roberts.
+// Copyright (c) 2026 Arcana Veritas LLC. All rights reserved.
+// "Claim Clash" is a trademark of Arcana Veritas LLC.
 //
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]

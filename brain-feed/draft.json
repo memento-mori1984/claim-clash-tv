@@ -1,11 +1,23 @@
 {
   "v": 1,
-  "date": "2026-07-02",
-  "daily": "Today, were the Empire State Building climbers granted supervised release until their next court date?",
-  "headline_seed": "Empire State Building Climbers",
+  "date": "2026-07-07",
+  "daily": "Today, the U.S. revoked authorization for Iranian oil sales following tanker attacks in the Gulf. What is the background of this decision, and what impacts could it have on global oil markets and regional tensions?",
+  "headline_seed": "U.S. revokes Iran oil sales authorization after tanker attacks",
   "feed_mode": "breaking",
-  "recency_note": "This development regarding the climbers' court status was reported less than an hour ago.",
+  "recency_note": "headlines within 36h",
   "pool": [
+    {
+      "text": "Today, the U.S. revoked authorization for Iranian oil sales following tanker attacks in the Gulf. What is the background of this decision, and what impacts could it have on global oil markets and regional tensions?",
+      "date": "2026-07-07"
+    },
+    {
+      "text": "What is the background of Microsoft's layoff announcement today, and what impacts could 4,800 job cuts have on the tech sector and affected regions?",
+      "date": "2026-07-06"
+    },
+    {
+      "text": "Did the Eastern US power grid operator today order emergency curbs as electricity use nears record levels?",
+      "date": "2026-07-03"
+    },
     {
       "text": "Today, were the Empire State Building climbers granted supervised release until their next court date?",
       "date": "2026-07-02"
@@ -15,5 +27,5 @@
       "date": "2026-06-30"
     }
   ],
-  "issued_at": 1782950400
+  "issued_at": 1783382400
 }

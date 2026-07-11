@@ -277,6 +277,9 @@
             `turnCount: ${(data.turns || []).length}`,
             'bookmarks:'
         ];
+        if (data.sessionRef) {
+            lines.splice(lines.length - 1, 0, `sessionRef: "${escapeYamlString(data.sessionRef)}"`);
+        }
         if (data.autoSave) {
             lines.splice(lines.length - 1, 0, 'autoSave: true');
             if (data.autoSaveReason) {
@@ -555,8 +558,9 @@
     }
 
 
-    const EXPORT_NAME_PREFIX = 'ClaimsClash';
-    const EXPORT_FILENAME_RE = /^ClaimsClash v(\d+) (\d{4}-\d{2}-\d{2}) (\d{2}) (.+)$/i;
+    const EXPORT_NAME_PREFIX = 'ClaimClash';
+    const EXPORT_FILENAME_RE = /^ClaimClash v(\d+) (\d{4}-\d{2}-\d{2}) (\d{2}) (.+)$/i;
+    const LEGACY_CLAIMS_EXPORT_FILENAME_RE = /^ClaimsClash v(\d+) (\d{4}-\d{2}-\d{2}) (\d{2}) (.+)$/i;
     const LEGACY_EXPORT_FILENAME_RE = /^conv (\d+) - (.+)$/i;
 
     function formatConvoDayNumber(n) {
@@ -595,6 +599,16 @@
         if (!stem) return null;
 
         let match = stem.match(EXPORT_FILENAME_RE);
+        if (match) {
+            return {
+                version: parseInt(match[1], 10) || 1,
+                date: match[2],
+                convo: parseInt(match[3], 10) || 1,
+                topic: match[4].trim()
+            };
+        }
+
+        match = stem.match(LEGACY_CLAIMS_EXPORT_FILENAME_RE);
         if (match) {
             return {
                 version: parseInt(match[1], 10) || 1,
@@ -883,6 +897,7 @@
     window.SessionExport = {
         collectSessionExportData,
         sessionHasExportableContent,
+        formatFileDate,
         buildSessionFingerprint,
         buildMarkdown,
         buildFrontmatter,

@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
+// Copyright (c) 2026 Arcana Veritas LLC. All rights reserved.
 // US school grade expectations + international-to-US mapping for academic use.
 // Hidden facilitator directives adjust primary AI vocabulary/complexity only.
 
@@ -530,7 +530,7 @@
     }
 
     function mountPanels() {
-        ['settings'].forEach(prefix => {
+        ['setup', 'settings'].forEach(prefix => {
             const host = document.getElementById(prefix + '-grade-level-host');
             if (!host) return;
             host.innerHTML = buildPanelHtml(prefix);

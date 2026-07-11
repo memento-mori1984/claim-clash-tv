@@ -1,0 +1,27 @@
+Claim Clash for Windows — Consumer install
+============================================
+Copyright (c) 2026 Arcana Veritas LLC. All rights reserved.
+
+This is the official consumer build: no site password, no pre-filled API keys.
+You add your own AI provider keys in the app (stored on your PC only).
+
+Version: {{VERSION}}
+
+RECOMMENDED: SETUP INSTALLER
+----------------------------
+1. Download Claim-Clash-Setup.exe from Claim-Clash.com.
+2. Save it to a normal folder (Desktop or Downloads). Do not run from inside the zip browser preview.
+   Never run the setup from C:\Windows\System32.
+3. Double-click Claim-Clash-Setup.exe.
+4. If Windows SmartScreen appears (unsigned app): More info → Run anyway.
+5. Follow the installer wizard. WebView2 may download if it is missing on your PC.
+6. Launch from Start Menu → Claim Clash.
+7. On first launch: add at least one API key (Gemini, Groq, OpenRouter, xAI, etc.), click Save, then Start.
+
+Uninstall: Windows Settings → Apps → Claim Clash → Uninstall
+
+NOTES
+-----
+- API keys stay in local storage on your computer only; they are never uploaded to Claim Clash servers.
+- This desktop app is separate from the password-gated web preview at Claim-Clash.com.
+- Questions: {{FEEDBACK_EMAIL}}

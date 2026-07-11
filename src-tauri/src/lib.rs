@@ -1,5 +1,5 @@
-// Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
-// "Claim Clash" is a trademark of Zachary H. Roberts.
+// Copyright (c) 2026 Arcana Veritas LLC. All rights reserved.
+// "Claim Clash" is a trademark of Arcana Veritas LLC.
 //
 //! Claim Clash Tauri backend: local HTTP server for Smart TV casting.
 //!
@@ -614,7 +614,10 @@ fn file_stem_name(filename: &str) -> String {
 
 fn parse_conv_topic_from_filename(filename: &str) -> (Option<u32>, String) {
     let stem = file_stem_name(filename);
-    if let Some(rest) = stem.strip_prefix("ClaimsClash v") {
+    if let Some(rest) = stem
+        .strip_prefix("ClaimClash v")
+        .or_else(|| stem.strip_prefix("ClaimsClash v"))
+    {
         let parts: Vec<&str> = rest.splitn(4, ' ').collect();
         if parts.len() >= 4 {
             if let Ok(conv) = parts[2].parse::<u32>() {
@@ -1008,7 +1011,7 @@ fn save_session_export(
 
     let dialog_name = sanitize_export_filename(default_name.trim());
     let dialog_default = if dialog_name.is_empty() {
-        format!("ClaimsClash v1 01 [topic].{ext}")
+        format!("ClaimClash v1 01 [topic].{ext}")
     } else {
         dialog_name
     };
@@ -1051,6 +1054,129 @@ fn fetch_brain_feed() -> Result<brain_feed::BrainFeedResponse, String> {
     brain_feed::fetch_verified_brain_feed()
 }
 
+fn main_webview_window(app: &tauri::AppHandle) -> Result<tauri::WebviewWindow, String> {
+    if let Some(window) = app.get_webview_window("main") {
+        return Ok(window);
+    }
+    app.webview_windows()
+        .into_values()
+        .next()
+        .ok_or_else(|| "no webview window found".to_string())
+}
+
+#[derive(Clone, Default)]
+struct ExplainerWindowState {
+    was_fullscreen: bool,
+    was_maximized: bool,
+    had_decorations: bool,
+    used_borderless_fallback: bool,
+}
+
+/// Sets OS fullscreen on the main window (used by setup explainer and toolbar).
+#[tauri::command]
+fn set_app_fullscreen(app: tauri::AppHandle, fullscreen: bool) -> Result<bool, String> {
+    let window = main_webview_window(&app)?;
+    if fullscreen {
+        let _ = window.show();
+        let _ = window.set_focus();
+        if window.is_maximized().unwrap_or(false) && !window.is_fullscreen().unwrap_or(false) {
+            let _ = window.unmaximize();
+        }
+        window.set_fullscreen(true).map_err(|e| e.to_string())?;
+        let active = window.is_fullscreen().map_err(|e| e.to_string())?;
+        if !active {
+            let _ = window.set_decorations(false);
+            window.maximize().map_err(|e| e.to_string())?;
+            return Ok(window.is_maximized().unwrap_or(false));
+        }
+        return Ok(true);
+    }
+
+    window.set_fullscreen(false).map_err(|e| e.to_string())?;
+    let _ = window.set_decorations(true);
+    let _ = window.unmaximize();
+    Ok(window.is_fullscreen().unwrap_or(false))
+}
+
+/// API key explainer: true fullscreen, or borderless maximized on Windows when needed.
+#[tauri::command]
+fn enter_api_key_explainer_fullscreen(
+    app: tauri::AppHandle,
+    state: tauri::State<Arc<Mutex<ExplainerWindowState>>>,
+) -> Result<bool, String> {
+    let window = main_webview_window(&app)?;
+    let mut saved = state.lock().map_err(|e| e.to_string())?;
+    *saved = ExplainerWindowState::default();
+    saved.was_fullscreen = window.is_fullscreen().unwrap_or(false);
+    saved.was_maximized = window.is_maximized().unwrap_or(false);
+    saved.had_decorations = window.is_decorated().unwrap_or(true);
+
+    let _ = window.set_focus();
+    if saved.was_maximized && !saved.was_fullscreen {
+        let _ = window.unmaximize();
+    }
+
+    window.set_fullscreen(true).map_err(|e| e.to_string())?;
+    if window.is_fullscreen().unwrap_or(false) {
+        return Ok(true);
+    }
+
+    saved.used_borderless_fallback = true;
+    window.set_fullscreen(false).map_err(|e| e.to_string())?;
+    window.set_decorations(false).map_err(|e| e.to_string())?;
+    window.maximize().map_err(|e| e.to_string())?;
+    Ok(true)
+}
+
+/// Restores window chrome/size after the API key explainer closes.
+#[tauri::command]
+fn exit_api_key_explainer_fullscreen(
+    app: tauri::AppHandle,
+    state: tauri::State<Arc<Mutex<ExplainerWindowState>>>,
+) -> Result<(), String> {
+    let window = main_webview_window(&app)?;
+    let snapshot = state.lock().map_err(|e| e.to_string())?.clone();
+
+    window.set_fullscreen(false).map_err(|e| e.to_string())?;
+    window
+        .set_decorations(snapshot.had_decorations)
+        .map_err(|e| e.to_string())?;
+
+    if snapshot.used_borderless_fallback {
+        if snapshot.was_maximized {
+            window.maximize().map_err(|e| e.to_string())?;
+        } else {
+            let _ = window.unmaximize();
+        }
+    } else if snapshot.was_fullscreen {
+        window.set_fullscreen(true).map_err(|e| e.to_string())?;
+    } else if snapshot.was_maximized {
+        window.maximize().map_err(|e| e.to_string())?;
+    } else {
+        let _ = window.unmaximize();
+    }
+
+    Ok(())
+}
+
+/// Returns whether the main window is in OS fullscreen.
+#[tauri::command]
+fn is_app_fullscreen(app: tauri::AppHandle) -> Result<bool, String> {
+    let window = app
+        .get_webview_window("main")
+        .ok_or_else(|| "main window not found".to_string())?;
+    window.is_fullscreen().map_err(|e| e.to_string())
+}
+
+/// Maximizes the main window (fallback when fullscreen permission is delayed).
+#[tauri::command]
+fn maximize_app_window(app: tauri::AppHandle) -> Result<(), String> {
+    let window = app
+        .get_webview_window("main")
+        .ok_or_else(|| "main window not found".to_string())?;
+    window.maximize().map_err(|e| e.to_string())
+}
+
 /// Lists filenames in the export scan folder (Documents/Claim Clash by default).
 #[tauri::command]
 fn list_export_folder_filenames(directory: Option<String>) -> Result<Vec<String>, String> {
@@ -1087,13 +1213,18 @@ fn list_export_folder_filenames(directory: Option<String>) -> Result<Vec<String>
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let cast_state = Arc::new(Mutex::new(CastState::default()));
+    let explainer_window_state = Arc::new(Mutex::new(ExplainerWindowState::default()));
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .manage(cast_state)
+        .manage(explainer_window_state)
         .setup(|app| {
             if let Some(window) = app.get_webview_window("main") {
+                let _ = window.show();
+                let _ = window.set_focus();
+                let _ = window.set_fullscreen(true);
                 let window_for_emit = window.clone();
                 window.on_window_event(move |event| {
                     if let tauri::WindowEvent::CloseRequested { api, .. } = event {
@@ -1120,7 +1251,12 @@ pub fn run() {
             read_session_backup,
             search_session_backups,
             fetch_brain_feed,
-            list_export_folder_filenames
+            list_export_folder_filenames,
+            set_app_fullscreen,
+            is_app_fullscreen,
+            maximize_app_window,
+            enter_api_key_explainer_fullscreen,
+            exit_api_key_explainer_fullscreen
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

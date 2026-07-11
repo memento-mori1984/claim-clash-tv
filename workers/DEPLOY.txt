@@ -1,0 +1,92 @@
+CLAIM CLASH — LIVE WEB DEPLOY (Claim-Clash.com)
+=================================================
+Password-gated developer preview. The app is NOT public until you remove the gate.
+
+Primary domain: claim-clash.com
+Legacy alias:   claims-clash.com (both serve the game; www.* redirects to claim-clash.com)
+
+PREREQUISITES
+-------------
+1. Cloudflare account with claim-clash.com and claims-clash.com on Cloudflare DNS
+2. Node.js + npm
+3. Wrangler CLI: npm install -g wrangler   (or use npx wrangler)
+4. wrangler login
+
+ONE-TIME SETUP
+--------------
+A. Build the static app bundle:
+     cd C:\Users\Ranzh\ClaimClash\claim-clash-tv
+     .\scripts\build-web.ps1
+
+B. Create KV namespace for brute-force protection:
+     cd workers
+     npx wrangler kv namespace create claim-clash-rate-limit
+   Copy the id from output into workers\wrangler.toml (REPLACE_WITH_YOUR_KV_NAMESPACE_ID).
+
+C. Choose a strong developer password (12+ chars) and generate secrets:
+     cd C:\Users\Ranzh\ClaimClash\claim-clash-tv
+     node scripts\hash-web-dev-password.mjs "YourStrongDeveloperPassword"
+
+D. Store secrets in Cloudflare (paste values when prompted):
+     cd workers
+     npx wrangler secret put DEV_PASSWORD_CREDENTIAL
+     npx wrangler secret put SESSION_SECRET
+
+DEPLOY
+------
+     cd C:\Users\Ranzh\ClaimClash\claim-clash-tv
+     .\scripts\deploy-web.ps1
+
+Or manually:
+     .\scripts\build-web.ps1
+     cd workers
+     npx wrangler deploy
+
+CUSTOM DOMAIN
+-------------
+After first deploy, in Cloudflare dashboard:
+  Workers & Pages -> claim-clash-site -> Settings -> Domains & Routes
+  Add: claim-clash.com, www.claim-clash.com, claims-clash.com, www.claims-clash.com
+
+wrangler.toml already lists all four. For a newly purchased zone (claim-clash.com):
+  1. Add the domain to your Cloudflare account
+  2. Run: cd workers && npx wrangler deploy
+  3. Confirm custom domains show Active in the Workers dashboard
+
+LOCAL PREVIEW (with password gate)
+----------------------------------
+     cd workers
+     copy .dev.vars.example .dev.vars
+     (fill in DEV_PASSWORD_CREDENTIAL and SESSION_SECRET from hash script)
+     npx wrangler dev
+   Open http://localhost:8787 and enter your developer password.
+
+SECURITY (what is enforced)
+---------------------------
+- PBKDF2-SHA256, 100,000 iterations (Workers Web Crypto max; password never stored plain text)
+- HMAC-signed HttpOnly session cookie (cleared on tab reload/close; 4h token cap as fallback)
+- Rate limit: 5 failed attempts per IP per 15 minutes, then 1-hour lockout
+- Artificial delay on failed logins (slows brute force)
+- All static files and /api/ai require valid session
+- Security headers: CSP, X-Frame-Options, nosniff, noindex robots.txt
+- AI proxy only forwards to known provider HTTPS hosts
+
+SHARE WITH TESTERS
+------------------
+Give them: https://claim-clash.com and the site password (ClaimClash2026 or your current password).
+
+Default deploy (.\scripts\deploy-web.ps1) embeds pre-filled tester keys from
+scripts/alpha-keys.local.json (Dev profile). Anyone with the site password can
+view those keys in build-profile.js — use low-quota keys and rotate if leaked.
+
+For testers to bring their own keys instead:
+  .\scripts\deploy-web.ps1 -NoTestingKeys
+
+REBUILD AFTER CODE CHANGES
+--------------------------
+     .\scripts\deploy-web.ps1
+
+GOING PUBLIC LATER
+------------------
+Remove site-gate.js auth checks or switch to Cloudflare Access / Store link only.
+Do not ship embedded API keys in web-dist (build-web.ps1 uses Release profile).

@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
+// Copyright (c) 2026 Arcana Veritas LLC. All rights reserved.
 //! Creator-signed Brain feed verification (server-side control).
 
 use base64::{engine::general_purpose::STANDARD, Engine as _};
@@ -177,12 +177,21 @@ pub fn fetch_verified_brain_feed() -> Result<BrainFeedResponse, String> {
     if !brain_feed_configured() {
         return Err("Brain feed not configured".to_string());
     }
-    let url = BRAIN_FEED_URL.trim();
-    if !url.starts_with("https://") {
+    let base = BRAIN_FEED_URL.trim();
+    if !base.starts_with("https://") {
         return Err("Brain feed URL must use HTTPS".to_string());
     }
+    let cache_bust = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+    let url = if base.contains('?') {
+        format!("{base}&cc={cache_bust}")
+    } else {
+        format!("{base}?cc={cache_bust}")
+    };
 
-    let body = ureq::get(url)
+    let body = ureq::get(&url)
         .set("User-Agent", "ClaimClash Brain Feed")
         .call()
         .map_err(|e| format!("Brain feed fetch failed: {e}"))?

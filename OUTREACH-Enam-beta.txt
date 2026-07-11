@@ -1,0 +1,54 @@
+TO: Enamselfemployeed@gmail.com
+SUBJECT: Claim Clash beta - would you try it? (Windows, ~15 min)
+
+---
+
+Hi Enam,
+
+Hope you are doing well. I built a Windows app called Claim Clash and I would really value your honest take as a neighbor and friend.
+
+Claim Clash is a two-player conversation game for one screen. You take turns asking evidence-based questions about a real topic while a shared AI helps you see what is actually known. It is not about winning an argument. It is about building a clearer picture together. Solo mode works too if you are testing alone.
+
+DOWNLOAD (Claim Clash 0.1.92 Beta)
+https://drive.google.com/file/d/1CVnPWWAPPB4aA3kuwsCjZDhpdV6RUilH/view?usp=sharing
+
+Click the link, then use the download button (top right) to save the zip to your PC.
+
+GET IT RUNNING (Windows 10 or 11)
+1. Extract the zip to a normal folder (for example Desktop\Claim Clash). Do not run the app from inside the zip file.
+2. Open the extracted folder and double-click: Claim Clash 0.1.92 Beta.exe
+3. If Windows shows "Windows protected your PC" (SmartScreen):
+   - Click More info (small link, easy to miss)
+   - Click Run anyway
+4. If nothing happens when you double-click:
+   - Right-click the .exe, choose Properties, and on the General tab check Unblock if you see that checkbox, then OK
+   - Try again
+5. If the app still will not open, install Microsoft WebView2 (many PCs already have it):
+   https://go.microsoft.com/fwlink/p/?LinkId=2124703
+   Run the installer, then try Claim Clash again.
+6. If antivirus quarantined the file, restore it from your antivirus quarantine and allow it.
+
+FIRST LAUNCH
+1. Read the short tester agreement in the zip (ALPHA-TESTER-AGREEMENT.txt) before running.
+2. On the Get started screen, add at least one of your own free API keys (Gemini, Groq, or OpenRouter are easy starts). Keys stay on your computer only.
+3. Use Shrink (top-right) if you need to window the app while copying a key from your browser.
+4. Click Next for a quick rules walkthrough, then Start Claim Clash.
+5. Try Load Example for a sample question, or type your own. If you have someone nearby, take turns with Ask and Follow Up.
+
+WHAT I AM LOOKING FOR (~15 minutes)
+- Did it install and open without trouble?
+- Was anything confusing on the welcome screen or in the game?
+- Did Ask / Follow Up feel natural? (Best with two people, but solo is fine.)
+- Any wording you would change?
+
+FEEDBACK
+Please use the Feedback button inside the app (welcome screen or top toolbar). It opens a pre-filled email form. Or reply to me directly at feedback@claim-clash.com. Even "this part confused me" is hugely helpful.
+
+When you are done testing, please delete the zip, the extracted folder, and the app from your PC. Do not share your personal API keys with anyone.
+
+Thanks for considering it. No pressure at all.
+
+Zachary H. Roberts
+Sole Member, Arcana Veritas LLC
+Creator, Claim Clash (Windows)
+feedback@claim-clash.com

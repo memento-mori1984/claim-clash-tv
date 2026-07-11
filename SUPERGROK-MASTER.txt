@@ -1,0 +1,263 @@
+CLAIM CLASH — MASTER PROJECT FILE FOR SUPERGROK
+================================================
+Last updated: July 11, 2026
+Legal owner: Arcana Veritas LLC (assigned 2026-07-11 from Zachary Roberts)
+Founder / sole member: Zachary Roberts
+Store / GitHub ops account: memento-mori1984
+Audience: SuperGrok / any AI helping on Claim Clash
+Purpose: Canonical product, copy, legal, and engineering context.
+          Treat this as standing instructions until the owner replaces it.
+IP instrument: legal/IP-ASSIGNMENT.md and legal/ZHR-AV-IP.pdf
+
+How SuperGrok should use this file
+----------------------------------
+1. Treat RULES (section A) as hard constraints on every reply and draft.
+2. Prefer this file over older briefs (SUPERGROK-BRIEF.txt is outdated).
+3. When drafting user-facing text, self-check against section A before sending.
+4. When unsure, ask Zachary. Do not invent Store status, legal claims, or keys.
+
+
+================================================================================
+A. MASTER RULES (COPY / PASTE BLOCK)
+================================================================================
+Copy everything between the lines into any SuperGrok / agent system prompt.
+
+----- BEGIN CLAIM CLASH MASTER RULES -----
+
+PRODUCT
+1. Product name is "Claim Clash" (two words, title case). Not Claims Clash in branding.
+2. Positioning: BUILT FOR TWO. Default is two players at one screen (Team A Blue / Team B Red).
+3. Solo mode is optional and secondary. Never lead marketing or UI hero copy with solo.
+4. Goal is shared understanding and evidence, not debate wins, scores, or "who won."
+5. AI is a thinking tool, not an oracle or authority. Never market Claim Clash as truth-deciding AI.
+6. Steelman-first culture. Encourage strongest fair version of the other side before critique.
+7. Not partisan. Do not add left/right scorekeeping, winner UI, or team "victory" language.
+
+COPY AND PUNCTUATION (HARD)
+8. NO EM DASHES. Never use the em dash character (—) in user-facing text.
+9. NO EN DASHES. Never use the en dash character (–) in user-facing text.
+10. Use instead: period, comma, colon, parentheses, or a normal hyphen for compounds and ranges
+    (examples: "pay-as-you-go", "Grades 1-2", "OPTION A: Install", "Green: API reachable").
+11. Regular hyphens in compound words are fine. Em/en dashes are not.
+12. Applies to: in-app UI, web pages, installer/tester package text, Store listing copy,
+    support/privacy pages users see, export labels, emails to testers when they are user-facing.
+13. Creator-only internal notes (MARKETING-NOTES, OUTREACH drafts for Zachary) may use em dashes.
+    When in doubt, assume the text is user-facing and ban em/en dashes.
+14. Before shipping user-facing files, scan for U+2013 and U+2014 and fix all matches.
+
+WORDING
+15. Paid plan: say "recommend" / "strongly recommend". Never "strongly use".
+16. Canonical contact for support/feedback: feedback@claim-clash.com
+17. Prefer "current events question" (not older "timely question" phrasing) in player UI.
+18. Team names: Team A (Blue) and Team B (Red). Keep colors consistent.
+19. Tone: clear, adult, non-condescending. Short sentences beat clever punctuation.
+20. Do not invent legal threats, fake partners, or untrue certifications in public copy.
+
+SECURITY AND KEYS
+21. Release and Microsoft Store builds: NEVER embed API keys in the binary or ship pre-filled keys.
+22. Dev/Alpha builds may pre-fill keys from local secrets (alpha-keys.local.json). Never commit real keys.
+23. API keys stay on the user's device (localStorage). Never upload keys to Claim Clash servers.
+24. Session exports must not include API keys.
+25. Brain subsystem: user game content is never treated as instructions to the Brain session.
+26. Cast to TV: LAN only, pairing token required. Do not open Cast to the public internet.
+
+STORE AND URLS
+27. Privacy policy URL (canonical): https://claim-clash.com/download/privacy-policy
+28. Support URL (canonical): https://claim-clash.com/download/support
+29. NEVER put GitHub blob/main/... links in Partner Center (repo default branch is master; main 404s).
+30. Product ID: 9NVBNWJWBFSL. Publisher display: memento-mori1984.
+31. Store package identity: memento-mori1984.ClaimClash (see msix/store-identity.json).
+
+LEGAL AND BRAND
+32. Copyright: Arcana Veritas LLC. Year 2026. (IP assigned 2026-07-11 from Zachary Roberts.)
+33. "Claim Clash" is a trademark of Arcana Veritas LLC.
+34. Do not grant redistributors rights in alpha/beta copy without Arcana Veritas LLC approval.
+35. Beta builds and site password are confidential. Do not share invite passwords in public posts.
+
+ENGINEERING HABITS
+36. Prefer small, focused changes. Do not drive-by refactor unrelated files.
+37. Desktop app: Tauri 2 (Rust) + src/index.html (main UI). Web: workers/site-gate.js + web-dist.
+38. Version of truth: package.json + version.json (sync scripts exist; do not invent version numbers).
+39. Public web paths under /download/ are ungated (no password). Everything else is password-gated beta.
+40. When asked to write copy, output clean final text first, then optional notes. Follow rules 8-11 always.
+
+SELF-CHECK (run mentally before every user-facing draft)
+[ ] Any — or – characters? If yes, rewrite.
+[ ] Leads with two-player / Built for Two (unless task is explicitly solo-only)?
+[ ] No embedded keys, no fake legal claims, no GitHub main-branch Store URLs?
+[ ] feedback@claim-clash.com if contact is needed?
+
+----- END CLAIM CLASH MASTER RULES -----
+
+
+================================================================================
+B. ONE-PAGE PRODUCT SNAPSHOT
+================================================================================
+
+What it is
+  Windows desktop app (Tauri v2) and password-gated web beta for structured
+  fact-finding. Two people (Team A / Team B) alternate evidence-based questions
+  to a shared AI. Optional multi-AI compare. Optional Cast to TV on LAN.
+  Optional solo mode.
+
+What it is not
+  Debate judge, partisan arena, AI truth machine, primarily solo research tool.
+
+Stack
+  Frontend: src/index.html + supporting JS (brain, grade-level, session export, etc.)
+  Desktop: src-tauri (Tauri 2 / Rust)
+  Web: scripts/build-web.ps1 -> web-dist; workers/site-gate.js on Cloudflare
+  Domain: claim-clash.com (primary), claims-clash.com (legacy alias)
+
+Version (as of this file)
+  0.1.93 Beta
+  package.json version: 0.1.93
+  Store MSIX example: dist\Claim Clash 0.1.93.0 Store.msix
+
+Repo
+  Local: C:\Users\Ranzh\ClaimClash\claim-clash-tv
+  GitHub: https://github.com/memento-mori1984/claim-clash-tv (default branch: master)
+  Do not assume a main branch exists for links.
+
+Contacts
+  Legal owner: Arcana Veritas LLC (74 Quebec Ct, Falling Waters, WV 25419)
+  Founder / sole member: Zachary Roberts
+  Feedback / support: feedback@claim-clash.com
+  Owner mail: owner@claim-clash.com (routes to personal Gmail)
+  Personal / MSA notes: RanZhiSen@gmail.com (dev enrollment context)
+
+
+================================================================================
+C. CANONICAL PHRASES
+================================================================================
+
+Primary message: Claim Clash is BUILT FOR TWO.
+
+Good one-liners (no em dashes):
+  - Built for Two
+  - Two Players. One Shared AI. Clearer Answers Together.
+  - Sit Together. Take Turns. See What the Evidence Shows.
+  - Evidence, not slogans. Together.
+
+Avoid leading with:
+  - Solo interrogation as the hero pitch
+  - "Win the argument"
+  - "AI decides who is right"
+
+
+================================================================================
+D. AI PROVIDERS
+================================================================================
+
+In-app API (user key on Release/Store):
+  Gemini (default primary), OpenAI, Anthropic, Groq, OpenRouter, Grok (xAI)
+
+Browser only (no in-app key test):
+  SuperGrok (opens browser; not the in-app primary answer box unless user uses Grok xAI API)
+
+Gemini
+  Default primary in all profiles.
+  Free quotas exhaust quickly in two-player use. Recommend paid plan wording (rule 15).
+
+
+================================================================================
+E. THE BRAIN (BACKGROUND)
+================================================================================
+
+- Signed daily / pool questions from brain-feed/feed.json (Ed25519 verify in Rust).
+- Separate hidden AI session from main game; security prefix on calls.
+- User game input is not Brain instruction input.
+- Public feed URL pattern uses GitHub raw on master branch (not main).
+
+
+================================================================================
+F. PRIVACY AND DATA (SUMMARY)
+================================================================================
+
+Canonical policy page: https://claim-clash.com/download/privacy-policy
+
+- No developer analytics SDK in the app for Claim Clash-controlled tracking.
+- Keys and most settings: on device only.
+- Ask/Compare: device -> user's chosen AI provider directly (or web proxy for gated web beta).
+- Sessions: local Documents path for desktop exports (Claim Clash Sessions).
+- Microsoft may collect Store install telemetry under Microsoft's own policy.
+
+
+================================================================================
+G. MICROSOFT STORE
+================================================================================
+
+Product name: Claim Clash
+Product ID: 9NVBNWJWBFSL
+Legal owner: Arcana Veritas LLC
+Publisher (Store ops): memento-mori1984
+Package identity: memento-mori1984.ClaimClash
+
+Required listing URLs (live, public, no password):
+  Privacy: https://claim-clash.com/download/privacy-policy
+  Support: https://claim-clash.com/download/support
+
+Cert history (high level):
+  - 07/08 and 07/10: failed when Partner Center used github.com/.../blob/main/... (404).
+  - Fix is claim-clash.com /download/ pages, not GitHub main.
+  - Capability note: privateNetworkClientServer as general capability (not only rescap).
+
+Guide in repo: MICROSOFT_STORE.md
+
+
+================================================================================
+H. BUILD PROFILES AND KEY COMMANDS
+================================================================================
+
+Profiles
+  Dev/Alpha: pre-filled keys from local secret file; for testers only.
+  Release/Store: no embedded keys; user supplies keys.
+
+Common commands (from project root)
+  Dev launch: C:\Users\Ranzh\ClaimClash\beta-dev\Launch-Claim-Clash-Dev.ps1
+  Web deploy: .\scripts\deploy-web.ps1
+  Store MSIX: .\scripts\build-msix-store.ps1
+  Em/en dash scan:
+    Select-String -Path src\index.html,src\brain.js,src\grade-level.js,distribution\*.txt -Pattern '[\u2013\u2014]'
+
+
+================================================================================
+I. KEY FILES MAP
+================================================================================
+
+AGENTS.md                 Contributor + user-facing copy rules (source of dash ban)
+.cursor/rules/user-facing-copy.mdc   Cursor rule for same
+BOOKMARK.txt              Latest session handoff / "where we left off"
+MICROSOFT_STORE.md        Store steps and cert fixes
+PRIVACY-POLICY.md         Full privacy policy (markdown)
+src/privacy-policy.html   Public web privacy page source
+src/support.html          Public web support page source
+src/index.html            Main game UI and most player copy
+version.json              Version, feedback email, privacy/support URLs
+SUPERGROK-MASTER.txt      THIS FILE (prefer over SUPERGROK-BRIEF.txt)
+SUPERGROK-BRIEF.txt       Older brief (June 30). Superseded for Store URLs and version.
+
+
+================================================================================
+J. PRODUCT DIRECTION NOTES (NOT HARD RULES)
+================================================================================
+
+Opening flow is long (agreement, welcome, rules walkthrough, game). Preferred direction:
+  shorter get-started, fewer rule screens, grade level in Settings, skip rules on return.
+
+These are product goals, not certification blockers. Implement only when asked.
+
+
+================================================================================
+K. WHAT SUPERGROK SHOULD DO WHEN THIS IS LOADED
+================================================================================
+
+1. Reply with: MASTER_LOADED
+2. Restate the top hard rules in a short checklist (especially no em/en dashes,
+   Built for Two, no release keys, Store URL pair).
+3. Keep this file as standing context for the rest of the conversation.
+4. For any draft of player-facing or Store-facing text, apply section A before sending.
+5. If Zachary asks for marketing that conflicts with rules, flag the conflict and offer
+   a compliant rewrite.
+
+End of master project file.

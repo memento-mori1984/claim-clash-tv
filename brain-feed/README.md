@@ -29,7 +29,7 @@ Run `.\scripts\sync-version.ps1` to regenerate `src-tauri/src/brain_config.rs`.
 
 ### Option A — craft from today's headlines (recommended)
 
-The click-2 **current events question** must feel like a push alert from the **last 24 to 48 hours**: breaking news, or a **new development** in an ongoing case (filing, ruling, vote, arrest, etc.).
+The click-2 **current events question** must feel like a push alert from the **last 24 to 48 hours**: breaking news, or a **new development** in an ongoing case (filing, ruling, vote, arrest, etc.). Questions should ask for **basic context and impacts** — avoid yes/no openings (`Did X happen?`).
 
 On a **slow news day** (few fresh headlines), the craft script falls back to an **obviously ridiculous** claim no player would seriously believe (still fact-checkable and playful).
 

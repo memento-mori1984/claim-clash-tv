@@ -1,0 +1,45 @@
+name = "claim-clash-site"
+main = "site-gate.js"
+compatibility_date = "2024-01-01"
+workers_dev = true
+
+# Static app bundle (built by scripts/build-web.ps1 into ../web-dist)
+[assets]
+directory = "../web-dist"
+binding = "ASSETS"
+run_worker_first = true
+
+# Create in Cloudflare dashboard: Workers KV -> claim-clash-rate-limit
+# Then replace id below before deploy (or use: wrangler kv namespace create claim-clash-rate-limit)
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "afba5d5a6b374030a3a1a9775a58de39"
+
+# Required secrets (never commit values):
+#   wrangler secret put DEV_PASSWORD_CREDENTIAL
+#   wrangler secret put SESSION_SECRET
+#
+# Generate credential + session secret:
+#   node scripts/hash-web-dev-password.mjs "YourDeveloperPassword"
+
+# Primary domain (canonical)
+[[routes]]
+pattern = "claim-clash.com"
+custom_domain = true
+
+[[routes]]
+pattern = "www.claim-clash.com"
+custom_domain = true
+
+# Legacy domain — still serves the game; www redirects to claim-clash.com
+[[routes]]
+pattern = "claims-clash.com"
+custom_domain = true
+
+[[routes]]
+pattern = "www.claims-clash.com"
+custom_domain = true
+
+[vars]
+SITE_NAME = "Claim Clash"
+PRIMARY_DOMAIN = "claim-clash.com"

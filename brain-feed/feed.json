@@ -1,8 +1,16 @@
 {
   "v": 1,
-  "date": "2026-07-03",
-  "daily": "Did the Eastern US power grid operator today order emergency curbs as electricity use nears record levels?",
+  "date": "2026-07-07",
+  "daily": "Today, the U.S. revoked authorization for Iranian oil sales following tanker attacks in the Gulf. What is the background of this decision, and what impacts could it have on global oil markets and regional tensions?",
   "pool": [
+    {
+      "text": "Today, the U.S. revoked authorization for Iranian oil sales following tanker attacks in the Gulf. What is the background of this decision, and what impacts could it have on global oil markets and regional tensions?",
+      "date": "2026-07-07"
+    },
+    {
+      "text": "What is the background of Microsoft's layoff announcement today, and what impacts could 4,800 job cuts have on the tech sector and affected regions?",
+      "date": "2026-07-06"
+    },
     {
       "text": "Did the Eastern US power grid operator today order emergency curbs as electricity use nears record levels?",
       "date": "2026-07-03"
@@ -16,6 +24,6 @@
       "date": "2026-06-30"
     }
   ],
-  "issued_at": 1783036800,
-  "sig": "glPkTRsxgpuQCrYLEsLtWgzI/w8mlvHH2TWMgexAXG+9cCV+I0qYAI+qjxwVEmP49UrSpvN2HiMlC+ZCGMxXDA=="
+  "issued_at": 1783456419,
+  "sig": "yRm8X6a1X/V667bjP60nh+Q4JqztAGgbunF0+Q/FmAtnUID6KlYF5Sew7nJqq30gK/LOxMeQPuiRKMbEMSCDBg=="
 }

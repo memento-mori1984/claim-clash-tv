@@ -1,9 +1,9 @@
 # Claim Clash Privacy Policy
 
 **Effective date:** June 27, 2026  
-**Last updated:** June 27, 2026
+**Last updated:** July 8, 2026
 
-Zachary H. Roberts ("we," "us," or "the developer") operates **Claim Clash**, a desktop application for structured, evidence-based fact-finding between opposing perspectives.
+Arcana Veritas LLC ("we," "us," or "the developer") operates **Claim Clash**, a desktop application for structured, evidence-based fact-finding between opposing perspectives.
 
 This policy explains what data the app touches, where it goes, and what we do **not** collect.
 
@@ -115,9 +115,9 @@ We may update this policy when the app changes. The **Last updated** date at the
 
 Questions about this policy or Claim Clash privacy practices:
 
-**Email:** ClaimsClashFeedback@gmail.com
+**Email:** feedback@claim-clash.com
 
 ---
 
-Copyright © 2026 Zachary H. Roberts. All rights reserved.  
-"Claim Clash" is a trademark of Zachary H. Roberts.
+Copyright © 2026 Arcana Veritas LLC. All rights reserved.  
+"Claim Clash" is a trademark of Arcana Veritas LLC.

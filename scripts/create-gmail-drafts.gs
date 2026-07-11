@@ -16,14 +16,16 @@ var PLACEHOLDER_TO = 'add-recipient@example.com';
 
 var SIGNATURE =
   'Zachary H. Roberts\n' +
-  'Creator, Claim Clash (Windows)\n' +
-  'ClaimsClashFeedback@gmail.com\n\n' +
+  'Sole Member, Arcana Veritas LLC\n' +
+  'Claim Clash (Windows)\n' +
+  'feedback@claim-clash.com\n\n' +
   'P.S. If this isn\'t your world, no worries — a forward to a teacher, debate coach, or librarian would mean a lot.';
 
 var SIGNATURE_FORMAL =
   'Zachary H. Roberts\n' +
-  'Creator, Claim Clash (Windows)\n' +
-  'ClaimsClashFeedback@gmail.com\n\n' +
+  'Sole Member, Arcana Veritas LLC\n' +
+  'Claim Clash (Windows)\n' +
+  'feedback@claim-clash.com\n\n' +
   'P.S. Happy to align language with your grant reporting needs.';
 
 function createClaimClashDrafts() {
@@ -113,7 +115,7 @@ function getTemplates() {
         '  • Evidence framing\n' +
         '  • Steelman before attack\n' +
         '  • AI literacy (how models differ on identical prompts)\n\n' +
-        'Would your squad try one 20-minute paired round at practice? I\'ll provide the build, checksum, and a short coach note. Feedback to ClaimsClashFeedback@gmail.com or reply here.\n\n' +
+        'Would your squad try one 20-minute paired round at practice? I\'ll provide the build, checksum, and a short coach note. Feedback to feedback@claim-clash.com or reply here.\n\n' +
         'If [SCHOOL/CLUB] isn\'t the right fit, I\'d appreciate a forward to another coach.\n\n' +
         SIGNATURE
     },
@@ -198,7 +200,7 @@ function getTemplates() {
         '  • Two people, ~15 minutes, one topic you both actually care about\n' +
         '  • Try Follow Up at least twice so turns alternate\n\n' +
         'FEEDBACK\n' +
-        '  • In-app Feedback button, or email ClaimsClashFeedback@gmail.com\n' +
+        '  • In-app Feedback button, or email feedback@claim-clash.com\n' +
         '  • If you tried solo, note that — but pairs are the priority\n\n' +
         'I\'m here if anything won\'t launch. Thank you again.\n\n' +
         SIGNATURE

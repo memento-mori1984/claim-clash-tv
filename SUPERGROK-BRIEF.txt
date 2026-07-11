@@ -1,0 +1,81 @@
+CLAIM CLASH — PROJECT BRIEF FOR SUPERGROK (June 30, 2026)
+
+=== CREATOR & CONTACTS ===
+- Legal owner: Arcana Veritas LLC (IP assignment effective 2026-07-11)
+- Founder / sole member: Zachary Roberts
+- Microsoft Store ops publisher id: memento-mori1984 (package identity until company conversion)
+- Personal email: RanZhiSen@gmail.com
+- Feedback: feedback@claim-clash.com
+- GitHub: memento-mori1984/claim-clash-tv
+- Copyright: Arcana Veritas LLC
+
+=== WHAT IT IS ===
+Claim Clash is a Windows desktop app (Tauri v2 + Rust backend + HTML/JS frontend) for a two-player conversation game. Players alternate turns asking evidence-based questions to a shared AI about polarizing topics. Goal: shared understanding, not debate wins. Solo mode available. Optional Cast-to-TV on LAN. Compare multiple AI providers side by side.
+
+Tagline: "Built for two" — evidence-based questions with a shared AI.
+
+=== CURRENT VERSION ===
+- Version: 0.1.92 Beta
+- Rules version: 3.4
+- Project root: C:\Users\Ranzh\ClaimClash\claim-clash-tv
+
+=== BUILD ARTIFACTS (0.1.92) ===
+- Release portable: dist\Claim Clash 0.1.92 Beta.exe (no embedded API keys)
+- Dev build: C:\Users\Ranzh\ClaimClash\beta-dev\Claim Clash 0.1.92 Beta Dev.exe (pre-filled tester keys)
+- Tester zip: dist\Claim Clash 0.1.92 Beta - Drive.zip (also G:\My Drive, OneDrive)
+- Store MSIX: dist\Claim Clash 0.1.92.0 Store.msix
+- MSIX identity: memento-mori1984.ClaimClash / Publisher CN=1A36C25D-F425-4410-92AF-C753F008067B
+
+=== BUILD PROFILES ===
+- Release/Store: no embedded keys; session-only keys unless user checks "Save API keys on this device"
+- Dev/Alpha: pre-filled keys from scripts/alpha-keys.local.json; always saved locally
+- Scripts: build-with-checksum.ps1, build-msix-store.ps1, package-drive-zip.ps1
+- set-build-profile.ps1: Release vs Dev
+
+=== RECENT UPDATES (0.1.91–0.1.92) ===
+API key setup UX:
+- Per-provider row buttons: Save | Clear | star (primary)
+- Save commits key to memory (+ localStorage if save enabled). Star only works after Save.
+- Clear empties field AND saved key; tracks user-cleared rows so dev pre-fill does not return
+- Gemini is default primary AI always (dev + release + Store)
+- Optional "Save API keys on this device" checkbox on release/Store
+- What is an API key? explainer updated for Save/Clear/star flow
+
+=== AI PROVIDERS ===
+- Gemini (default primary), OpenAI, Anthropic, Groq, OpenRouter, Grok/xAI (in-app API), SuperGrok (browser link only, no key)
+- User brings own API keys on release/Store builds
+
+=== THE BRAIN (background subsystem) ===
+- Fetches signed daily current-events question from GitHub feed (brain-feed/feed.json)
+- Hidden AI session separate from main game; security prefix on every call
+- User game input never passed to Brain as instructions
+
+=== PRIVACY & DATA ===
+- Privacy policy: https://github.com/memento-mori1984/claim-clash-tv/blob/master/PRIVACY-POLICY.md
+- API keys: local only, never uploaded to Claim Clash servers, not in exports
+- Network: direct from user PC to AI providers; Brain feed fetch; Cast LAN HTTP server (pairing token)
+- Session saves: Documents\Claim Clash\ (Markdown/Word/PDF export)
+- Alpha tester agreement in zip (no redistribution clause)
+- MSIX capabilities: internetClient, privateNetworkClientServer, runFullTrust
+
+=== MICROSOFT STORE STATUS ===
+- Developer enrolled (Individual, free 2026 flow)
+- App name reserved: Claim Clash (MSIX product)
+- MSIX 0.1.92 built; may cancel in-cert old submission and submit fresh
+- Guide: MICROSOFT_STORE.md; testing: msix/MSIX-TESTING.txt
+
+=== LEGAL TOPICS USER MAY ASK ABOUT ===
+- Copyright/trademark (NOTICE, LICENSE in repo)
+- Alpha tester agreement / beta terms
+- Privacy policy adequacy for Store + AI API data flows
+- Liability disclaimers (AI not infallible, user-configured providers)
+- Microsoft Store certification declarations
+- API key handling as credential/privacy matter
+- Individual vs Company publisher liability
+- Terms of use / EULA for Store listing
+- Export compliance, age ratings
+- Cast LAN server legal/security considerations
+
+=== USER PREFERENCES ===
+- No em dashes in user-facing copy
+- Official release never embeds API keys

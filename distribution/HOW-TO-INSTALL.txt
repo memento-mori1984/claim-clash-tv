@@ -1,5 +1,7 @@
 Claim Clash: How to Install (Windows)
 ======================================
+Copyright (c) 2026 Arcana Veritas LLC. All rights reserved.
+
 Version: {{VERSION}}
 
 Three ways to run Claim Clash on Windows:
@@ -70,4 +72,4 @@ TROUBLESHOOTING
 ---------------
 See TROUBLESHOOTING.txt in this package.
 
-Feedback: ClaimsClashFeedback@gmail.com
+Feedback: feedback@claim-clash.com

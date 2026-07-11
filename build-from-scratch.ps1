@@ -1,5 +1,5 @@
 # Claim Clash - Clean rebuild from scratch (no version bump, portable exe only)
-# Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
+# Copyright (c) 2026 Arcana Veritas LLC. All rights reserved.
 #
 # Usage (from project root):
 #   .\build-from-scratch.ps1

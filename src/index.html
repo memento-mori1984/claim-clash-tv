@@ -1,13 +1,19 @@
 <!--
-Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
-"Claim Clash" is a trademark of Zachary H. Roberts.
+Copyright © 2026 Arcana Veritas LLC. All rights reserved.
+"Claim Clash" is a trademark of Arcana Veritas LLC.
 -->
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Claim Clash: a two-player evidence game for exploring political claims with AI. Team A and Team B take turns asking questions and comparing answers.">
+    <meta property="og:title" content="Claim Clash">
+    <meta property="og:description" content="Structured, evidence-based fact-finding between opposing perspectives. Play in your browser at Claim-Clash.com.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://claim-clash.com">
+    <link rel="canonical" href="https://claim-clash.com">
     <title>Claim Clash</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -102,31 +108,236 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             opacity: 0.45;
             cursor: not-allowed;
         }
+        #api-key-explainer-screen {
+            background:
+                radial-gradient(ellipse 80% 50% at 50% -10%, rgba(139, 92, 246, 0.14), transparent),
+                radial-gradient(ellipse 60% 40% at 0% 100%, rgba(16, 185, 129, 0.1), transparent),
+                #0a0a0a;
+        }
+        #api-key-explainer-screen:not(.hidden) {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100dvh;
+            max-height: 100vh;
+            z-index: 9999;
+        }
+        html.api-key-explainer-open,
+        body.api-key-explainer-open {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+        }
+        #api-key-explainer-content {
+            white-space: pre-wrap;
+            line-height: 1.65;
+        }
+        #offline-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 300;
+        }
+        body.offline-banner-visible {
+            padding-top: 2.75rem;
+        }
+
+        /* --- Responsive layout (classes set by client-env.js) --- */
+        /* Same section order on all screen sizes: play area → quick actions → bookmarks → rules */
+        #game-layout-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .cc-mobile .panel-head {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .cc-mobile .panel-head-actions {
+            width: 100%;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+        }
+        .cc-mobile .panel-head-actions .toolbar-btn {
+            flex: 1 1 auto;
+            min-width: 0;
+            justify-content: center;
+        }
+        .cc-mobile #cast-help-popover,
+        .cc-mobile #solo-interrogation-help-popover,
+        .cc-mobile #session-help-popover {
+            left: 0;
+            right: auto;
+            top: 100%;
+            transform: none;
+            margin-top: 0.5rem;
+            margin-left: 0;
+            max-width: min(18rem, 92vw);
+        }
+
+        .cc-phone #game-screen {
+            padding: 1rem 0.75rem 1.5rem;
+        }
+        .cc-phone #game-screen .game-title {
+            font-size: 1.625rem;
+            line-height: 1.2;
+        }
+        .cc-phone #game-screen .game-logo {
+            width: 7.5rem;
+        }
+        .cc-phone #game-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            width: 100%;
+        }
+        .cc-phone #game-toolbar .toolbar-btn {
+            flex: 1 1 calc(50% - 0.25rem);
+            min-width: 8.5rem;
+            justify-content: center;
+            font-size: 0.8rem;
+            padding: 0.55rem 0.65rem;
+            touch-action: manipulation;
+        }
+        .cc-phone #game-toolbar .toolbar-btn-feedback {
+            flex: 1 1 100%;
+            width: 100%;
+            min-width: 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 0.7rem 1rem;
+        }
+        .cc-phone .fullscreen-toggle-btn {
+            display: none !important;
+        }
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
+            gap: 0.5rem;
+        }
+        .quick-actions-grid .quick-action-full {
+            grid-column: 1 / -1;
+        }
+        .cc-phone #rules-panel .rules-grid {
+            grid-template-columns: 1fr;
+        }
+        @media (min-width: 1024px) {
+            #rules-panel .rules-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        .cc-phone #setup-screen {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        .cc-phone #setup-screen .setup-title {
+            font-size: 1.75rem;
+        }
+        .cc-mobile #first-player-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .cc-mobile #first-player-row button {
+            width: 100%;
+            max-width: none;
+        }
+
+        /* Current question: prep left, turn actions (Follow Up + Ask) right */
+        .question-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+        .question-actions-prep {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+        .question-actions-turn {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 0 0 auto;
+        }
+        .question-actions-turn .question-actions-ask {
+            font-weight: 600;
+        }
+        .cc-mobile .question-actions-turn {
+            flex: 1 1 100%;
+        }
+        .cc-mobile .question-actions-turn .toolbar-btn {
+            flex: 1 1 calc(50% - 0.25rem);
+            justify-content: center;
+            min-width: 0;
+        }
     </style>
 </head>
 <body class="text-zinc-200">
 
+    <div id="offline-banner" class="hidden bg-amber-950 border-b border-amber-800 px-4 py-2.5 text-center text-sm text-amber-100 shadow-lg" role="status" aria-live="polite">
+        <i class="fa-solid fa-wifi-slash mr-2" aria-hidden="true"></i>No internet connection. AI features need Wi-Fi or Ethernet to work.
+    </div>
+
     <!-- Setup / Get started screen -->
     <div id="setup-screen" class="min-h-screen flex flex-col items-center px-6 py-10 pb-16">
+        <div class="fixed top-4 right-4 z-50">
+            <button type="button" onclick="toggleFullScreen()"
+                class="fullscreen-toggle-btn toolbar-btn px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-2xl text-sm flex items-center gap-x-2 shadow-lg"
+                title="Shrink to copy API keys from another window, or expand to full screen">
+                <i class="fa-solid fa-compress"></i> <span>Shrink</span>
+            </button>
+        </div>
         <div class="w-full max-w-3xl mx-auto space-y-6">
             <div class="text-center pt-2">
                 <img id="setup-logo" src="claimsclash.png" alt="Claim Clash"
                      class="w-44 sm:w-52 h-auto rounded-2xl border border-zinc-700 shadow-xl mx-auto" />
                 <div class="flex flex-wrap items-center justify-center gap-2 mt-5">
-                    <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-100">Claim Clash</h1>
+                    <h1 class="setup-title text-3xl sm:text-4xl font-bold tracking-tight text-zinc-100">Claim Clash</h1>
                     <span class="text-[10px] px-1.5 py-0.5 bg-zinc-800 border border-zinc-700 rounded text-zinc-400">v<span id="setup-version"></span></span>
                     <span id="setup-phase" class="text-[10px] px-1.5 py-0.5 bg-amber-900/80 border border-amber-700 rounded text-amber-300">Alpha</span>
                 </div>
                 <p class="text-emerald-400/90 text-xs font-medium uppercase tracking-wider mt-4">Built for two</p>
                 <p class="text-zinc-400 text-sm sm:text-base mt-2 max-w-xl mx-auto">A two-player conversation game for evidence-based questions with a shared AI. Sit together, take turns, and build a clearer picture. Solo mode is available when you are on your own.</p>
                 <p class="text-zinc-500 text-xs mt-3 max-w-lg mx-auto">Not sure where to start? Preloaded example questions are perfectly fine to explore. They are updated regularly. Use <strong class="text-zinc-400">Load Example</strong> after you enter the game.</p>
+                <div id="setup-desktop-install" class="mt-5 max-w-md mx-auto">
+                    <a id="setup-desktop-install-btn" href="/download/Claim-Clash-Setup.exe" download="Claim-Clash-Setup.exe"
+                        class="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 hover:border-zinc-500 rounded-2xl text-sm font-semibold text-zinc-100 transition-colors">
+                        <i class="fa-solid fa-download" aria-hidden="true"></i>
+                        <span>Install on my computer (Windows)</span>
+                    </a>
+                    <p id="setup-desktop-install-note" class="text-[11px] text-zinc-500 mt-2 leading-relaxed">
+                        Consumer desktop app: no site password, no pre-filled API keys. You add your own AI keys after install.
+                        <a id="setup-desktop-install-guide" href="/download/HOW-TO-INSTALL.txt" class="text-zinc-400 hover:text-zinc-300 underline">Install guide</a>
+                    </p>
+                </div>
             </div>
 
             <div class="section rounded-3xl p-6 sm:p-7">
-                <h2 class="text-lg font-semibold mb-1 flex items-center gap-2">
-                    <i class="fa-solid fa-robot text-violet-400"></i> Choose Your AI Assistants
-                </h2>
-                <p class="text-xs text-zinc-500 mb-4">Add API keys in any order. Use the arrows to set display order. Star your primary AI. Its answers appear in the main box.</p>
+                <div class="flex flex-wrap items-start justify-between gap-3 mb-1">
+                    <h2 class="text-lg font-semibold flex items-center gap-2">
+                        <i class="fa-solid fa-robot text-violet-400"></i> Choose Your AI Assistants
+                    </h2>
+                    <div class="flex flex-wrap gap-2 shrink-0">
+                        <button type="button" onclick="showTeacherOptions()"
+                            class="px-3 py-1.5 bg-emerald-900/50 hover:bg-emerald-800/70 border border-emerald-700/60 rounded-xl text-xs text-emerald-100 flex items-center gap-x-2">
+                            <i class="fa-solid fa-chalkboard-user"></i> <span>Teacher options</span>
+                        </button>
+                        <button type="button" onclick="showApiKeyExplainer()"
+                            class="px-3 py-1.5 bg-violet-900/60 hover:bg-violet-800/80 border border-violet-700/60 rounded-xl text-xs text-violet-100 flex items-center gap-x-2">
+                            <i class="fa-solid fa-circle-question"></i> <span>What is an API key?</span>
+                        </button>
+                    </div>
+                </div>
+                <p class="text-xs text-zinc-500 mb-4">Add API keys in any order. Click <strong class="text-zinc-400">Save</strong> on each row to commit a key, <strong class="text-zinc-400">Clear</strong> to remove one, then star your primary AI. Its answers appear in the main box.</p>
                 <div id="setup-provider-list" class="space-y-3"></div>
                 <div id="setup-primary-paid-guidance" class="hidden mt-2"></div>
                 <details id="setup-api-status-legend" class="hidden mt-3 pt-3 border-t border-zinc-800 text-[10px] text-zinc-500">
@@ -136,7 +347,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                         <span class="inline-flex items-center gap-1.5"><span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" aria-hidden="true"></span> Green: API reachable</span>
                         <span class="inline-flex items-center gap-1.5"><span class="inline-block w-2.5 h-2.5 rounded-full bg-red-500 shrink-0" aria-hidden="true"></span> Red: cannot connect (check key, quota, or network)</span>
                         <span class="inline-flex items-center gap-1.5"><span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0" aria-hidden="true"></span> Amber: checking…</span>
-                        <span class="inline-flex items-center gap-1.5"><span class="inline-block w-2.5 h-2.5 rounded-full bg-sky-500 shrink-0" aria-hidden="true"></span> Blue: Grok opens in browser (no API test)</span>
+                        <span class="inline-flex items-center gap-1.5"><span class="inline-block w-2.5 h-2.5 rounded-full bg-sky-500 shrink-0" aria-hidden="true"></span> Blue: SuperGrok opens in browser (no API test)</span>
                     </div>
                     <p class="text-zinc-600 mt-2">Tested when this page opens and when you change keys or switch your primary AI.</p>
                     <p class="font-medium text-zinc-400 mb-2 mt-3">Free API tier (dot beside each provider)</p>
@@ -145,51 +356,20 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                         <span class="inline-flex items-center gap-1.5"><span class="inline-block w-2.5 h-2.5 rounded-full bg-zinc-500 shrink-0" aria-hidden="true"></span> Gray: no public free API tier</span>
                     </div>
                 </details>
-                <p id="setup-alpha-keys-note" class="text-[10px] text-zinc-600 mt-4 hidden">Gemini, Groq, OpenRouter, and Grok (xAI) are pre-filled for alpha testing. Saved keys stay on this device only.</p>
-                <p id="setup-dev-keys-note" class="text-[10px] text-zinc-600 mt-4 hidden">Developer testing build: API keys are pre-filled for your convenience. Saved keys stay on this device only.</p>
-                <p id="setup-release-keys-note" class="text-[10px] text-zinc-600 mt-4 hidden">Add your own API keys. They stay on this device only and are never embedded in the app.</p>
-            </div>
-
-            <div id="setup-alpha-agreement-section" class="hidden section rounded-3xl p-6 sm:p-7 border-amber-900/30 bg-zinc-900/40">
-                <h2 class="text-lg font-semibold text-zinc-100 mb-2 flex items-center gap-2">
-                    <i class="fa-solid fa-file-signature text-amber-400"></i> Alpha tester agreement
-                </h2>
-                <label class="flex items-start gap-3 text-sm text-zinc-300 cursor-pointer">
-                    <input type="checkbox" id="setup-agreement-checkbox" class="mt-1 rounded border-zinc-600 bg-zinc-800 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-zinc-900 shrink-0" />
-                    <span>I agree to the alpha tester terms for Claim Clash <span id="alpha-agreement-version"></span> (pre-release testing only).</span>
+                <p id="setup-alpha-keys-note" class="text-[10px] text-zinc-600 mt-4 hidden">Grok (xAI), Gemini, Claude, Groq, and OpenRouter are pre-filled for alpha testing. Grok (xAI) is starred as primary by default. Saved keys stay on this device only.</p>
+                <p id="setup-dev-keys-note" class="text-[10px] text-zinc-600 mt-4 hidden">Beta testing build: API keys are pre-filled and refresh when the site updates. If every AI fails, hard-refresh (Ctrl+F5) or clear site data for claim-clash.com, then log in again. Grok (xAI) is the default primary AI.</p>
+                <p id="setup-release-keys-note" class="text-[10px] text-zinc-600 mt-4 hidden">Add your own API keys. Grok (xAI) is the default primary AI. Check Save keys on this device below to keep keys after you close the app (stored locally only, never uploaded).</p>
+                <label id="setup-save-keys-row" class="hidden mt-4 flex items-start gap-3 text-sm text-zinc-300 cursor-pointer">
+                    <input type="checkbox" id="setup-save-keys-checkbox" class="mt-1 rounded border-zinc-600 bg-zinc-800 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-zinc-900 shrink-0" />
+                    <span>Save API keys on this device (local storage only; treat like a password)</span>
                 </label>
-                <details class="mt-3 text-sm text-zinc-400">
-                    <summary class="cursor-pointer text-zinc-300 hover:text-zinc-200 text-xs font-medium">Read full agreement</summary>
-                    <div id="alpha-agreement-body" class="mt-3 space-y-3 leading-relaxed max-h-64 overflow-y-auto pr-1">
-                        <div>
-                            <p class="font-medium text-zinc-100 mb-1">You agree that you will not:</p>
-                            <ul class="list-disc pl-5 space-y-1 text-zinc-400">
-                                <li>Share, forward, upload, or redistribute this build, zip file, or download link to any other person or party.</li>
-                                <li>Post screenshots, recordings, or unreleased details online or in workplace pitches without written permission.</li>
-                                <li>Copy, clone, reverse engineer, tamper with, or recreate Claim Clash, its rules, branding, or underlying idea.</li>
-                                <li>Use the Claim Clash name, logo, or branding for any other product or service.</li>
-                                <li>Present this project or pitch the same idea to any company, publisher, or investor as your own work.</li>
-                                <li id="alpha-agreement-keys-item">Share, copy, post, or give anyone else the pre-filled alpha testing API keys in this build.</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <p class="font-medium text-zinc-100 mb-1">When you finish testing</p>
-                            <p class="text-zinc-400">Send feedback through the app first. Then delete this zip file, the extracted folder, and the app executable from your PC.</p>
-                        </div>
-                        <div>
-                            <p class="font-medium text-zinc-100 mb-1">How to send feedback</p>
-                            <p class="text-zinc-400">Use Send Alpha Tester Feedback on this screen or the Feedback button on the main screen.</p>
-                        </div>
-                        <div>
-                            <p class="font-medium text-zinc-100 mb-1">Ownership</p>
-                            <p class="text-zinc-400">Claim Clash is owned by Zachary H. Roberts. This build is for testing and feedback only, with no warranty.</p>
-                        </div>
-                        <p class="text-xs text-zinc-500">Full text: ALPHA-TESTER-AGREEMENT.txt in your zip. Questions: <span id="alpha-agreement-email"></span></p>
-                    </div>
-                </details>
-                <button type="button" onclick="declineAlphaAgreement()" class="mt-3 text-xs text-zinc-500 hover:text-red-300 underline">I do not agree</button>
-                <div id="alpha-agreement-declined" class="hidden mt-3 text-sm text-red-300">
-                    You did not accept the alpha tester agreement. Please close this application and delete your copy of the build.
+
+                <div id="setup-teacher-options-section" class="hidden mt-5 pt-5 border-t border-zinc-800">
+                    <h3 class="text-sm font-semibold text-zinc-200 mb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-graduation-cap text-violet-400"></i> Teacher options
+                    </h3>
+                    <p class="text-[11px] text-zinc-500 mb-3">Set grade level so the AI matches your classroom vocabulary and inquiry depth. Optional — skip if you are not using this in school.</p>
+                    <div id="setup-grade-level-host"></div>
                 </div>
             </div>
 
@@ -201,6 +381,31 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 <p id="setup-start-hint" class="text-sm text-zinc-500 max-w-md mx-auto">Enter at least one API key above to enable Next.</p>
                 <button type="button" onclick="showFeedback()" class="w-full max-w-md mx-auto px-4 py-2 bg-amber-800/90 hover:bg-amber-900 rounded-2xl text-sm flex items-center justify-center gap-x-2">
                     <i class="fa-solid fa-comment-dots"></i> <span>Send Alpha Tester Feedback</span>
+                </button>
+                <p class="text-[10px] text-zinc-600 max-w-md mx-auto pt-2 leading-relaxed">
+                    &copy; 2026 Arcana Veritas LLC. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- API key explainer overlay (app launches fullscreen) -->
+    <div id="api-key-explainer-screen" class="hidden fixed inset-0 z-[60] flex flex-col px-6 py-8 sm:py-10 overflow-y-auto">
+        <div class="w-full max-w-2xl mx-auto flex flex-col flex-1 min-h-0">
+            <div class="text-center pt-2 shrink-0">
+                <p class="text-xs font-medium uppercase tracking-wider text-violet-400/90">Get started</p>
+                <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100 mt-2">What is an API key?</h2>
+                <p class="text-sm text-zinc-400 mt-2">A short guide before you paste your first key.</p>
+            </div>
+
+            <div class="section rounded-3xl p-6 sm:p-7 border-violet-900/30 bg-zinc-900/50 mt-6 flex-1 min-h-0 overflow-y-auto">
+                <div id="api-key-explainer-content" class="text-sm text-zinc-300 space-y-4"></div>
+            </div>
+
+            <div class="text-center py-6 shrink-0">
+                <button type="button" id="api-key-explainer-close-btn" onclick="closeApiKeyExplainer()"
+                    class="w-full max-w-md mx-auto px-8 py-3.5 bg-violet-600 hover:bg-violet-700 rounded-2xl text-base font-semibold flex items-center justify-center gap-x-2">
+                    <i class="fa-solid fa-arrow-left"></i> <span>Back to setup</span>
                 </button>
             </div>
         </div>
@@ -247,14 +452,14 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         <!-- Logo in top middle -->
         <div class="flex justify-center mb-2">
             <img src="claimsclash.png" alt="Claim Clash" 
-                 class="w-48 h-auto rounded-2xl border border-zinc-700 shadow-md" />
+                 class="game-logo w-48 h-auto rounded-2xl border border-zinc-700 shadow-md" />
         </div>
 
         <!-- Header: stacks title and toolbar on narrow widths so Settings/About never overlap -->
         <div class="flex flex-col xl:flex-row xl:justify-between xl:items-start gap-4 mb-6">
             <div class="min-w-0 flex-1">
                 <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <h1 class="text-4xl font-bold tracking-tight">Claim Clash</h1>
+                    <h1 class="game-title text-4xl font-bold tracking-tight">Claim Clash</h1>
                     <span class="text-[10px] px-1.5 py-0.5 bg-zinc-800 border border-zinc-700 rounded text-zinc-400 flex-shrink-0">v<span id="header-version"></span></span>
                     <span id="header-phase" class="text-[10px] px-1.5 py-0.5 bg-amber-900 border border-amber-700 rounded text-amber-300 flex-shrink-0">Alpha</span>
                 </div>
@@ -262,11 +467,11 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 <p class="text-zinc-500 text-sm">Built for Two &bull; Team A &amp; Team B Take Turns &bull; Shared AI Assistant &bull; Solo Mode Optional</p>
                 <p class="text-zinc-600 text-xs mt-0.5">Rules v<span id="header-rules-version"></span> &bull; June 2026</p>
             </div>
-            <div class="flex flex-wrap gap-2 justify-start xl:justify-end flex-shrink-0 max-w-full">
-                <div class="flex items-center gap-1.5">
+            <div id="game-toolbar" class="flex flex-wrap gap-2 justify-start xl:justify-end flex-shrink-0 max-w-full">
+                <div id="cast-toolbar-group" class="flex items-center gap-1.5">
                     <button id="cast-button" class="toolbar-btn px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-2xl text-sm flex items-center gap-x-2">
-                        <i class="fa-solid fa-tv"></i>
-                        <span id="cast-button-label">Cast to TV</span>
+                        <i class="fa-solid fa-tv toolbar-btn-icon"></i>
+                        <span id="cast-button-label" class="toolbar-btn-label">Cast to TV</span>
                         <span id="cast-status-dot" class="inline-block w-2.5 h-2.5 rounded-full bg-red-500 ml-1.5 flex-shrink-0" title="Not casting" aria-label="Cast status"></span>
                     </button>
                     <div class="relative inline-flex items-center">
@@ -279,23 +484,23 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                         </div>
                     </div>
                 </div>
-                <button onclick="toggleFullScreen()" class="toolbar-btn px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
-                    <i class="fa-solid fa-expand"></i> <span>Full Screen</span>
+                <button type="button" onclick="toggleFullScreen()" class="fullscreen-toggle-btn toolbar-btn px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm flex items-center gap-x-2" title="Full screen">
+                    <i class="fa-solid fa-expand toolbar-btn-icon"></i> <span class="toolbar-btn-label">Full Screen</span>
                 </button>
-                <button onclick="showSettings()" class="toolbar-btn px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
-                    <i class="fa-solid fa-cog"></i> <span>Settings</span>
+                <button onclick="showSettings()" class="toolbar-btn px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm flex items-center gap-x-2" title="Settings">
+                    <i class="fa-solid fa-cog toolbar-btn-icon"></i> <span class="toolbar-btn-label">Settings</span>
                 </button>
-                <button onclick="showAbout()" class="toolbar-btn px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
-                    <i class="fa-solid fa-info-circle"></i> <span>About</span>
+                <button onclick="showAbout()" class="toolbar-btn px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm flex items-center gap-x-2" title="About">
+                    <i class="fa-solid fa-info-circle toolbar-btn-icon"></i> <span class="toolbar-btn-label">About</span>
                 </button>
-                <button onclick="showFeedback()" class="toolbar-btn px-4 py-2 bg-amber-700 hover:bg-amber-800 rounded-2xl text-sm flex items-center gap-x-2">
-                    <i class="fa-solid fa-comment-dots"></i> <span>Feedback</span>
+                <button onclick="showFeedback()" class="toolbar-btn toolbar-btn-feedback px-4 py-2 bg-amber-700 hover:bg-amber-800 rounded-2xl text-sm flex items-center gap-x-2" title="Send alpha tester feedback">
+                    <i class="fa-solid fa-comment-dots toolbar-btn-icon"></i> <span class="toolbar-btn-label">Feedback</span>
                 </button>
                 <button type="button" onclick="saveAndQuit()" class="toolbar-btn px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-600 rounded-2xl text-sm flex items-center gap-x-2" title="Save session to Documents\Claim Clash and close">
-                    <i class="fa-solid fa-door-open"></i> <span>Save &amp; Quit</span>
+                    <i class="fa-solid fa-door-open toolbar-btn-icon"></i> <span class="toolbar-btn-label">Save &amp; Quit</span>
                 </button>
                 <button type="button" onclick="quitWithoutSaving('toolbar')" class="toolbar-btn px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-2xl text-sm flex items-center gap-x-2" title="Close without saving a session file">
-                    <i class="fa-solid fa-xmark"></i> <span>Quit without saving</span>
+                    <i class="fa-solid fa-xmark toolbar-btn-icon"></i> <span class="toolbar-btn-label">Quit without saving</span>
                 </button>
             </div>
         </div>
@@ -325,22 +530,53 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             <button onclick="setFirstPlayer('Team B')" class="px-4 py-1.5 bg-red-600 hover:bg-red-700 rounded-2xl text-sm">Team B</button>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div id="game-layout-grid">
             
             <!-- Main Area -->
-            <div class="lg:col-span-8 space-y-6">
+            <div id="game-main" class="space-y-6">
                 
                 <!-- Question -->
                 <div class="section rounded-3xl p-6">
-                    <div class="panel-head mb-3">
+                    <div class="panel-head mb-2">
                         <span class="text-sm font-medium text-zinc-400">CURRENT QUESTION</span>
-                        <div class="panel-head-actions">
-                            <div id="player-badge" class="flex-shrink-0"></div>
-                            <button onclick="askPrimaryAI()" class="toolbar-btn px-4 py-1 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm flex items-center gap-x-2">
+                        <div id="player-badge" class="flex-shrink-0"></div>
+                    </div>
+                    <div class="question-actions mb-2">
+                        <div class="question-actions-prep">
+                            <button id="load-example-btn" type="button" onclick="loadExampleFlow()"
+                                    class="toolbar-btn px-3 py-1.5 bg-amber-700 hover:bg-amber-800 rounded-2xl text-sm flex items-center gap-x-2"
+                                    title="Rule of 2: click 1 = stock example; click 2 = today's current events; then stock + past current events shuffled.">
+                                <i class="fa-solid fa-lightbulb"></i> <span>Load Example</span>
+                            </button>
+                            <button type="button" onclick="startNewSession()"
+                                    class="toolbar-btn px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-2xl text-sm flex items-center gap-x-2"
+                                    title="Clear AI memory and start a fresh topic">
+                                <i class="fa-solid fa-rotate-left"></i> <span>Start New Session</span>
+                            </button>
+                            <div class="relative inline-flex items-center">
+                                <button id="session-help" type="button" onclick="toggleSessionHelp(event)"
+                                        class="cast-help-btn w-8 h-8 flex items-center justify-center rounded-full text-sm font-semibold text-zinc-200 hover:text-white"
+                                        title="How does AI memory work?" aria-label="Session memory help">?</button>
+                                <div id="session-help-popover" onclick="event.stopPropagation()"
+                                     class="hidden absolute left-0 top-full mt-2 z-30 w-72 bg-zinc-950 border border-zinc-700 rounded-2xl px-4 py-3 text-sm text-zinc-300 shadow-lg text-left">
+                                    Your primary AI remembers this entire conversation for the session. Each Ask builds on earlier questions and answers. <strong>Follow Up</strong> only passes the turn to the other player — it does not clear memory. Click <strong>Start New Session</strong> when you want a fresh topic with no prior context.<br><br><strong>Save &amp; Quit</strong> (toolbar) opens the export menu so you can pick Markdown, Word, or PDF, then save and close. The window X button does the same. Use <strong>Quit without saving</strong> in the toolbar to close with no file.<br><br>Tap the <strong>Plan tip</strong> notice beside the answer label if you want billing guidance for your primary AI.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="question-actions-turn">
+                            <button id="follow-up-btn" type="button" onclick="followUp()"
+                                    class="toolbar-btn px-4 py-1.5 rounded-2xl text-sm flex items-center gap-x-2"
+                                    title="Pass the turn to the other player">
+                                <i class="fa-solid fa-reply"></i> <span>Follow Up</span>
+                            </button>
+                            <button type="button" onclick="askPrimaryAI()"
+                                    class="question-actions-ask toolbar-btn px-5 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm flex items-center gap-x-2"
+                                    title="Send this question to the primary AI">
                                 <i class="fa-solid fa-paper-plane"></i> <span>Ask</span>
                             </button>
                         </div>
                     </div>
+                    <p id="load-example-hint" class="text-[10px] text-zinc-500 leading-snug mb-3">Rule of 2: click 1 = example; click 2 = today's current events question (once per session). After that, stock examples and past current events shuffle together.</p>
                     <div id="question-box" contenteditable="true" 
                          class="min-h-[100px] text-xl p-4 bg-zinc-900 border border-zinc-700 rounded-2xl focus:outline-none focus:border-blue-500">
                     </div>
@@ -348,30 +584,9 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
                 <!-- Primary AI Answer -->
                 <div class="section rounded-3xl p-6">
-                    <div class="panel-head mb-3">
-                        <div class="min-w-0 flex-1">
-                            <span id="primary-answer-label" class="text-sm font-medium text-zinc-400 min-w-0">PRIMARY AI ANSWER</span>
-                            <span id="game-primary-paid-guidance" class="hidden relative inline-flex items-center ml-1"></span>
-                        </div>
-                        <div class="panel-head-actions">
-                            <button type="button" onclick="startNewSession()"
-                                    class="toolbar-btn px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-2xl text-sm">
-                                Start New Session
-                            </button>
-                            <div class="relative inline-flex items-center">
-                                <button id="session-help" type="button" onclick="toggleSessionHelp(event)"
-                                        class="cast-help-btn w-8 h-8 flex items-center justify-center rounded-full text-sm font-semibold text-zinc-200 hover:text-white"
-                                        title="How does AI memory work?" aria-label="Session memory help">?</button>
-                                <div id="session-help-popover" onclick="event.stopPropagation()"
-                                     class="hidden absolute right-0 top-full mt-2 z-30 w-72 bg-zinc-950 border border-zinc-700 rounded-2xl px-4 py-3 text-sm text-zinc-300 shadow-lg text-left">
-                                    Your primary AI remembers this entire conversation for the session. Each Ask builds on earlier questions and answers. Follow Up only passes the turn. It does not clear memory. Click <strong>Start New Session</strong> when you want a fresh topic with no prior context.<br><br><strong>Save &amp; Quit</strong> (toolbar) opens the export menu so you can pick Markdown, Word, or PDF, then save and close. The window X button does the same. Use <strong>Quit without saving</strong> in the toolbar (or in that menu) to close with no file.<br><br>Tap the <strong>Plan tip</strong> notice beside the answer label if you want billing guidance for your primary AI.
-                                </div>
-                            </div>
-                            <button id="follow-up-btn" onclick="followUp()" 
-                                    class="toolbar-btn px-4 py-1.5 rounded-2xl text-sm flex items-center gap-x-2">
-                                <i class="fa-solid fa-reply"></i> <span>Follow Up</span>
-                            </button>
-                        </div>
+                    <div class="mb-3">
+                        <span id="primary-answer-label" class="text-sm font-medium text-zinc-400 min-w-0">PRIMARY AI ANSWER</span>
+                        <span id="game-primary-paid-guidance" class="hidden relative inline-flex items-center ml-1"></span>
                     </div>
                     <div id="answer-box" contenteditable="true" 
                          class="min-h-[120px] text-lg p-4 bg-zinc-900 border border-zinc-700 rounded-2xl focus:outline-none focus:border-blue-500">
@@ -395,62 +610,59 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 </div>
             </div>
 
-            <!-- Side Panel -->
-            <div class="lg:col-span-4 space-y-6">
-                <div class="section rounded-3xl p-5">
-                    <div class="text-sm font-medium text-zinc-400 mb-3">QUICK ACTIONS</div>
-                    <div class="space-y-3">
-                        <button id="load-example-btn" onclick="loadExampleFlow()" class="w-full bg-amber-700 hover:bg-amber-800 px-4 py-3 rounded-2xl text-sm" title="Rule of 2: click 1 loads an example; click 2 loads today's current events question once per session.">Load Example</button>
-                        <p id="load-example-hint" class="text-[10px] text-zinc-500 leading-snug">Rule of 2: click 1 = example; click 2 = today's current events question (once per session).</p>
-                        <button onclick="addBookmark()" class="w-full bg-amber-600 hover:bg-amber-700 px-4 py-3 rounded-2xl text-sm flex items-center justify-center gap-x-2">
-                            <i class="fa-solid fa-bookmark"></i> <span>Bookmark Concern</span>
-                        </button>
-                        <button onclick="showExportSessionModal()" class="w-full bg-sky-700 hover:bg-sky-800 px-4 py-3 rounded-2xl text-sm flex items-center justify-center gap-x-2">
-                            <i class="fa-solid fa-file-export"></i> <span>Export Session</span>
-                        </button>
-                        <button onclick="showPastSessionsModal()" class="w-full bg-violet-700 hover:bg-violet-800 px-4 py-3 rounded-2xl text-sm flex items-center justify-center gap-x-2">
-                            <i class="fa-solid fa-clock-rotate-left"></i> <span>Past Sessions</span>
-                        </button>
-                        <!--
-                          ARCHIVED: JAILBREAK MODE UI (removed from shipping build; retained for records)
-                          See the "JAILBREAK MODE ARCHIVE" block in the <script> section below.
-                          That block documents the Quick Actions toggle, status text, and how to re-enable.
-                        -->
-                        <button onclick="clearCurrent()" class="w-full bg-zinc-800 hover:bg-zinc-700 px-4 py-3 rounded-2xl text-sm">Clear Current</button>
-                    </div>
-                </div>
-
-                <div class="section rounded-3xl p-5">
-                    <div class="text-sm font-medium text-zinc-400 mb-3">RULES &amp; GUIDELINES</div>
-                    <p class="text-[11px] text-zinc-500 mb-3">Each button opens one rules topic. Preloaded example questions (updated regularly) are perfectly fine to explore via Load Example.</p>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <button onclick="showRuleSection('intro')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Introduction</button>
-                        <button onclick="showRuleSection('steelman')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Steelman vs Strawman</button>
-                        <button onclick="showRuleSection('how')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">How to Play</button>
-                        <button onclick="showRuleSection('core')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Core Rules</button>
-                        <button onclick="showRuleSection('challenge')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Challenging an Answer</button>
-                        <button onclick="showRuleSection('focus')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Staying Focused</button>
-                        <button onclick="showRuleSection('ending')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Ending a Round</button>
-                        <button onclick="showRuleSection('examples')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Example Flow</button>
-                        <button onclick="showRuleSection('best')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Best Practices</button>
-                        <button onclick="showRuleSection('tips')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Tips for a Great Game</button>
-                    </div>
+            <!-- Quick Actions -->
+            <div id="quick-actions-panel" class="section rounded-3xl p-5">
+                <div class="text-sm font-medium text-zinc-400 mb-3">QUICK ACTIONS</div>
+                <div class="quick-actions-grid">
+                    <button onclick="addBookmark()" class="w-full bg-amber-600 hover:bg-amber-700 px-4 py-3 rounded-2xl text-sm flex items-center justify-center gap-x-2">
+                        <i class="fa-solid fa-bookmark"></i> <span>Bookmark Concern</span>
+                    </button>
+                    <button onclick="showExportSessionModal()" class="w-full bg-sky-700 hover:bg-sky-800 px-4 py-3 rounded-2xl text-sm flex items-center justify-center gap-x-2">
+                        <i class="fa-solid fa-file-export"></i> <span>Export Session</span>
+                    </button>
+                    <button onclick="showPastSessionsModal()" class="w-full bg-violet-700 hover:bg-violet-800 px-4 py-3 rounded-2xl text-sm flex items-center justify-center gap-x-2">
+                        <i class="fa-solid fa-clock-rotate-left"></i> <span>Past Sessions</span>
+                    </button>
+                    <!--
+                      ARCHIVED: JAILBREAK MODE UI (removed from shipping build; retained for records)
+                      See the "JAILBREAK MODE ARCHIVE" block in the <script> section below.
+                      That block documents the Quick Actions toggle, status text, and how to re-enable.
+                    -->
+                    <button onclick="clearCurrent()" class="quick-action-full w-full bg-zinc-800 hover:bg-zinc-700 px-4 py-3 rounded-2xl text-sm">Clear Current</button>
                 </div>
             </div>
-        </div>
 
-        <!-- Bookmarks -->
-        <div class="mt-6 section rounded-3xl p-5">
-            <div class="panel-head mb-3">
-                <span class="font-medium">Bookmarks</span>
-                <button onclick="showBookmarkModal()" class="toolbar-btn text-xs px-3 py-1 bg-zinc-800 hover:bg-zinc-700 rounded-xl">Manage</button>
+            <!-- Bookmarks -->
+            <div id="bookmarks-panel" class="section rounded-3xl p-5">
+                <div class="panel-head mb-3">
+                    <span class="font-medium">Bookmarks</span>
+                    <button onclick="showBookmarkModal()" class="toolbar-btn text-xs px-3 py-1 bg-zinc-800 hover:bg-zinc-700 rounded-xl">Manage</button>
+                </div>
+                <div id="bookmarks-list" class="text-sm text-zinc-400"></div>
             </div>
-            <div id="bookmarks-list" class="text-sm text-zinc-400"></div>
+
+            <!-- Rules & Guidelines (reference — always at bottom) -->
+            <div id="rules-panel" class="section rounded-3xl p-5">
+                <div class="text-sm font-medium text-zinc-400 mb-3">RULES &amp; GUIDELINES</div>
+                <p class="text-[11px] text-zinc-500 mb-3">Each button opens one rules topic. Preloaded example questions (updated regularly) are perfectly fine to explore via Load Example.</p>
+                <div class="rules-grid grid grid-cols-2 gap-2 text-xs">
+                    <button onclick="showRuleSection('intro')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Introduction</button>
+                    <button onclick="showRuleSection('steelman')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Steelman vs Strawman</button>
+                    <button onclick="showRuleSection('how')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">How to Play</button>
+                    <button onclick="showRuleSection('core')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Core Rules</button>
+                    <button onclick="showRuleSection('challenge')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Challenging an Answer</button>
+                    <button onclick="showRuleSection('focus')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Staying Focused</button>
+                    <button onclick="showRuleSection('ending')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Ending a Round</button>
+                    <button onclick="showRuleSection('examples')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Example Flow</button>
+                    <button onclick="showRuleSection('best')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Best Practices</button>
+                    <button onclick="showRuleSection('tips')" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-left">Tips for a Great Game</button>
+                </div>
+            </div>
         </div>
 
         <footer class="mt-8 text-center text-[10px] text-zinc-600 leading-relaxed">
-            Copyright &copy; 2026 Zachary H. Roberts. All rights reserved.<br>
-            &ldquo;Claim Clash&rdquo; is a trademark of Zachary H. Roberts.
+            &copy; 2026 Arcana Veritas LLC. All rights reserved.<br>
+            &ldquo;Claim Clash&rdquo; is a trademark of Arcana Veritas LLC.
         </footer>
     </div>
 
@@ -469,7 +681,11 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
     <div id="settings-modal" onclick="closeSettingsModal()" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
         <div onclick="event.stopImmediatePropagation()" class="bg-zinc-900 border border-zinc-700 rounded-3xl p-6 w-full max-w-xl mx-4 max-h-[92vh] overflow-y-auto">
             <h3 class="text-xl font-semibold mb-4">Settings</h3>
-            <p class="text-xs text-zinc-500 mb-4">API keys, grade level, display order, and primary AI. Keys stay in localStorage on this device only.</p>
+            <p id="settings-keys-note" class="text-xs text-zinc-500 mb-4">API keys (Save / Clear per row), grade level, display order, and primary AI. Grok (xAI) is the default primary AI.</p>
+            <label id="settings-save-keys-row" class="hidden mb-4 flex items-start gap-3 text-sm text-zinc-300 cursor-pointer">
+                <input type="checkbox" id="settings-save-keys-checkbox" class="mt-1 rounded border-zinc-600 bg-zinc-800 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-zinc-900 shrink-0" />
+                <span>Save API keys on this device (local storage only)</span>
+            </label>
             <div class="mb-5 pb-5 border-b border-zinc-800">
                 <h4 class="text-sm font-medium text-zinc-300 mb-2 flex items-center gap-2"><i class="fa-solid fa-graduation-cap text-violet-400"></i> Grade level (academic)</h4>
                 <div id="settings-grade-level-host"></div>
@@ -498,13 +714,20 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     <span id="about-version"></span>
                 </div>
                 <div>
+                    <span class="font-medium text-zinc-400">Browser:</span>
+                    <span id="about-client-env" class="text-zinc-500">Detecting…</span>
+                </div>
+                <div id="about-platform-line" class="hidden">
+                    Web edition at <a href="https://claim-clash.com" class="text-amber-400 hover:text-amber-300 underline" target="_blank" rel="noopener">Claim-Clash.com</a> (also <a href="https://claims-clash.com" class="text-zinc-400 hover:text-zinc-300 underline" target="_blank" rel="noopener">claims-clash.com</a>).<br>
+                    API keys stay in your browser only (localStorage). Cast to TV is in the desktop app.
+                </div>
+                <div id="about-desktop-line">
                     Built with Tauri 2 (Rust + webview).<br>
                     Most game logic lives in a single <code class="text-amber-400">src/index.html</code> file.
                 </div>
-                <div class="pt-2 border-t border-zinc-800 text-xs text-amber-400">
-                    <strong>Security note:</strong> This app does not ship pre-built executables.<br>
-                    For maximum trust, clone the source and build it yourself.
-                    API keys are stored only in your browser's localStorage.
+                <div id="about-security-line" class="pt-2 border-t border-zinc-800 text-xs text-amber-400">
+                    <strong>Security note:</strong> API keys are stored only in your browser's localStorage.<br>
+                    <span id="about-desktop-security">For maximum trust on desktop, clone the source and build it yourself.</span>
                 </div>
                 <div class="text-xs text-zinc-500">
                     Open source - Build instructions and checksum verification in the repository README.
@@ -515,8 +738,8 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     </button>
                 </div>
                 <div class="pt-2 border-t border-zinc-800 text-xs">
-                    Copyright &copy; 2026 Zachary H. Roberts. All rights reserved.<br>
-                    "Claim Clash" is a trademark of Zachary H. Roberts.
+                    &copy; 2026 Arcana Veritas LLC. All rights reserved.<br>
+                    &ldquo;Claim Clash&rdquo; is a trademark of Arcana Veritas LLC.
                 </div>
             </div>
 
@@ -852,6 +1075,21 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         </div>
     </div>
 
+    <script>
+        // Beta gate: clear site password session when this tab closes (requires login again).
+        (function () {
+            function clearSiteSession() {
+                try {
+                    fetch('/logout', { method: 'GET', credentials: 'same-origin', keepalive: true, redirect: 'manual' });
+                } catch (e) { /* silent */ }
+            }
+            window.addEventListener('pagehide', clearSiteSession);
+        })();
+    </script>
+    <script src="web-config.js"></script>
+    <script src="web-brain-feed.js"></script>
+    <script src="client-env.js"></script>
+    <script src="web-platform.js"></script>
     <script src="build-profile.js"></script>
     <script src="example-flow-questions.js"></script>
     <script src="vendor/jszip.min.js"></script>
@@ -880,8 +1118,11 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
          */
 
         // --- 1. Tauri bridge ---
-        /** Invokes a Tauri command; supports Tauri 2 global layouts (__TAURI__.invoke / core.invoke). */
+        /** Invokes a Tauri command; on web, uses ClaimClashWeb.invoke shim. */
         function tauriInvoke(cmd, args) {
+            if (window.ClaimClashWeb && typeof window.ClaimClashWeb.isWebPlatform === 'function' && window.ClaimClashWeb.isWebPlatform()) {
+                return window.ClaimClashWeb.invoke(cmd, args);
+            }
             let invokeFn = null;
             if (window.__TAURI__) {
                 if (typeof window.__TAURI__.invoke === 'function') invokeFn = window.__TAURI__.invoke;
@@ -891,7 +1132,6 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             if (!invokeFn) {
                 return Promise.reject(new Error('Tauri invoke not available. Make sure this is running inside the Tauri app.'));
             }
-            // Support calling as invoke(cmd) or invoke(cmd, args)
             if (args === undefined || args === null) {
                 return invokeFn(cmd);
             }
@@ -905,8 +1145,10 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         let bookmarks = [];
 
         const BUILD_PROFILE_STORAGE_KEY = 'claimClashLastBuildProfile';
+        const SAVE_API_KEYS_STORAGE_KEY = 'claimClashSaveApiKeys';
+        const PRIMARY_PROVIDER_USER_SET_KEY = 'claimClashPrimaryProviderUserSet';
         const API_KEY_STORAGE_KEYS = ['geminiApiKey', 'openaiApiKey', 'anthropicApiKey', 'groqApiKey', 'openrouterApiKey', 'xaiApiKey'];
-        const FREE_TIER_PROVIDER_IDS = ['gemini', 'groq', 'openrouter', 'grok'];
+        const FREE_TIER_PROVIDER_IDS = ['gemini', 'groq', 'openrouter', 'supergrok'];
 
         function getBuildProfile() {
             return window.CLAIM_CLASH_BUILD_PROFILE || 'release';
@@ -923,8 +1165,23 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             return profile === 'dev' || profile === 'alpha';
         }
 
+        /** Dev/Alpha builds and web beta preview require the tester agreement. */
+        function isBetaTesterBuild() {
+            return isDevBuildProfile();
+        }
+
         function isReleaseBuildProfile() {
             return getBuildProfile() === 'release';
+        }
+
+        const RELEASE_BUILD_STAMP_KEY = 'claimClashReleaseBuildStamp';
+        const DEV_BUILD_STAMP_KEY = 'claimClashDevBuildStamp';
+        const DEV_KEYS_FINGERPRINT_KEY = 'claimClashDevKeysFingerprint';
+
+        function embeddedKeysFingerprint() {
+            if (!isDevBuildProfile()) return '';
+            const keys = window.ALPHA_TESTING_KEYS || {};
+            return API_KEY_STORAGE_KEYS.map(k => `${k}:${(keys[k] || '').trim()}`).join('\n');
         }
 
         /** Pre-filled tester keys exist only in Dev/Alpha profile builds (see scripts/set-build-profile.ps1). */
@@ -934,41 +1191,216 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             return (keys[storage] || '').trim();
         }
 
+        function getApiKeyVariable(storage) {
+            switch (storage) {
+                case 'geminiApiKey': return geminiApiKey;
+                case 'openaiApiKey': return openaiApiKey;
+                case 'anthropicApiKey': return anthropicApiKey;
+                case 'groqApiKey': return groqApiKey;
+                case 'openrouterApiKey': return openrouterApiKey;
+                case 'xaiApiKey': return xaiApiKey;
+                default: return '';
+            }
+        }
+
+        function setApiKeyVariable(storage, value) {
+            const val = String(value || '').trim();
+            switch (storage) {
+                case 'geminiApiKey': geminiApiKey = val; break;
+                case 'openaiApiKey': openaiApiKey = val; break;
+                case 'anthropicApiKey': anthropicApiKey = val; break;
+                case 'groqApiKey': groqApiKey = val; break;
+                case 'openrouterApiKey': openrouterApiKey = val; break;
+                case 'xaiApiKey': xaiApiKey = val; break;
+                default: break;
+            }
+        }
+
+        function clearStoredApiKeys() {
+            API_KEY_STORAGE_KEYS.forEach(key => {
+                try { localStorage.removeItem(key); } catch (e) {}
+            });
+        }
+
+        /** Dev builds always persist keys. Release/Store: only when user opts in. */
+        function isSaveApiKeysEnabled() {
+            if (isDevBuildProfile()) return true;
+            try {
+                return localStorage.getItem(SAVE_API_KEYS_STORAGE_KEY) === '1';
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function setSaveApiKeysEnabled(enabled) {
+            if (isDevBuildProfile()) return;
+            try {
+                if (enabled) {
+                    localStorage.setItem(SAVE_API_KEYS_STORAGE_KEY, '1');
+                } else {
+                    localStorage.removeItem(SAVE_API_KEYS_STORAGE_KEY);
+                    clearStoredApiKeys();
+                }
+            } catch (e) { /* silent */ }
+        }
+
+        function readSaveApiKeysCheckbox(id) {
+            const el = document.getElementById(id);
+            return !!(el && el.checked);
+        }
+
+        function syncSaveApiKeysCheckboxes() {
+            const enabled = isSaveApiKeysEnabled();
+            const setupCb = document.getElementById('setup-save-keys-checkbox');
+            const settingsCb = document.getElementById('settings-save-keys-checkbox');
+            if (setupCb) setupCb.checked = enabled;
+            if (settingsCb) settingsCb.checked = enabled;
+        }
+
+        function bindSaveApiKeysCheckbox(id) {
+            const el = document.getElementById(id);
+            if (!el || el.dataset.bound) return;
+            el.dataset.bound = '1';
+            el.addEventListener('change', () => {
+                if (isDevBuildProfile()) {
+                    el.checked = true;
+                    return;
+                }
+                const enabled = el.checked;
+                setSaveApiKeysEnabled(enabled);
+                syncSaveApiKeysCheckboxes();
+                if (!enabled) {
+                    reloadApiKeysFromStorage();
+                }
+                renderSetupProviders();
+                renderSettingsProviders();
+                updateSetupStartState();
+            });
+        }
+
+        /** Provider rows the user explicitly cleared; skip dev pre-fill until they Save again. */
+        const userClearedApiKeyStorage = new Set();
+
         function getStoredOrDefaultKey(storage) {
+            if (userClearedApiKeyStorage.has(storage)) {
+                return (getApiKeyVariable(storage) || '').trim();
+            }
+            if (isReleaseBuildProfile() && !isSaveApiKeysEnabled()) {
+                return (getApiKeyVariable(storage) || '').trim();
+            }
             const stored = (localStorage.getItem(storage) || '').trim();
             if (stored && stored !== 'YOUR_GEMINI_API_KEY_HERE') return stored;
+            if (isReleaseBuildProfile()) {
+                return (getApiKeyVariable(storage) || '').trim();
+            }
             return getTestingDefaultKey(storage);
         }
 
-        /** Release builds start clean; Dev builds keep saved settings and embedded keys. */
+        /** Release/Store: session-only keys unless user opts in. Dev: localStorage + embedded keys. */
         function applyBuildProfileStoragePolicy() {
             const current = getBuildProfile();
             let previous = '';
             try { previous = localStorage.getItem(BUILD_PROFILE_STORAGE_KEY) || ''; } catch (e) {}
 
-            if (previous === current) return;
-
             if (current === 'release') {
-                API_KEY_STORAGE_KEYS.forEach(key => {
-                    try { localStorage.removeItem(key); } catch (e) {}
-                });
-                try { localStorage.removeItem(RULES_WALKTHROUGH_SKIP_KEY); } catch (e) {}
-                try { localStorage.removeItem('primaryProviderId'); } catch (e) {}
+                const stamp = (typeof window.CLAIM_CLASH_BUILD_STAMP === 'string' && window.CLAIM_CLASH_BUILD_STAMP)
+                    ? window.CLAIM_CLASH_BUILD_STAMP
+                    : APP_VERSION;
+                let storedStamp = '';
+                try { storedStamp = localStorage.getItem(RELEASE_BUILD_STAMP_KEY) || ''; } catch (e) {}
+
+                if (!isSaveApiKeysEnabled()) {
+                    clearStoredApiKeys();
+                }
+                if (previous !== current || storedStamp !== stamp) {
+                    if (!isSaveApiKeysEnabled()) {
+                        setRulesWalkthroughSkipped(false);
+                        try { localStorage.removeItem('primaryProviderId'); } catch (e) {}
+                        try { localStorage.removeItem(PRIMARY_PROVIDER_USER_SET_KEY); } catch (e) {}
+                    }
+                }
+                try { localStorage.setItem(RELEASE_BUILD_STAMP_KEY, stamp); } catch (e) {}
+            }
+
+            if (current === 'dev') {
+                const stamp = (typeof window.CLAIM_CLASH_BUILD_STAMP === 'string' && window.CLAIM_CLASH_BUILD_STAMP)
+                    ? window.CLAIM_CLASH_BUILD_STAMP
+                    : APP_VERSION;
+                const fingerprint = embeddedKeysFingerprint();
+                let storedStamp = '';
+                let storedFingerprint = '';
+                try { storedStamp = localStorage.getItem(DEV_BUILD_STAMP_KEY) || ''; } catch (e) {}
+                try { storedFingerprint = localStorage.getItem(DEV_KEYS_FINGERPRINT_KEY) || ''; } catch (e) {}
+                if (storedStamp !== stamp || (fingerprint && storedFingerprint !== fingerprint)) {
+                    setRulesWalkthroughSkipped(false);
+                    const embedded = window.ALPHA_TESTING_KEYS || {};
+                    API_KEY_STORAGE_KEYS.forEach(storage => {
+                        const val = (embedded[storage] || '').trim();
+                        if (val) {
+                            try { localStorage.setItem(storage, val); } catch (e) {}
+                            userClearedApiKeyStorage.delete(storage);
+                        }
+                    });
+                    try { localStorage.setItem(DEV_BUILD_STAMP_KEY, stamp); } catch (e) {}
+                    if (fingerprint) {
+                        try { localStorage.setItem(DEV_KEYS_FINGERPRINT_KEY, fingerprint); } catch (e) {}
+                    }
+                }
             }
 
             try { localStorage.setItem(BUILD_PROFILE_STORAGE_KEY, current); } catch (e) {}
         }
 
-        const APP_VERSION = "0.1.91";
+        const APP_VERSION = "0.1.93";
         const APP_PHASE = "Beta";
-        const FEEDBACK_EMAIL = "ClaimsClashFeedback@gmail.com";
-        const PRIVACY_POLICY_URL = "https://github.com/memento-mori1984/claim-clash-tv/blob/master/PRIVACY-POLICY.md";
+        const FEEDBACK_EMAIL = "feedback@claim-clash.com";
+        const PRIVACY_POLICY_URL = "https://claim-clash.com/download/privacy-policy";
         const RULES_VERSION = "3.4";
         const FEEDBACK_BODY_URL_LIMIT = 5500;
         const FEEDBACK_DRAFT_KEY = "claimClashFeedbackDraft";
-        const ALPHA_AGREEMENT_KEY = "claimClashAlphaTesterAgreedVersion";
+
         const RULES_WALKTHROUGH_SKIP_KEY = "claimClashSkipRulesWalkthrough";
+
+        function rulesWalkthroughSkipStore() {
+            try { return sessionStorage; } catch (e) { return null; }
+        }
+
+        function clearLegacyRulesWalkthroughSkip() {
+            try { localStorage.removeItem(RULES_WALKTHROUGH_SKIP_KEY); } catch (e) { /* ignore */ }
+        }
+
+        function getRulesWalkthroughSkipped() {
+            const store = rulesWalkthroughSkipStore();
+            if (!store) return false;
+            try { return store.getItem(RULES_WALKTHROUGH_SKIP_KEY) === '1'; } catch (e) { return false; }
+        }
+
+        function setRulesWalkthroughSkipped(enabled) {
+            const store = rulesWalkthroughSkipStore();
+            if (!store) return;
+            try {
+                if (enabled) store.setItem(RULES_WALKTHROUGH_SKIP_KEY, '1');
+                else store.removeItem(RULES_WALKTHROUGH_SKIP_KEY);
+            } catch (e) { /* ignore */ }
+        }
+
+        let geminiApiKey = '';
+        let openaiApiKey = '';
+        let anthropicApiKey = '';
+        let groqApiKey = '';
+        let openrouterApiKey = '';
+        let xaiApiKey = '';
+
         applyBuildProfileStoragePolicy();
+        clearLegacyRulesWalkthroughSkip();
+
+        geminiApiKey = getStoredOrDefaultKey('geminiApiKey');
+        openaiApiKey = getStoredOrDefaultKey('openaiApiKey');
+        anthropicApiKey = getStoredOrDefaultKey('anthropicApiKey');
+        groqApiKey = getStoredOrDefaultKey('groqApiKey');
+        openrouterApiKey = getStoredOrDefaultKey('openrouterApiKey');
+        xaiApiKey = getStoredOrDefaultKey('xaiApiKey');
+
         const EXPORT_FORMAT_KEY = "claimClashExportFormat";
         const EXPORT_DELIVERY_KEY = "claimClashExportDelivery";
 
@@ -979,7 +1411,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         const RULES_WALKTHROUGH_SECTIONS = {
             welcome_play: {
                 title: 'Welcome to play',
-                content: "Claim Clash is built for two people at one screen exploring real topics through evidence-based questions to a shared AI. Team A (Blue) and Team B (Red) alternate turns. The goal is a clearer shared picture, not a debate win.\n\nTWO-PLAYER FLOW\nStep 1: One player types a question and clicks Ask.\nStep 2: The AI responds.\nStep 3: The other player clicks Follow Up to take their turn.\nStep 4: Continue alternating on the same topic. Steelman the other side's strongest argument when you can.\n\nSOLO PLAY (OPTIONAL): Turn on Single Player Interrogation Mode above the question box when no partner is present.\n\nCASTING: Use Cast to TV to mirror the game on a bigger screen (same Wi-Fi).\n\nPRELOADED QUESTIONS: It is perfectly fine to explore preloaded example questions. Use Load Example in Quick Actions (rule of 2: click 1 is an example; click 2 is today's current events question, once per session).\n\nTreat your primary AI as a thinking tool, not an oracle. You can compare multiple assistants on the same question."
+                content: "Claim Clash is built for two people at one screen exploring real topics through evidence-based questions to a shared AI. Team A (Blue) and Team B (Red) alternate turns. The goal is a clearer shared picture, not a debate win.\n\nTWO-PLAYER FLOW\nStep 1: One player types a question and clicks Ask.\nStep 2: The AI responds.\nStep 3: The other player clicks Follow Up to take their turn.\nStep 4: Continue alternating on the same topic. Steelman the other side's strongest argument when you can.\n\nSOLO PLAY (OPTIONAL): Turn on Single Player Interrogation Mode above the question box when no partner is present.\n\nCASTING: Use Cast to TV to mirror the game on a bigger screen (same Wi-Fi).\n\nPRELOADED QUESTIONS: It is perfectly fine to explore preloaded example questions. Use Load Example in Quick Actions (rule of 2: click 1 is a stock example; click 2 is today's current events question, once per session; after that, stock examples and past current events shuffle together).\n\nTreat your primary AI as a thinking tool, not an oracle. You can compare multiple assistants on the same question."
             },
             steelman_core: {
                 title: 'Steelman & core rules',
@@ -995,7 +1427,6 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             }
         };
 
-        let geminiApiKey = getStoredOrDefaultKey('geminiApiKey');
         /** Primary AI multi-turn memory: { role: 'user'|'assistant', text } */
         let primarySessionMessages = [];
         /** Hidden cross-AI comparison notes keyed by provider id (not shown in UI). */
@@ -1003,6 +1434,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         /** In-modal analyze thread: { role, text, label?, modelUsed?, isError? } */
         let analyzeDifferencesThread = [];
         let lastAnalyzeComparisonData = null;
+        let pendingPastSessionRecallContext = null;
 
         const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.0-flash-exp"];
         const GROQ_MODEL = "llama-3.3-70b-versatile";
@@ -1014,6 +1446,12 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         const OPENROUTER_MODELS_FREE = ['meta-llama/llama-3.3-70b-instruct:free', 'openrouter/free'];
         const OPENROUTER_MODELS = OPENROUTER_MODELS_FREE;
         const XAI_MODELS = ["grok-4.3", "grok-3-fast"];
+        const ANTHROPIC_MODELS = [
+            'claude-sonnet-5',
+            'claude-sonnet-4-6',
+            'claude-haiku-4-5-20251001',
+            'claude-opus-4-8'
+        ];
 
         /** Optional plan tip for starred primary AI (shown behind Plan tip notice, not inline banners). */
         const PRIMARY_PAID_GUIDANCE = {
@@ -1038,12 +1476,16 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 planUrl: 'https://openrouter.ai/credits'
             },
             grok: {
-                message: 'Browser-only Grok is not reliable as primary AI. Add a paid xAI API key or star another provider.',
+                message: 'Grok (xAI) uses your xAI API key for in-app answers. A paid xAI plan is recommended for primary AI.',
                 planUrl: 'https://console.x.ai/'
+            },
+            supergrok: {
+                message: 'SuperGrok opens in your browser. It is best as a comparison toggle, not your primary in-app AI.',
+                planUrl: 'https://grok.com'
             }
         };
 
-        const DEFAULT_PROVIDER_ORDER = ['gemini', 'openai', 'anthropic', 'groq', 'openrouter', 'grok'];
+        const DEFAULT_PROVIDER_ORDER = ['grok', 'gemini', 'anthropic', 'openai', 'groq', 'openrouter', 'supergrok'];
 
         /** Public free-tier availability per provider (setup/settings indicators). */
         const PROVIDER_FREE_TIER = {
@@ -1077,21 +1519,27 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 note: 'Includes free models; paid credits recommended for primary AI.'
             },
             grok: {
+                available: false,
+                label: 'Requires xAI API key (paid billing)',
+                note: 'In-app Grok answers use your xAI API key from console.x.ai.'
+            },
+            supergrok: {
                 available: true,
                 label: 'Free in browser without an API key',
-                buttonLabel: 'Open Grok (free)',
+                buttonLabel: 'Open SuperGrok (free)',
                 url: 'https://grok.com',
-                note: 'Optional paid xAI API key for in-app answers. Use console.x.ai.'
+                note: 'Opens SuperGrok in your browser. No API key. Not the same as Grok (xAI) in-app API.'
             }
         };
 
         const AI_PROVIDERS = [
             { id: 'gemini', name: 'Gemini', requiresKey: true, keyStorage: 'geminiApiKey', placeholder: 'AIza...', keyUrl: 'https://aistudio.google.com/apikey' },
+            { id: 'anthropic', name: 'Claude (Anthropic API)', requiresKey: true, keyStorage: 'anthropicApiKey', placeholder: 'sk-ant-...', keyUrl: 'https://console.anthropic.com/settings/keys' },
             { id: 'openai', name: 'OpenAI (GPT-4o)', requiresKey: true, keyStorage: 'openaiApiKey', placeholder: 'sk-...', keyUrl: 'https://platform.openai.com/api-keys' },
-            { id: 'anthropic', name: 'Anthropic (Claude 3.5)', requiresKey: true, keyStorage: 'anthropicApiKey', placeholder: 'sk-ant-...', keyUrl: 'https://console.anthropic.com/settings/keys' },
             { id: 'groq', name: 'Groq (Llama 3.3)', requiresKey: true, keyStorage: 'groqApiKey', placeholder: 'gsk_...', keyUrl: 'https://console.groq.com/keys' },
             { id: 'openrouter', name: 'OpenRouter', requiresKey: true, keyStorage: 'openrouterApiKey', placeholder: 'sk-or-...', keyUrl: 'https://openrouter.ai/keys' },
-            { id: 'grok', name: 'Grok (xAI)', requiresKey: false, optionalKey: true, keyStorage: 'xaiApiKey', placeholder: 'xai-... (optional)', keyUrl: 'https://console.x.ai/' }
+            { id: 'grok', name: 'Grok (xAI)', requiresKey: true, keyStorage: 'xaiApiKey', placeholder: 'xai-...', keyUrl: 'https://console.x.ai/' },
+            { id: 'supergrok', name: 'SuperGrok', requiresKey: false, isLink: true, keyUrl: 'https://grok.com' }
         ];
 
         let providerOrder = loadProviderOrder();
@@ -1101,13 +1549,6 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         // Jailbreak feature is disabled in shipping builds (always false for cast sync).
         const JAILBREAK_FEATURE_DISABLED = true;
         const jailbreakMode = false;
-
-        // Load additional keys (alpha defaults apply when Settings has no saved key)
-        let openaiApiKey = getStoredOrDefaultKey('openaiApiKey');
-        let anthropicApiKey = getStoredOrDefaultKey('anthropicApiKey');
-        let groqApiKey = getStoredOrDefaultKey('groqApiKey');
-        let openrouterApiKey = getStoredOrDefaultKey('openrouterApiKey');
-        let xaiApiKey = getStoredOrDefaultKey('xaiApiKey');
 
         // --- 3. Onboarding and provider configuration ---
 
@@ -1128,12 +1569,22 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             localStorage.setItem('providerOrder', JSON.stringify(providerOrder));
         }
 
-        function loadPrimaryProviderId() {
-            const saved = localStorage.getItem('primaryProviderId');
-            if (saved && AI_PROVIDERS.some(p => p.id === saved)) {
-                if (!isReleaseBuildProfile() || FREE_TIER_PROVIDER_IDS.includes(saved)) return saved;
+        function defaultPrimaryProviderId() {
+            const prefer = ['grok', 'gemini', 'groq', 'anthropic', 'openrouter', 'openai'];
+            for (const id of prefer) {
+                if (providerIsConfigured(id)) return id;
             }
-            return FREE_TIER_PROVIDER_IDS[0];
+            return 'grok';
+        }
+
+        function loadPrimaryProviderId() {
+            const userSet = localStorage.getItem(PRIMARY_PROVIDER_USER_SET_KEY) === '1';
+            const saved = localStorage.getItem('primaryProviderId');
+            if (!userSet || !saved || !AI_PROVIDERS.some(p => p.id === saved)) {
+                return defaultPrimaryProviderId();
+            }
+            if (saved === 'supergrok') return defaultPrimaryProviderId();
+            return saved;
         }
 
         function savePrimaryProviderId() {
@@ -1144,8 +1595,13 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             return AI_PROVIDERS.find(p => p.id === id);
         }
 
+        function isSuperGrokProvider(id) {
+            return id === 'supergrok';
+        }
+
+        /** Grok (xAI) always uses the API key. Browser mode is SuperGrok only. */
         function grokUsesBrowserOnly() {
-            return !(xaiApiKey && xaiApiKey.trim());
+            return false;
         }
 
         function getOrderedProviders() {
@@ -1173,20 +1629,200 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             }
         }
 
+        function getProviderKeyInput(providerId, context) {
+            const lists = context === 'settings'
+                ? ['#settings-provider-list']
+                : context === 'setup'
+                    ? ['#setup-provider-list']
+                    : ['#setup-provider-list', '#settings-provider-list'];
+            for (let i = 0; i < lists.length; i++) {
+                const row = document.querySelector(lists[i] + ' [data-provider-id="' + providerId + '"]');
+                if (row) {
+                    const input = row.querySelector('.setup-key-input');
+                    if (input) return input;
+                }
+            }
+            return null;
+        }
+
+        /** Reads the live value from this provider's row input. */
+        function getApiKeyFromDomInput(providerId, context) {
+            const input = getProviderKeyInput(providerId, context);
+            return input ? (input.value || '').trim() : '';
+        }
+
+        function providerKeyInputIsDirty(providerId) {
+            const p = getProviderById(providerId);
+            if (!p || p.isLink) return false;
+            const saved = (getApiKeyForProvider(providerId) || '').trim();
+            const setupVal = getApiKeyFromDomInput(providerId, 'setup');
+            const settingsVal = getApiKeyFromDomInput(providerId, 'settings');
+            if (setupVal && setupVal !== saved) return true;
+            if (settingsVal && settingsVal !== saved) return true;
+            return false;
+        }
+
+        function providerCanBePrimary(id) {
+            const p = getProviderById(id);
+            if (!p) return false;
+            if (p.isLink) return true;
+            return providerHasSavedKey(id);
+        }
+
+        /** True after Save on this row (memory) or pre-filled dev keys at load. */
+        function providerHasSavedKey(id) {
+            const p = getProviderById(id);
+            if (!p) return false;
+            if (p.isLink) return true;
+            return !!(getApiKeyForProvider(id) || '').trim();
+        }
+
+        function updateProviderSaveButtonState(providerId) {
+            const saved = providerHasSavedKey(providerId);
+            const dirty = providerKeyInputIsDirty(providerId);
+            const showSaved = saved && !dirty;
+            document.querySelectorAll('[data-provider-save-btn="' + providerId + '"]').forEach(btn => {
+                btn.textContent = showSaved ? 'Saved' : 'Save';
+                btn.className = 'provider-save-btn px-2.5 py-2 text-xs rounded-xl shrink-0 ' +
+                    (showSaved
+                        ? 'bg-emerald-900/50 border border-emerald-700/60 text-emerald-200'
+                        : 'bg-emerald-800 hover:bg-emerald-700 text-emerald-100');
+                btn.title = showSaved
+                    ? (isSaveApiKeysEnabled() ? 'Key saved on this device' : 'Key saved for this session')
+                    : 'Save this API key (required before starring as primary)';
+            });
+            updateProviderPrimaryButtonState(providerId);
+            updateProviderClearButtonState(providerId);
+        }
+
+        function providerHasClearableKey(providerId) {
+            const p = getProviderById(providerId);
+            if (!p || p.isLink) return false;
+            if (providerHasSavedKey(providerId)) return true;
+            return !!(getApiKeyFromDomInput(providerId, 'setup') || getApiKeyFromDomInput(providerId, 'settings'));
+        }
+
+        function updateProviderClearButtonState(providerId) {
+            const canClear = providerHasClearableKey(providerId);
+            document.querySelectorAll('[data-provider-clear-btn="' + providerId + '"]').forEach(btn => {
+                btn.disabled = !canClear;
+                btn.className = 'provider-clear-btn px-2.5 py-2 text-xs rounded-xl shrink-0 ' +
+                    (canClear
+                        ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-600'
+                        : 'bg-zinc-900 text-zinc-600 border border-zinc-800 cursor-not-allowed opacity-60');
+                btn.title = canClear ? 'Clear this API key' : 'No key to clear';
+            });
+        }
+
+        function updateProviderPrimaryButtonState(providerId) {
+            const canStar = providerCanBePrimary(providerId);
+            const isPrimary = primaryProviderId === providerId;
+            document.querySelectorAll('[data-provider-primary-btn="' + providerId + '"]').forEach(btn => {
+                btn.disabled = !canStar;
+                btn.className = 'provider-primary-btn px-2 py-1 text-sm rounded-xl ' +
+                    (isPrimary
+                        ? 'bg-amber-600 text-white'
+                        : canStar
+                            ? 'bg-zinc-800 hover:bg-zinc-700 text-zinc-400'
+                            : 'bg-zinc-800/60 text-zinc-600 cursor-not-allowed opacity-60');
+                btn.title = canStar
+                    ? 'Set as primary AI (main answer box). Open Plan tip for billing guidance.'
+                    : 'Click Save on this row before starring as primary';
+            });
+        }
+
+        function refreshAllProviderRowInteractiveState() {
+            AI_PROVIDERS.forEach(p => updateProviderSaveButtonState(p.id));
+        }
+
+        function saveProviderApiKey(providerId, opts) {
+            opts = opts || {};
+            const p = getProviderById(providerId);
+            if (!p || p.isLink) return true;
+            const input = getProviderKeyInput(providerId, opts.context);
+            const val = input
+                ? input.value.trim()
+                : (getApiKeyFromDomInput(providerId, 'setup') || getApiKeyFromDomInput(providerId, 'settings'));
+            if (!val) {
+                if (!opts.quiet) alert('Enter an API key for ' + p.name + ' first.');
+                return false;
+            }
+            if (isReleaseBuildProfile() && !opts.skipPersistPref) {
+                applySaveApiKeysPreferenceFromUi();
+                setSaveApiKeysEnabled(true);
+                syncSaveApiKeysCheckboxes();
+                applyBuildProfileUi();
+            }
+            userClearedApiKeyStorage.delete(p.keyStorage);
+            setApiKeyVariable(p.keyStorage, val);
+            if (isSaveApiKeysEnabled()) {
+                try { localStorage.setItem(p.keyStorage, val); } catch (e) { /* silent */ }
+            } else if (isReleaseBuildProfile()) {
+                try { localStorage.removeItem(p.keyStorage); } catch (e) { /* silent */ }
+            }
+            syncProviderKeyInputsFromMemory(providerId, val);
+            updateProviderSaveButtonState(providerId);
+            updateSetupStartState();
+            if (window.Brain && typeof Brain.refreshSetupApiStatus === 'function') {
+                Brain.refreshSetupApiStatus();
+            }
+            return true;
+        }
+
+        function clearProviderApiKey(providerId) {
+            const p = getProviderById(providerId);
+            if (!p || p.isLink) return;
+            if (!providerHasClearableKey(providerId)) return;
+            userClearedApiKeyStorage.add(p.keyStorage);
+            setApiKeyVariable(p.keyStorage, '');
+            try { localStorage.removeItem(p.keyStorage); } catch (e) { /* silent */ }
+            document.querySelectorAll(
+                '#setup-provider-list [data-provider-id="' + providerId + '"] .setup-key-input, ' +
+                '#settings-provider-list [data-provider-id="' + providerId + '"] .setup-key-input'
+            ).forEach(input => { input.value = ''; });
+            const prevPrimary = primaryProviderId;
+            ensureValidPrimary();
+            syncSelectedAIsFromKeys();
+            savePrimaryProviderId();
+            updatePrimaryAnswerLabel();
+            if (primaryProviderId !== prevPrimary) {
+                renderSetupProviders();
+                renderSettingsProviders();
+            } else {
+                refreshAllProviderRowInteractiveState();
+                updateSetupStartState();
+            }
+            if (window.Brain && typeof Brain.refreshSetupApiStatus === 'function') {
+                Brain.refreshSetupApiStatus();
+            }
+        }
+
+        /** Keeps setup and settings inputs aligned after Save. */
+        function syncProviderKeyInputsFromMemory(providerId, val) {
+            const value = val !== undefined
+                ? String(val).trim()
+                : String(getApiKeyForProvider(providerId) || '').trim();
+            ['setup', 'settings'].forEach(ctx => {
+                const input = getProviderKeyInput(providerId, ctx);
+                if (input) input.value = value;
+            });
+        }
+
         function providerIsConfigured(id) {
             const p = getProviderById(id);
             if (!p) return false;
-            if (p.optionalKey || p.isLink) return true;
-            const key = getApiKeyForProvider(id);
-            return !!(key && key.trim());
+            if (p.isLink) return true;
+            if (providerHasSavedKey(id)) return true;
+            return !!getApiKeyFromDomInput(id);
         }
 
         function countConfiguredProviders() {
-            return AI_PROVIDERS.filter(p => providerIsConfigured(p.id) && (p.keyStorage || p.optionalKey || p.isLink)).length;
+            return AI_PROVIDERS.filter(p => providerIsConfigured(p.id) && (p.keyStorage || p.isLink)).length;
         }
 
         function ensureValidPrimary() {
             if (providerIsConfigured(primaryProviderId)) return;
+            if (primaryProviderId === defaultPrimaryProviderId()) return;
             const fallback = providerOrder.find(id => providerIsConfigured(id));
             if (fallback) primaryProviderId = fallback;
         }
@@ -1195,7 +1831,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             selectedAIs = {};
             getOrderedProviders().forEach(p => {
                 if (p.id === primaryProviderId || !providerIsConfigured(p.id)) return;
-                if (isReleaseBuildProfile() && !FREE_TIER_PROVIDER_IDS.includes(p.id)) return;
+                if (isReleaseBuildProfile() && !FREE_TIER_PROVIDER_IDS.includes(p.id) && !providerHasSavedKey(p.id)) return;
                 selectedAIs[p.id] = true;
             });
         }
@@ -1211,10 +1847,10 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             const guidance = PRIMARY_PAID_GUIDANCE[primaryProviderId];
             const provider = getProviderById(primaryProviderId);
             if (!guidance || !provider) return null;
-            if (primaryProviderId === 'grok' && grokUsesBrowserOnly()) {
+            if (primaryProviderId === 'supergrok') {
                 return {
                     name: provider.name,
-                    message: 'Browser-only Grok cannot serve as a reliable primary AI. Add a paid xAI API key and star Grok again, or choose OpenAI, Anthropic, or Gemini with paid billing.',
+                    message: 'SuperGrok opens in your browser. Star Grok (xAI), Gemini, or another in-app API provider as primary for answers in the main box.',
                     planUrl: guidance.planUrl || provider.keyUrl
                 };
             }
@@ -1306,11 +1942,23 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         }
 
         function setPrimaryProvider(id) {
-            if (!providerIsConfigured(id)) {
-                alert('Set an API key for this provider first (or use Grok which needs no key).');
+            const p = getProviderById(id);
+            if (p && !p.isLink && !providerHasSavedKey(id)) {
+                alert('Enter this provider\'s API key and click Save before starring it as primary.');
+                return;
+            }
+            if (!providerCanBePrimary(id)) {
+                alert('Set an API key for this provider first (or use SuperGrok for free browser mode).');
                 return;
             }
             primaryProviderId = id;
+            try {
+                if (id === defaultPrimaryProviderId()) {
+                    localStorage.removeItem(PRIMARY_PROVIDER_USER_SET_KEY);
+                } else {
+                    localStorage.setItem(PRIMARY_PROVIDER_USER_SET_KEY, '1');
+                }
+            } catch (e) { /* silent */ }
             savePrimaryProviderId();
             syncSelectedAIsFromKeys();
             updatePrimaryAnswerLabel();
@@ -1389,8 +2037,8 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
             const primaryBtn = document.createElement('button');
             primaryBtn.type = 'button';
-            primaryBtn.className = 'px-2 py-1 text-sm rounded-xl ' + (primaryProviderId === provider.id ? 'bg-amber-600 text-white' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-400');
-            primaryBtn.title = 'Set as primary AI (main answer box). Open Plan tip for billing guidance.';
+            primaryBtn.dataset.providerPrimaryBtn = provider.id;
+            primaryBtn.className = 'provider-primary-btn px-2 py-1 text-sm rounded-xl';
             primaryBtn.innerHTML = '<i class="fa-solid fa-star"></i>';
             primaryBtn.onclick = () => setPrimaryProvider(provider.id);
 
@@ -1405,26 +2053,42 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             if (provider.isLink) {
                 const note = document.createElement('p');
                 note.className = 'text-xs text-zinc-500';
-                note.textContent = 'Opens in browser. No API key required.';
+                note.textContent = provider.id === 'supergrok'
+                    ? 'Opens SuperGrok in your browser. No API key required.'
+                    : 'Opens in browser. No API key required.';
                 body.appendChild(note);
+                if (provider.keyUrl) {
+                    const openBtn = document.createElement('button');
+                    openBtn.type = 'button';
+                    openBtn.className = 'mt-2 px-3 py-1.5 text-xs bg-sky-800 hover:bg-sky-700 rounded-xl text-sky-100';
+                    openBtn.textContent = 'Open SuperGrok (free)';
+                    openBtn.onclick = () => openExternalUrl(provider.keyUrl);
+                    body.appendChild(openBtn);
+                }
             } else {
                 const input = document.createElement('input');
                 input.type = 'password';
                 input.className = 'w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-sm setup-key-input';
+                input.autocomplete = 'off';
+                input.setAttribute('data-lpignore', 'true');
+                input.setAttribute('data-form-type', 'other');
                 input.dataset.providerId = provider.id;
                 input.dataset.keyStorage = provider.keyStorage;
                 input.placeholder = provider.placeholder || 'API key';
                 input.value = getStoredOrDefaultKey(provider.keyStorage);
-                input.addEventListener('input', () => {
+                const onKeyFieldUpdate = () => {
+                    updateProviderSaveButtonState(provider.id);
                     updateSetupStartState();
-                    if (window.Brain && typeof Brain.refreshSetupApiStatus === 'function') {
-                        Brain.refreshSetupApiStatus();
-                    }
-                });
+                };
+                input.addEventListener('input', onKeyFieldUpdate);
+                input.addEventListener('change', onKeyFieldUpdate);
+
+                const keyRow = document.createElement('div');
+                keyRow.className = 'flex flex-wrap gap-2 items-center';
+                keyRow.appendChild(input);
+                input.classList.add('flex-1', 'min-w-[12rem]');
+
                 if (provider.keyUrl) {
-                    const keyRow = document.createElement('div');
-                    keyRow.className = 'flex gap-2 items-center';
-                    keyRow.appendChild(input);
                     const linkBtn = document.createElement('button');
                     linkBtn.type = 'button';
                     linkBtn.className = 'px-2.5 py-2 text-xs bg-zinc-800 hover:bg-zinc-700 rounded-xl shrink-0';
@@ -1433,14 +2097,32 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     linkBtn.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square"></i>';
                     linkBtn.onclick = () => openExternalUrl(provider.keyUrl);
                     keyRow.appendChild(linkBtn);
-                    body.appendChild(keyRow);
-                } else {
-                    body.appendChild(input);
                 }
-                if (provider.optionalKey && isDevBuildProfile()) {
+
+                const saveBtn = document.createElement('button');
+                saveBtn.type = 'button';
+                saveBtn.dataset.providerSaveBtn = provider.id;
+                saveBtn.className = 'provider-save-btn px-2.5 py-2 text-xs rounded-xl shrink-0 bg-emerald-800 hover:bg-emerald-700 text-emerald-100';
+                saveBtn.textContent = 'Save';
+                saveBtn.title = 'Save this API key (required before starring as primary)';
+                saveBtn.onclick = () => saveProviderApiKey(provider.id, { context: context });
+                keyRow.appendChild(saveBtn);
+
+                const clearBtn = document.createElement('button');
+                clearBtn.type = 'button';
+                clearBtn.dataset.providerClearBtn = provider.id;
+                clearBtn.className = 'provider-clear-btn px-2.5 py-2 text-xs rounded-xl shrink-0';
+                clearBtn.textContent = 'Clear';
+                clearBtn.title = 'Clear this API key';
+                clearBtn.onclick = () => clearProviderApiKey(provider.id);
+                keyRow.appendChild(clearBtn);
+
+                body.appendChild(keyRow);
+                updateProviderSaveButtonState(provider.id);
+                if (provider.id === 'grok' && isDevBuildProfile()) {
                     const note = document.createElement('p');
                     note.className = 'text-xs text-zinc-500 mt-1';
-                    note.textContent = 'Pre-filled for alpha testing. Clear this field to use Open in Grok in the browser instead.';
+                    note.textContent = 'Pre-filled xAI API key for developer testing. Use SuperGrok below for free browser mode without a key.';
                     body.appendChild(note);
                 }
 
@@ -1457,6 +2139,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             if (!list) return;
             list.innerHTML = '';
             getOrderedProviders().forEach(p => list.appendChild(buildProviderRow(p, 'setup')));
+            refreshAllProviderRowInteractiveState();
             updateSetupStartState();
             if (window.Brain && typeof Brain.refreshSetupApiStatus === 'function') {
                 Brain.refreshSetupApiStatus();
@@ -1468,16 +2151,23 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             if (!list) return;
             list.innerHTML = '';
             getOrderedProviders().forEach(p => list.appendChild(buildProviderRow(p, 'settings')));
+            refreshAllProviderRowInteractiveState();
         }
 
         function saveKeysFromInputs(rootSelector) {
             const root = document.querySelector(rootSelector) || document;
+            const persist = isSaveApiKeysEnabled();
             root.querySelectorAll('.setup-key-input').forEach(input => {
                 const storage = input.dataset.keyStorage;
                 const val = input.value.trim();
                 if (!storage) return;
-                if (val) localStorage.setItem(storage, val);
-                else localStorage.removeItem(storage);
+                setApiKeyVariable(storage, val);
+                if (persist) {
+                    if (val) localStorage.setItem(storage, val);
+                    else localStorage.removeItem(storage);
+                } else if (isReleaseBuildProfile()) {
+                    try { localStorage.removeItem(storage); } catch (e) {}
+                }
             });
             reloadApiKeysFromStorage();
             ensureValidPrimary();
@@ -1485,11 +2175,30 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         }
 
         function shouldSkipRulesWalkthrough() {
-            try {
-                return localStorage.getItem(RULES_WALKTHROUGH_SKIP_KEY) === '1';
-            } catch (e) {
-                return false;
+            return getRulesWalkthroughSkipped();
+        }
+
+        function isRuleOfTwoDailyReadyForSetup() {
+            return !!(window.Brain && typeof Brain.isRuleOfTwoDailyReady === 'function' && Brain.isRuleOfTwoDailyReady());
+        }
+
+        function ruleOfTwoSetupHint() {
+            const status = (window.Brain && typeof Brain.getRuleOfTwoDailyStatus === 'function')
+                ? Brain.getRuleOfTwoDailyStatus()
+                : 'loading';
+            if (status.startsWith('feed-stale:')) {
+                const feedDate = status.slice('feed-stale:'.length);
+                const today = new Date();
+                const todayYmd = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+                return `Today's question (${todayYmd}) is not on the server yet (feed dated ${feedDate}). Retrying…`;
             }
+            if (status === 'offline') {
+                return 'Loading today\'s current events question — waiting for internet…';
+            }
+            if (status === 'feed-unavailable') {
+                return 'Loading today\'s current events question — waiting for signed feed…';
+            }
+            return 'Loading today\'s current events question (Rule of 2). Please wait…';
         }
 
         function updateSetupStartState() {
@@ -1500,32 +2209,46 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             const tempCount = document.querySelectorAll('#setup-provider-list .setup-key-input').length
                 ? [...document.querySelectorAll('#setup-provider-list .setup-key-input')].filter(i => i.value.trim()).length
                 : 0;
-            const alpha = isAlphaBuildProfile();
-            const agreed = !alpha || !!document.getElementById('setup-agreement-checkbox')?.checked;
-            const ready = tempCount >= 1 && agreed;
+            const keysReady = tempCount >= 1;
+            const dailyReady = isRuleOfTwoDailyReadyForSetup();
+            const canProceed = keysReady;
             const skipWalkthrough = shouldSkipRulesWalkthrough();
             const labelSpan = startBtn.querySelector('span');
             const icon = startBtn.querySelector('i');
+            const ruleStatus = (window.Brain && typeof Brain.getRuleOfTwoDailyStatus === 'function')
+                ? Brain.getRuleOfTwoDailyStatus()
+                : '';
+            const dailyPending = keysReady && !dailyReady;
 
-            startBtn.disabled = !ready;
-            if (ready) {
+            startBtn.disabled = !canProceed;
+            if (canProceed) {
                 if (skipWalkthrough) {
                     if (labelSpan) labelSpan.textContent = 'Start Claim Clash';
                     if (icon) icon.className = 'fa-solid fa-play';
-                    hint.textContent = 'You are ready. Click Start Claim Clash to enter the game.';
                 } else {
                     if (labelSpan) labelSpan.textContent = 'Next';
                     if (icon) icon.className = 'fa-solid fa-arrow-right';
-                    hint.textContent = 'You are ready. Click Next to review the rules before you start.';
                 }
-                hint.className = 'text-sm text-emerald-400 max-w-md mx-auto';
+                if (dailyPending && (ruleStatus === 'loading' || ruleStatus.startsWith('retry-'))) {
+                    hint.textContent = 'API keys ready. Loading today\'s current events question in the background…';
+                    hint.className = 'text-sm text-amber-300/90 max-w-md mx-auto';
+                } else if (dailyPending) {
+                    hint.textContent = ruleOfTwoSetupHint() + ' You can start now — stock examples work; click 2 retries when today\'s question is published.';
+                    hint.className = 'text-sm text-amber-300/90 max-w-md mx-auto';
+                } else if (skipWalkthrough) {
+                    hint.textContent = 'You are ready. Click Start Claim Clash to enter the game.';
+                    hint.className = 'text-sm text-emerald-400 max-w-md mx-auto';
+                } else {
+                    hint.textContent = 'You are ready. Click Next to review the rules before you start.';
+                    hint.className = 'text-sm text-emerald-400 max-w-md mx-auto';
+                }
             } else {
+                if (labelSpan) labelSpan.textContent = skipWalkthrough ? 'Start Claim Clash' : 'Next';
+                if (icon) icon.className = skipWalkthrough ? 'fa-solid fa-play' : 'fa-solid fa-arrow-right';
                 if (tempCount < 1) {
                     hint.textContent = skipWalkthrough
                         ? 'Enter at least one API key above to enable Start.'
                         : 'Enter at least one API key above to enable Next.';
-                } else if (alpha && !agreed) {
-                    hint.textContent = 'Check the alpha tester agreement box to continue.';
                 } else {
                     hint.textContent = skipWalkthrough
                         ? 'Enter at least one API key above to enable Start.'
@@ -1534,6 +2257,8 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 hint.className = 'text-sm text-zinc-500 max-w-md mx-auto';
             }
         }
+
+        window.updateSetupStartState = updateSetupStartState;
 
         /** Saves keys from welcome screen; opens rules walkthrough or enters the game. */
         function buildPrimaryApiUserText(question, recallContext) {
@@ -1567,20 +2292,24 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             return text;
         }
 
-        function proceedFromSetup() {
+        function applySaveApiKeysPreferenceFromUi() {
+            if (isReleaseBuildProfile()) {
+                setSaveApiKeysEnabled(readSaveApiKeysCheckbox('setup-save-keys-checkbox'));
+            }
+        }
+
+        async function proceedFromSetup() {
+            applySaveApiKeysPreferenceFromUi();
             saveKeysFromInputs('#setup-screen');
-            if (isAlphaBuildProfile()) {
-                const agreementCb = document.getElementById('setup-agreement-checkbox');
-                if (!agreementCb || !agreementCb.checked) {
-                    alert('Please agree to the alpha tester terms to continue.');
-                    return;
-                }
-                const ver = typeof APP_VERSION !== 'undefined' ? APP_VERSION : '0.1.0';
-                try { localStorage.setItem(ALPHA_AGREEMENT_KEY, ver); } catch (e) {}
+            if (window.GradeLevel && typeof GradeLevel.saveFromDom === 'function') {
+                try { GradeLevel.saveFromDom('setup'); } catch (e) { /* ignore */ }
             }
             if (countConfiguredProviders() < 1) {
                 alert('Please enter at least one API key before continuing.');
                 return;
+            }
+            if (window.Brain && typeof Brain.prepareRuleOfTwoDaily === 'function') {
+                void Brain.prepareRuleOfTwoDaily({ background: true });
             }
             ensureValidPrimary();
             savePrimaryProviderId();
@@ -1588,7 +2317,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             syncSelectedAIsFromKeys();
 
             if (shouldSkipRulesWalkthrough()) {
-                enterMainGame();
+                void enterMainGame();
                 return;
             }
 
@@ -1600,8 +2329,8 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         }
 
         function skipRulesWalkthroughNow() {
-            try { localStorage.setItem(RULES_WALKTHROUGH_SKIP_KEY, '1'); } catch (e) {}
-            enterMainGame();
+            setRulesWalkthroughSkipped(true);
+            void enterMainGame();
         }
 
         function showRulesWalkthroughPage() {
@@ -1653,15 +2382,16 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         function finishRulesWalkthrough() {
             const skipCheckbox = document.getElementById('rules-walkthrough-skip-checkbox');
             if (skipCheckbox && skipCheckbox.checked) {
-                try { localStorage.setItem(RULES_WALKTHROUGH_SKIP_KEY, '1'); } catch (e) {}
+                setRulesWalkthroughSkipped(true);
             }
             const walkthrough = document.getElementById('rules-walkthrough-screen');
             if (walkthrough) walkthrough.classList.add('hidden');
-            enterMainGame();
+            void enterMainGame();
         }
 
         /** Validates keys, hides onboarding screens, and initializes the main game UI. */
-        function enterMainGame() {
+        async function enterMainGame() {
+            applySaveApiKeysPreferenceFromUi();
             saveKeysFromInputs('#setup-screen');
             if (countConfiguredProviders() < 1) {
                 alert('Please enter at least one API key before continuing.');
@@ -1670,12 +2400,15 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             ensureValidPrimary();
             savePrimaryProviderId();
             saveProviderOrder();
-            syncSelectedAIsFromKeys();
 
             document.getElementById('setup-screen').classList.add('hidden');
             const walkthrough = document.getElementById('rules-walkthrough-screen');
             if (walkthrough) walkthrough.classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
+            scrollMainGameToTop();
+
+            beginFreshPlaySession();
+            await reserveSessionReferenceIdentity();
             initGameUI();
             if (typeof tauriInvoke === 'function') {
                 tauriInvoke('ensure_claim_clash_documents_folder').catch(function () {});
@@ -1720,7 +2453,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             },
             best: {
                 title: "Best Practices for Asking the AI",
-                content: "- Be specific: \"What are the top 5 most credible pieces of evidence...\" or \"What do primary sources say about X?\"\n- Ask the AI to cite sources when possible.\n- Use clear phrasing such as \"Did X happen?\" or \"I heard that...\" when seeking verification.\n- Request structure when helpful: \"Answer in bullet points with sources\" or \"Provide a pros and cons table.\"\n- Follow up iteratively: \"Based on your last answer, please expand on Y.\"\n- Add focus: \"Focus on primary sources\" or \"Note any uncertainties or unverified claims.\"\n- Frame claims about people as claims about actions, policies, or events.\n- If your primary AI is Grok, use Open in Grok and paste the composed prompt if the link does not preload."
+                content: "- Be specific: \"What are the top 5 most credible pieces of evidence...\" or \"What do primary sources say about X?\"\n- Ask the AI to cite sources when possible.\n- Use clear phrasing such as \"Did X happen?\" or \"I heard that...\" when seeking verification.\n- Request structure when helpful: \"Answer in bullet points with sources\" or \"Provide a pros and cons table.\"\n- Follow up iteratively: \"Based on your last answer, please expand on Y.\"\n- Add focus: \"Focus on primary sources\" or \"Note any uncertainties or unverified claims.\"\n- Frame claims about people as claims about actions, policies, or events.\n- If your primary AI is SuperGrok, use Open in SuperGrok and paste the composed prompt if the link does not preload."
             },
             tips: {
                 title: "Tips for a Great Game",
@@ -1991,12 +2724,146 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             element.innerHTML = html;
         }
 
+        function isOfflineOrNetworkError(err) {
+            if (window.Brain && typeof Brain.isOfflineOrNetworkError === 'function') {
+                return Brain.isOfflineOrNetworkError(err);
+            }
+            if (typeof navigator !== 'undefined' && navigator.onLine === false) return true;
+            const msg = String(err && err.message !== undefined ? err.message : err).toLowerCase();
+            return msg.includes('no internet connection') && msg.includes('claim clash needs internet');
+        }
+
+        function isDeviceOrProbeOffline() {
+            if (window.Brain && typeof Brain.isDeviceOrProbeOffline === 'function') {
+                return Brain.isDeviceOrProbeOffline();
+            }
+            return typeof navigator !== 'undefined' && navigator.onLine === false;
+        }
+
+        function requestTimeoutMessage() {
+            if (window.Brain && typeof Brain.requestTimeoutMessage === 'function') {
+                return Brain.requestTimeoutMessage();
+            }
+            return 'Request timed out. The AI took too long to respond. Try again or switch to another provider.';
+        }
+
+        function networkUnavailableMessage() {
+            if (window.Brain && typeof Brain.networkUnavailableMessage === 'function') {
+                return Brain.networkUnavailableMessage();
+            }
+            return 'No internet connection. Claim Clash needs internet to reach AI services. Check your Wi-Fi or Ethernet, then try again.';
+        }
+
+        function renderOfflineErrorHtml(failedName) {
+            return `<div class="rounded-xl border border-amber-900/50 bg-amber-950/20 px-3 py-2"><p class="text-sm text-amber-100/95"><strong>${escapeHtml(failedName)}</strong> could not connect.</p><p class="text-sm text-zinc-300 mt-2">${escapeHtml(networkUnavailableMessage())}</p></div>`;
+        }
+
+        async function ensureInternetForAi() {
+            if (window.Brain && typeof Brain.assertInternetAvailable === 'function') {
+                await Brain.assertInternetAvailable();
+                return;
+            }
+            if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+                throw new Error(networkUnavailableMessage());
+            }
+        }
+
+        function throwIfOffline(err) {
+            if (isDeviceOrProbeOffline()) {
+                throw new Error(networkUnavailableMessage());
+            }
+            throw err instanceof Error ? err : new Error(String(err));
+        }
+
+        const AI_FETCH_TIMEOUT_MS = 20000;
+        const GEMINI_FETCH_TIMEOUT_MS = 45000;
+
+        async function fetchWithTimeout(url, options, timeoutMs) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs || AI_FETCH_TIMEOUT_MS);
+            const fetchFn = (window.ClaimClashWeb && typeof window.ClaimClashWeb.aiFetch === 'function' && typeof isWebPlatform === 'function' && isWebPlatform())
+                ? window.ClaimClashWeb.aiFetch
+                : fetch;
+            try {
+                const res = await fetchFn(url, { ...options, signal: controller.signal });
+                clearTimeout(timer);
+                return res;
+            } catch (err) {
+                clearTimeout(timer);
+                if (err && err.name === 'AbortError') {
+                    throw new Error(requestTimeoutMessage());
+                }
+                throwIfOffline(err);
+            }
+        }
+
         const ERROR_EXPLAINER_ORDER = ['groq', 'openrouter', 'openai', 'anthropic', 'gemini', 'grok'];
+        const ANALYZE_FALLBACK_ORDER = ['groq', 'gemini', 'openrouter', 'anthropic', 'openai', 'grok'];
+
+        function scrollMainGameToTop() {
+            try {
+                window.scrollTo(0, 0);
+            } catch (e) { /* silent */ }
+            const game = document.getElementById('game-screen');
+            if (game) game.scrollTop = 0;
+            if (document.documentElement) document.documentElement.scrollTop = 0;
+            if (document.body) document.body.scrollTop = 0;
+        }
+
+        function extractApiErrorBody(data, res) {
+            if (!data || typeof data !== 'object') {
+                return (res && !res.ok) ? `HTTP ${res.status}` : 'API request failed';
+            }
+            if (typeof data.error === 'string') return data.error;
+            if (data.error && data.error.message) return data.error.message;
+            if (data.message) return data.message;
+            if (data.code && data.error) return `${data.code}: ${data.error}`;
+            if (!res.ok) return `HTTP ${res.status}`;
+            return null;
+        }
+
+        function getAnalyzeFallbackCandidates() {
+            const ordered = [primaryProviderId, ...ANALYZE_FALLBACK_ORDER];
+            const seen = new Set();
+            return ordered.filter(id => {
+                if (!id || seen.has(id) || isSuperGrokProvider(id)) return false;
+                seen.add(id);
+                if (!providerIsConfigured(id)) return false;
+                return !!(getApiKeyForProvider(id) || '').trim();
+            });
+        }
+
+        async function callAnalyzeWithFallback(userPrompt, onTrying) {
+            const candidates = getAnalyzeFallbackCandidates();
+            if (!candidates.length) {
+                throw new Error('No configured AI available for analysis.');
+            }
+
+            let lastError = 'Analysis failed';
+            for (const providerId of candidates) {
+                const provider = getProviderById(providerId);
+                const name = provider ? provider.name : providerId;
+                if (typeof onTrying === 'function') onTrying(name);
+                try {
+                    const result = await callAIProvider(providerId, userPrompt);
+                    return {
+                        text: result.text,
+                        modelUsed: result.modelUsed,
+                        providerId,
+                        providerName: name,
+                        usedFallback: providerId !== primaryProviderId
+                    };
+                } catch (e) {
+                    lastError = e.message || String(e);
+                }
+            }
+            throw new Error(lastError);
+        }
 
         function getExplainerProviderCandidates(failedProviderId) {
             return ERROR_EXPLAINER_ORDER.filter(id => {
                 if (id === failedProviderId) return false;
-                if (id === 'grok' && grokUsesBrowserOnly()) return false;
+                if (isSuperGrokProvider(id)) return false;
                 if (!providerIsConfigured(id)) return false;
                 const key = getApiKeyForProvider(id);
                 return !!(key && key.trim());
@@ -2019,7 +2886,19 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         }
 
         function buildStaticErrorExplanation(rawError, failedName) {
+            if (isDeviceOrProbeOffline()) {
+                return networkUnavailableMessage();
+            }
             const err = String(rawError).toLowerCase();
+            if (err.includes('timed out') || err.includes('took too long')) {
+                return `${failedName} took too long to respond. Try again, or switch primary AI in Settings to Groq or another provider.`;
+            }
+            if (err.includes('not_found_error') || err.includes('model:') || err.includes('model not found')) {
+                return `${failedName} could not find the AI model this build requested. Refresh the page for the latest update, or switch primary AI in Settings to Groq or Gemini.`;
+            }
+            if (err.includes('permission-denied') || err.includes('credits or licenses') || err.includes('purchase those on')) {
+                return `${failedName} rejected the API key or team has no API credits yet. SuperGrok or Claude Pro subscriptions do not fund API calls. Add prepaid credits in the provider console, paste the correct API key in Settings, then click Save.`;
+            }
             if (err.includes('quota') || err.includes('resource_exhausted') || err.includes('429') || err.includes('rate limit') || err.includes('exceeded')) {
                 const fallbackHint = isDevBuildProfile()
                     ? ' Switch primary AI in Settings to a provider on a paid plan (OpenAI, Anthropic, or paid Gemini/OpenRouter credits).'
@@ -2038,6 +2917,9 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         async function explainApiErrorPlainEnglish(failedProviderId, rawError, context = '') {
             const failed = getProviderById(failedProviderId);
             const failedName = failed ? failed.name : String(failedProviderId);
+            if (isDeviceOrProbeOffline()) {
+                return { text: networkUnavailableMessage(), explainedBy: null };
+            }
             const prompt = buildErrorExplanationPrompt(failedName, rawError, context);
             const candidates = getExplainerProviderCandidates(failedProviderId);
 
@@ -2063,6 +2945,10 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             if (!element) return;
             const failed = getProviderById(failedProviderId);
             const failedName = failed ? failed.name : 'AI';
+            if (isDeviceOrProbeOffline()) {
+                element.innerHTML = renderOfflineErrorHtml(failedName);
+                return;
+            }
             element.innerHTML = '<span class="text-zinc-400">Getting a plain-English explanation from another assistant...</span>';
 
             const explained = await explainApiErrorPlainEnglish(failedProviderId, rawError, context);
@@ -2110,11 +2996,9 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 return;
             }
             await autoSaveSessionRecord('new-session');
-            lastSessionAutoSaveFingerprint = null;
-            resetPrimarySession(true);
-            if (window.Brain && typeof Brain.resetExampleFlowSession === 'function') {
-                Brain.resetExampleFlowSession();
-            }
+            beginFreshPlaySession();
+            await reserveSessionReferenceIdentity();
+            renderAIResponses();
             scheduleCastPush();
         }
 
@@ -2163,6 +3047,87 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             pushCurrentContentToCast();
         }
 
+
+
+        const API_KEY_EXPLAINER_SECTIONS = [
+            {
+                title: 'In plain English',
+                body: 'An API key is a private code from an AI company (Google, Groq, OpenRouter, and others) that lets Claim Clash send your questions to their service on your behalf.\n\nThink of it like a personal access card: you create it in your account with that company, paste it into the matching row, click Save, and Claim Clash uses it only when you click Ask.'
+            },
+            {
+                title: 'Why Claim Clash asks for one',
+                body: 'Claim Clash does not run its own AI. It connects directly from your computer to the provider you choose. That keeps you in control of which AI answers your questions and which account gets billed (if any).\n\nYou need at least one API key before you can click Next and start playing. SuperGrok (browser) is optional for comparison later.'
+            },
+            {
+                title: 'Where your key lives',
+                body: 'Official builds never ship with anyone else\'s keys. You paste your own.\n\nEach provider row has Save and Clear buttons. Save commits a key for that session (and for future sessions if you check Save API keys on this device below). Clear removes the typed and saved key for that row. Star a provider as primary only after you have Saved its key.\n\nUnchecked Save API keys on this device means session-only storage (keys clear when you quit). Keys are never uploaded to Claim Clash servers or embedded in exported game files.\n\nGrok (xAI) is the default primary AI (starred). Star another provider after you Save its key.'
+            },
+            {
+                title: 'Free tiers to start',
+                body: 'Several providers offer a free API tier (look for the green dot beside the provider name):\n\n• Gemini: free tier at Google AI Studio\n• Groq: free tier with rate limits\n• OpenRouter: free models available\n• SuperGrok: free in the browser (no API key; opens externally)\n• Grok (xAI): requires an xAI API key for in-app answers (console.x.ai)\n\nOpenAI and Anthropic require paid billing setup. They are fine for comparison later, but free tiers are the easiest way to begin.'
+            },
+            {
+                title: 'How to get a key (typical steps)',
+                body: '1. Click the link beside a provider (for example "Get free API key" under Gemini).\n2. Sign in or create an account with that company.\n3. Create a new API key in their dashboard.\n4. Copy the key and paste it into the matching box on the setup screen.\n5. Click Save on that row (the button turns green when saved).\n6. Gemini is already starred as primary. To switch, Save the other provider\'s key first, then star it.\n7. Check Save API keys on this device if you want keys to persist after you close the app.\n\nUse Clear to remove a key from a row. If a key fails, check for extra spaces, an expired trial, or rate limits on a free plan.'
+            },
+            {
+                title: 'Treat it like a password',
+                body: 'Do not post your API key online, share it in screenshots, or give it to other people. If a key leaks, revoke it in the provider\'s dashboard and create a new one.\n\nYou can change, Save, or Clear keys anytime on the setup screen or in Settings after you enter the game.'
+            }
+        ];
+
+        function renderApiKeyExplainerContent() {
+            const container = document.getElementById('api-key-explainer-content');
+            if (!container) return;
+            container.innerHTML = '';
+            API_KEY_EXPLAINER_SECTIONS.forEach(section => {
+                const block = document.createElement('div');
+                block.className = 'space-y-2';
+                const heading = document.createElement('h3');
+                heading.className = 'text-base font-semibold text-zinc-100';
+                heading.textContent = section.title;
+                const body = document.createElement('p');
+                body.className = 'text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap';
+                body.textContent = section.body;
+                block.appendChild(heading);
+                block.appendChild(body);
+                container.appendChild(block);
+            });
+        }
+
+        function showTeacherOptions() {
+            const section = document.getElementById('setup-teacher-options-section');
+            if (!section) return;
+            section.classList.remove('hidden');
+            section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            const enabled = document.getElementById('setup-grade-enabled');
+            if (enabled) enabled.focus({ preventScroll: true });
+        }
+
+        async function showApiKeyExplainer() {
+            renderApiKeyExplainerContent();
+            const screen = document.getElementById('api-key-explainer-screen');
+            const setup = document.getElementById('setup-screen');
+            if (!screen) return;
+            if (setup) setup.classList.add('hidden');
+            screen.classList.remove('hidden');
+            document.documentElement.classList.add('api-key-explainer-open');
+            document.body.classList.add('api-key-explainer-open');
+        }
+
+        async function closeApiKeyExplainer() {
+            const screen = document.getElementById('api-key-explainer-screen');
+            const setup = document.getElementById('setup-screen');
+            if (!screen || screen.classList.contains('hidden')) return;
+            screen.classList.add('hidden');
+            if (setup) setup.classList.remove('hidden');
+            document.documentElement.classList.remove('api-key-explainer-open');
+            document.body.classList.remove('api-key-explainer-open');
+        }
+
+        window.showApiKeyExplainer = showApiKeyExplainer;
+        window.closeApiKeyExplainer = closeApiKeyExplainer;
+
         /** Closes every overlay modal except the cast modal (cast has its own lifecycle). */
         function closeAllModals() {
             closeSinglePlayerInterrogationHelp();
@@ -2171,6 +3136,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             closeFeedbackModal();
             closeExportSessionModal();
             closeAnalyzeDifferencesModal();
+            void closeApiKeyExplainer();
             ['bookmark-modal', 'settings-modal', 'about-modal', 'rules-modal'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.classList.add('hidden');
@@ -2230,11 +3196,11 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`;
                 
                 try {
-                    const res = await fetch(url, {
+                    const res = await fetchWithTimeout(url, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ contents })
-                    });
+                    }, GEMINI_FETCH_TIMEOUT_MS);
                     const data = await res.json();
 
                     if (data.error) {
@@ -2253,11 +3219,24 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                         };
                     }
                 } catch (err) {
+                    if (isDeviceOrProbeOffline()) {
+                        return { success: false, error: networkUnavailableMessage() };
+                    }
+                    if (err && err.name === 'AbortError') {
+                        lastError = requestTimeoutMessage();
+                        break;
+                    }
                     lastError = err.message || String(err);
                     continue;
                 }
             }
             return { success: false, error: lastError };
+        }
+
+        /** Queues comparison AI queries (runs in parallel with primary Ask). */
+        function scheduleComparisonQueries() {
+            const anySelected = Object.keys(selectedAIs).some(k => selectedAIs[k]);
+            if (anySelected) setTimeout(() => querySelectedAIs(), 150);
         }
 
         /** Sends the current question to the primary AI and fills #answer-box. */
@@ -2273,12 +3252,26 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             if (!question) return alert("Please enter a question first.");
 
             renderAIResponses();
+            scheduleComparisonQueries();
 
             const answerBox = document.getElementById("answer-box");
 
-            if (primary.id === 'grok' && grokUsesBrowserOnly()) {
-                answerBox.innerHTML = '<span class="text-zinc-400">Grok is your primary AI. Opening Grok in your browser now.</span>';
-                openGrokWithQuery();
+            if (primary.id !== 'supergrok') {
+                try {
+                    await ensureInternetForAi();
+                } catch (e) {
+                    answerBox.innerHTML = renderOfflineErrorHtml(primary.name);
+                    pushCurrentContentToCast();
+                    return;
+                }
+            }
+
+            if (primary.id === 'supergrok') {
+                answerBox.innerHTML =
+                    '<div class="space-y-2">' +
+                    '<span class="text-zinc-400">SuperGrok is your primary AI. Click below when you want to open it in your browser.</span>' +
+                    '<button type="button" onclick="openSuperGrokWithQuery()" class="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-xl">Open in SuperGrok</button>' +
+                    '</div>';
                 pushCurrentContentToCast();
                 return;
             }
@@ -2304,8 +3297,6 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 } else {
                     renderAiAnswer(answerBox, text, { modelUsed, isError: false });
                 }
-                const anySelected = Object.keys(selectedAIs).some(k => selectedAIs[k]);
-                if (anySelected && !isError) setTimeout(() => querySelectedAIs(), 150);
                 pushCurrentContentToCast();
             };
 
@@ -2402,18 +3393,18 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 const box = document.createElement("div");
                 box.className = "bg-zinc-900/50 border border-zinc-700 rounded-2xl p-4 min-h-[100px] flex flex-col";
 
-                const grokBrowser = provider.id === 'grok' && grokUsesBrowserOnly();
+                const grokBrowser = isSuperGrokProvider(provider.id);
                 let header = `<div class="panel-head mb-2"><span class="text-sm font-medium">${provider.name}</span><div class="panel-head-actions">`;
                 if (grokBrowser) {
-                    header += `<button onclick="openGrokWithQuery()" class="text-xs px-3 py-0.5 bg-blue-600 hover:bg-blue-700 rounded-xl">Open in Grok</button>`;
+                    header += `<button onclick="openSuperGrokWithQuery()" class="text-xs px-3 py-0.5 bg-blue-600 hover:bg-blue-700 rounded-xl">Open in SuperGrok</button>`;
                 } else {
                     header += `<button onclick="querySingleAI('${provider.id}', this)" class="text-xs px-3 py-0.5 bg-emerald-600 hover:bg-emerald-700 rounded-xl">Ask</button>`;
                 }
                 header += `</div></div>`;
 
                 const waitingText = grokBrowser
-                    ? '<span class="text-zinc-500 text-xs">Click "Open in Grok" or use Query Selected to open Grok in your browser. Add an xAI API key in Settings for in-app answers.</span>'
-                    : 'Waiting...';
+                    ? '<span class="text-zinc-500 text-xs">Click "Open in SuperGrok" when you want to use SuperGrok in your browser. Add a Grok (xAI) API key in Settings for in-app answers.</span>'
+                    : '<span class="text-zinc-500 text-xs">Click Ask or Query Selected to query this AI.</span>';
 
                 box.innerHTML = `
                     ${header}
@@ -2488,6 +3479,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             if (responseDiv) responseDiv.innerHTML = "Querying...";
 
             try {
+                await ensureInternetForAi();
                 const result = await callAIProvider(providerId, augmentQuestionWithComparisonContext(providerId, question));
                 if (responseDiv) {
                     renderAiAnswer(responseDiv, result.text, { modelUsed: result.modelUsed });
@@ -2510,25 +3502,39 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             if (!question) return alert("Please enter a question first.");
 
             const active = getOrderedProviders().filter(p => p.id !== primaryProviderId && selectedAIs[p.id] && providerIsConfigured(p.id));
-
-            for (const provider of active) {
-                const boxes = document.querySelectorAll(`.ai-response[data-provider="${provider.id}"]`);
-                if (boxes.length) {
-                    boxes[0].innerHTML = (provider.id === 'grok' && grokUsesBrowserOnly())
-                        ? 'Opening Grok in browser...'
-                        : 'Querying...';
+            const needsApi = active.some(p => !isSuperGrokProvider(p.id));
+            if (needsApi) {
+                try {
+                    await ensureInternetForAi();
+                } catch (e) {
+                    for (const provider of active) {
+                        if (isSuperGrokProvider(provider.id)) continue;
+                        const boxes = document.querySelectorAll(`.ai-response[data-provider="${provider.id}"]`);
+                        if (boxes.length) {
+                            boxes[0].innerHTML = renderOfflineErrorHtml(provider.name);
+                        }
+                    }
+                    scheduleCastPush();
+                    return;
                 }
             }
 
             for (const provider of active) {
                 const boxes = document.querySelectorAll(`.ai-response[data-provider="${provider.id}"]`);
-                if (provider.id === 'grok' && grokUsesBrowserOnly()) {
-                    openGrokWithQuery();
+                if (boxes.length) {
+                    boxes[0].innerHTML = isSuperGrokProvider(provider.id)
+                        ? '<span class="text-zinc-500 text-xs">SuperGrok does not open automatically. Click "Open in SuperGrok" above when you are ready.</span>'
+                        : 'Querying...';
+                }
+            }
+
+            await Promise.all(active.map(async (provider) => {
+                const boxes = document.querySelectorAll(`.ai-response[data-provider="${provider.id}"]`);
+                if (isSuperGrokProvider(provider.id)) {
                     if (boxes.length) {
-                        boxes[0].innerHTML = '<span class="text-zinc-400 text-xs">Opened Grok in your browser. The answer appears there. Add an xAI API key in Settings for in-app Grok answers.</span>';
+                        boxes[0].innerHTML = '<span class="text-zinc-400 text-xs">Click "Open in SuperGrok" above to open SuperGrok in your browser. Add a Grok (xAI) API key in Settings for in-app answers.</span>';
                     }
-                    scheduleCastPush();
-                    continue;
+                    return;
                 }
                 try {
                     const result = await callAIProvider(provider.id, augmentQuestionWithComparisonContext(provider.id, question));
@@ -2545,7 +3551,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                         );
                     }
                 }
-            }
+            }));
             scheduleCastPush();
         }
 
@@ -2553,9 +3559,9 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             'Querying...',
             'Waiting...',
             'Click "Ask" or use "Query Selected"',
-            'Click "Open in Grok"',
-            'Opened Grok in your browser',
-            'Opening Grok in browser'
+            'Click "Open in SuperGrok"',
+            'SuperGrok does not open automatically',
+            'Click below when you want to open it in your browser'
         ];
 
         function isPlaceholderAnswerText(text) {
@@ -2786,8 +3792,8 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 return;
             }
 
-            if (primaryProviderId === 'grok' && grokUsesBrowserOnly()) {
-                alert('Your primary AI is Grok in browser mode. Add an xAI API key in Settings or choose a different primary AI to run Analyze Differences.');
+            if (primaryProviderId === 'supergrok') {
+                alert('Your primary AI is SuperGrok (browser mode). Star an in-app API provider as primary to run Analyze Differences.');
                 return;
             }
 
@@ -2820,12 +3826,18 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             setAnalyzeDifferencesLoading(`Analyzing with ${primary ? primary.name : 'primary AI'}...`);
 
             try {
+                await ensureInternetForAi();
                 const prompt = buildAnalyzeDifferencesPrompt(data);
-                const result = await callPrimaryWithSessionAppend(prompt);
+                const result = await callAnalyzeWithFallback(prompt, (name) => {
+                    setAnalyzeDifferencesLoading(`Analyzing with ${name}...`);
+                });
                 applyComparisonNotesFromAnalysis(data, result.text);
+                const analysisLabel = result.usedFallback
+                    ? `Initial analysis (via ${result.providerName})`
+                    : 'Initial analysis';
                 analyzeDifferencesThread.push({
                     role: 'assistant',
-                    label: 'Initial analysis',
+                    label: analysisLabel,
                     text: result.text,
                     modelUsed: result.modelUsed
                 });
@@ -2835,7 +3847,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 const explained = await explainApiErrorPlainEnglish(
                     primaryProviderId,
                     e.message || String(e),
-                    'The player ran Analyze Differences.'
+                    'The player ran Analyze Differences and every configured AI failed.'
                 );
                 analyzeDifferencesThread.push({
                     role: 'assistant',
@@ -2881,12 +3893,19 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             }
 
             try {
+                await ensureInternetForAi();
                 const prompt = `[Dig deeper into cross-AI analysis] ${followUp}`;
-                const result = await callPrimaryWithSessionAppend(prompt);
+                if (pending) pending.textContent = 'Thinking...';
+                const result = await callAnalyzeWithFallback(prompt, (name) => {
+                    if (pending) pending.textContent = `Thinking with ${name}...`;
+                });
                 appendDigDeeperToComparisonNotes(followUp, result.text);
+                const digLabel = result.usedFallback
+                    ? `Dig deeper (via ${result.providerName})`
+                    : 'Dig deeper';
                 analyzeDifferencesThread.push({
                     role: 'assistant',
-                    label: 'Dig deeper',
+                    label: digLabel,
                     text: result.text,
                     modelUsed: result.modelUsed
                 });
@@ -2895,7 +3914,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 const explained = await explainApiErrorPlainEnglish(
                     primaryProviderId,
                     e.message || String(e),
-                    'The player used Dig Deeper in Analyze Differences.'
+                    'The player used Dig Deeper in Analyze Differences and every configured AI failed.'
                 );
                 analyzeDifferencesThread.push({
                     role: 'assistant',
@@ -2938,11 +3957,11 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 for (let model of GEMINI_MODELS) {
                     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`;
                     try {
-                        const res = await fetch(url, {
+                        const res = await fetchWithTimeout(url, {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({ contents })
-                        });
+                        }, GEMINI_FETCH_TIMEOUT_MS);
                         const data = await res.json();
                         if (data.error) {
                             lastError = data.error.message || lastError;
@@ -2955,6 +3974,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                             return { text: data.candidates[0].content.parts[0].text, modelUsed: model };
                         }
                     } catch (err) {
+                        throwIfOffline(err);
                         if (err.message && !err.message.includes('not found') && !err.message.includes('not supported')) {
                             lastError = err.message;
                         }
@@ -2968,64 +3988,85 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 if (!openaiApiKey) throw new Error("OpenAI API key missing. Add it in Settings.");
                 const messages = buildChatMessagesForProvider(question, sessionMessages);
 
-                const res = await fetch("https://api.openai.com/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${openaiApiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: "gpt-4o",
-                        messages: messages,
-                        max_tokens: 2000
-                    })
-                });
-                const data = await res.json();
-                if (data.error) throw new Error(data.error.message);
-                return { text: data.choices[0].message.content, modelUsed: "gpt-4o" };
+                try {
+                    const res = await fetchWithTimeout("https://api.openai.com/v1/chat/completions", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${openaiApiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: "gpt-4o",
+                            messages: messages,
+                            max_tokens: 2000
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.error) throw new Error(data.error.message);
+                    return { text: data.choices[0].message.content, modelUsed: "gpt-4o" };
+                } catch (err) {
+                    throwIfOffline(err);
+                }
             }
 
             if (providerId === 'anthropic') {
-                if (!anthropicApiKey) throw new Error("Anthropic API key missing. Add it in Settings.");
+                if (!anthropicApiKey) throw new Error("Claude API key missing. Add it in Settings.");
                 const messages = buildChatMessagesForProvider(question, sessionMessages);
 
-                const res = await fetch("https://api.anthropic.com/v1/messages", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "x-api-key": anthropicApiKey,
-                        "anthropic-version": "2023-06-01"
-                    },
-                    body: JSON.stringify({
-                        model: "claude-3-5-sonnet-20240620",
-                        max_tokens: 2000,
-                        messages: messages
-                    })
-                });
-                const data = await res.json();
-                if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-                return { text: data.content[0].text, modelUsed: "claude-3.5-sonnet" };
+                let lastError = "Claude API failed";
+                for (const model of ANTHROPIC_MODELS) {
+                    try {
+                        const res = await fetchWithTimeout("https://api.anthropic.com/v1/messages", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "x-api-key": anthropicApiKey,
+                                "anthropic-version": "2023-06-01"
+                            },
+                            body: JSON.stringify({
+                                model: model,
+                                max_tokens: 2000,
+                                messages: messages
+                            })
+                        });
+                        const data = await res.json();
+                        const errMsg = extractApiErrorBody(data, res);
+                        if (errMsg || !res.ok) {
+                            lastError = errMsg || `HTTP ${res.status}`;
+                            continue;
+                        }
+                        return { text: data.content[0].text, modelUsed: model };
+                    } catch (err) {
+                        throwIfOffline(err);
+                        lastError = err.message || String(err);
+                    }
+                }
+                throw new Error(lastError);
             }
 
             if (providerId === 'groq') {
                 if (!groqApiKey) throw new Error("Groq API key missing. Add it in Settings.");
                 const messages = buildChatMessagesForProvider(question, sessionMessages);
 
-                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${groqApiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: GROQ_MODEL,
-                        messages: messages,
-                        max_tokens: 2000
-                    })
-                });
-                const data = await res.json();
-                if (data.error) throw new Error(data.error.message);
-                return { text: data.choices[0].message.content, modelUsed: GROQ_MODEL };
+                try {
+                    const res = await fetchWithTimeout("https://api.groq.com/openai/v1/chat/completions", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${groqApiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: GROQ_MODEL,
+                            messages: messages,
+                            max_tokens: 2000
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.error) throw new Error(data.error.message);
+                    return { text: data.choices[0].message.content, modelUsed: GROQ_MODEL };
+                } catch (err) {
+                    throwIfOffline(err);
+                }
             }
 
             if (providerId === 'openrouter') {
@@ -3036,7 +4077,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 const orModels = getOpenRouterModelsForProvider('openrouter');
                 for (const model of orModels) {
                     try {
-                        const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                        const res = await fetchWithTimeout("https://openrouter.ai/api/v1/chat/completions", {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json",
@@ -3057,6 +4098,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                         }
                         return { text: data.choices[0].message.content, modelUsed: data.model || model };
                     } catch (err) {
+                        throwIfOffline(err);
                         lastError = err.message || String(err);
                     }
                 }
@@ -3064,13 +4106,13 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             }
 
             if (providerId === 'grok') {
-                if (!xaiApiKey) throw new Error("No xAI API key. Add one in Settings or use Open in Grok.");
+                if (!xaiApiKey) throw new Error("No xAI API key. Add one in Settings or use Open in SuperGrok.");
                 const messages = buildChatMessagesForProvider(question, sessionMessages);
 
                 let lastError = "Grok API failed";
                 for (const model of XAI_MODELS) {
                     try {
-                        const res = await fetch("https://api.x.ai/v1/chat/completions", {
+                        const res = await fetchWithTimeout("https://api.x.ai/v1/chat/completions", {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json",
@@ -3083,12 +4125,18 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                             })
                         });
                         const data = await res.json();
-                        if (data.error) {
-                            lastError = data.error.message || JSON.stringify(data.error);
+                        const errMsg = extractApiErrorBody(data, res);
+                        if (errMsg || !res.ok) {
+                            lastError = errMsg || `HTTP ${res.status}`;
+                            continue;
+                        }
+                        if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+                            lastError = 'Grok API returned an empty response';
                             continue;
                         }
                         return { text: data.choices[0].message.content, modelUsed: data.model || model };
                     } catch (err) {
+                        throwIfOffline(err);
                         lastError = err.message || String(err);
                     }
                 }
@@ -3098,23 +4146,58 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             throw new Error("Unknown provider");
         }
 
-        function openGrokWithQuery() {
+        const GROK_LINK_BRIDGE = 'http://127.0.0.1:3877';
+
+        function buildSuperGrokPrompt() {
             const question = getQuestionPlainText();
-            if (!question) return alert("Please enter a question first.");
-
+            if (!question) return null;
             const rulesText = Object.values(RULE_SECTIONS).map(s => `${s.title}\n${s.content}`).join("\n\n");
-
-            const prompt = `You are facilitating the Claim Clash game.\n\n` +
+            return `You are facilitating the Claim Clash game.\n\n` +
                 `Here are the full rules:\n${rulesText}\n\n` +
                 `Current question from the player:\n${question}\n\n` +
                 `Please respond as Grok in the style of the game, providing a structured, evidence-based answer.`;
+        }
 
+        function openSuperGrokUrl(prompt, handoffId) {
             const encoded = encodeURIComponent(prompt);
-            // Open grok.x.ai with prefilled prompt (best effort)
-            window.open(`https://grok.x.ai/?q=${encoded}`, "_blank");
+            const nonce = Date.now();
+            let url = `https://grok.com/?q=${encoded}&cc_ns=${nonce}`;
+            if (handoffId) {
+                url += `#grok-link-id=${encodeURIComponent(handoffId)}`;
+            }
+            window.open(url, '_blank', 'noopener,noreferrer');
+        }
+
+        function openSuperGrokWithQuery() {
+            const prompt = buildSuperGrokPrompt();
+            if (!prompt) return alert("Please enter a question first.");
 
             navigator.clipboard.writeText(prompt).catch(() => {});
+
+            const encoded = encodeURIComponent(prompt);
+            const nonce = Date.now();
+            const url = `https://grok.com/?q=${encoded}&cc_ns=${nonce}`;
+            const opened = window.open(url, '_blank', 'noopener,noreferrer');
+            if (!opened) {
+                alert('Your browser blocked the SuperGrok tab. Allow popups for this site, then try again. The prompt is on your clipboard — paste it at grok.com.');
+                return;
+            }
+
+            // Register a fresh Grok Link handoff for sync (desktop only; does not block the tab).
+            void fetch(`${GROK_LINK_BRIDGE}/api/handoff`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                body: JSON.stringify({
+                    source: 'claim-clash',
+                    task: 'supergrok-session',
+                    message: prompt,
+                    context: 'New SuperGrok session from Claim Clash (Rule of 2 / comparison).'
+                })
+            }).catch(() => {});
         }
+
+        window.openGrokWithQuery = openSuperGrokWithQuery;
+        window.openSuperGrokWithQuery = openSuperGrokWithQuery;
 
         function updateAIUI() {
             renderAIToggles();
@@ -3822,7 +4905,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                 const nameEl = div.parentElement.querySelector('.text-sm.font-medium');
                 const name = nameEl ? nameEl.textContent.trim() : provider || 'AI';
                 const text = div.innerHTML.trim();
-                if (text && text !== 'Querying...' && text !== 'Waiting...' && text !== 'Click "Ask" or use "Query Selected"' && !text.includes('Click "Open in Grok"')) {
+                if (text && text !== 'Querying...' && text !== 'Waiting...' && text !== 'Click "Ask" or use "Query Selected"' && !text.includes('Click "Open in SuperGrok"')) {
                     answers.push({ name: name, text: text });
                 }
             });
@@ -3935,6 +5018,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
         function showSettings() {
             closeAllModals();
+            syncSaveApiKeysCheckboxes();
             renderSettingsProviders();
             updatePrimaryPaidSuggestion();
             if (window.GradeLevel && typeof GradeLevel.syncAllPanels === 'function') {
@@ -3948,7 +5032,11 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         }
 
         function saveAllApiKeys() {
+            if (isReleaseBuildProfile()) {
+                setSaveApiKeysEnabled(readSaveApiKeysCheckbox('settings-save-keys-checkbox'));
+            }
             saveKeysFromInputs('#settings-modal');
+            applyBuildProfileUi();
             if (window.GradeLevel && typeof GradeLevel.saveFromDom === 'function') {
                 GradeLevel.saveFromDom('settings');
             }
@@ -3985,6 +5073,47 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         let pendingExportEmailParts = null;
         let pendingEmailAttachmentContext = null;
         let sessionExportConvoNum = null;
+        /** Internal nickname for reference exports (frontmatter sessionRef), e.g. 20260702-c03 */
+        let sessionRefNickname = null;
+
+        function formatSessionRefNickname(fileDate, convoNum) {
+            const day = String(fileDate || '').replace(/-/g, '');
+            const convo = String(Math.max(1, parseInt(convoNum, 10) || 1)).padStart(2, '0');
+            return day + '-c' + convo;
+        }
+
+        async function reserveSessionReferenceIdentity() {
+            const fileDate = window.SessionExport && SessionExport.formatFileDate
+                ? SessionExport.formatFileDate(new Date())
+                : new Date().toISOString().slice(0, 10);
+            const filenames = await listExportScanFilenames();
+            const naming = SessionExport.resolveExportNaming({
+                fileDate: fileDate,
+                topic: '[topic]',
+                filenames: filenames,
+                sessionConvoNum: null
+            });
+            sessionExportConvoNum = naming.convoNum;
+            sessionRefNickname = formatSessionRefNickname(fileDate, naming.convoNum);
+            return naming;
+        }
+
+        function beginFreshPlaySession() {
+            try { localStorage.removeItem('claimClashTodayDailyExampleServedDate'); } catch (e) { /* legacy */ }
+            bookmarks = [];
+            currentPlayer = 'Team A';
+            pendingPastSessionRecallContext = null;
+            lastSessionAutoSaveFingerprint = null;
+            resetPrimarySession(true);
+            syncSelectedAIsFromKeys();
+            if (window.Brain && typeof Brain.resetExampleFlowSession === 'function') {
+                Brain.resetExampleFlowSession();
+            }
+            const aiResponses = document.getElementById('ai-responses');
+            if (aiResponses) aiResponses.innerHTML = '';
+            updateBookmarksList();
+            updatePlayerBadge();
+        }
 
         function clearPendingEmailAttachmentContext() {
             pendingEmailAttachmentContext = null;
@@ -4016,6 +5145,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             data.exportVersion = naming.exportVersion;
             data.convTopic = topic;
             data.exportBasename = SessionExport.resolveExportBasename(data);
+            data.sessionRef = sessionRefNickname || formatSessionRefNickname(data.fileDate, data.convNumber);
             return data;
         }
 
@@ -4303,11 +5433,16 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         }
 
         async function quitWithoutSaving(reason) {
-            if (!confirm('Close Claim Clash without saving this session to a file?')) {
+            const onWeb = window.ClaimClashWeb && typeof window.ClaimClashWeb.isWebPlatform === 'function' && window.ClaimClashWeb.isWebPlatform();
+            const prompt = onWeb
+                ? 'Leave the game and return to the login screen without saving this session?'
+                : 'Close Claim Clash without saving this session to a file?';
+            if (!confirm(prompt)) {
                 return;
             }
             sessionCloseHandled = false;
             closeExportSessionModal();
+            hideQuitOverlay();
             await prepareAndQuitClaimClash(reason || 'quit-without-save', { skipAutoSave: true });
         }
 
@@ -4425,6 +5560,20 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             if (overlay) overlay.classList.remove('hidden');
         }
 
+        function hideQuitOverlay() {
+            const overlay = document.getElementById('quit-overlay');
+            if (overlay) overlay.classList.add('hidden');
+        }
+
+        function returnToLoginPage(message) {
+            if (window.ClaimClashWeb && typeof window.ClaimClashWeb.isWebPlatform === 'function' && window.ClaimClashWeb.isWebPlatform()) {
+                showQuitOverlay(message || 'Returning to login...');
+                window.location.href = '/logout';
+                return true;
+            }
+            return false;
+        }
+
         async function prepareAndQuitClaimClash(reason, options) {
             const opts = options || {};
             if (sessionCloseHandled) return;
@@ -4446,6 +5595,12 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             } catch (e) {
                 console.warn('Quit preparation failed', e);
             }
+            sessionExportConvoNum = null;
+            sessionRefNickname = null;
+            lastSessionAutoSaveFingerprint = null;
+            if (returnToLoginPage('Returning to login...')) {
+                return;
+            }
             showQuitOverlay('Closing Claim Clash...');
             try {
                 await tauriInvoke('quit_app');
@@ -4462,6 +5617,7 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
                     console.warn('Could not close app', e2);
                 }
             }
+            hideQuitOverlay();
         }
 
         async function saveAndQuit() {
@@ -4754,8 +5910,6 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
         // --- 8b. Past session recall UI ---
 
-        let pendingPastSessionRecallContext = null;
-
         function formatPastSessionLabel(meta) {
             const conv = meta.conv ? ('conv ' + meta.conv) : 'session';
             const topic = meta.topic ? (' [' + meta.topic + ']') : '';
@@ -4897,6 +6051,46 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
 
         // --- 9. Alpha tester feedback ---
 
+        function applyConsumerInstallUi() {
+            const cfg = window.CLAIM_CLASH_WEB_CONFIG || {};
+            const block = document.getElementById('setup-desktop-install');
+            const btn = document.getElementById('setup-desktop-install-btn');
+            const note = document.getElementById('setup-desktop-install-note');
+            const guide = document.getElementById('setup-desktop-install-guide');
+            if (!block || !btn) return;
+
+            const available = cfg.consumerInstallAvailable !== false;
+            const installUrl = String(cfg.consumerInstallUrl || '/download/Claim-Clash-Setup.exe').trim();
+            const guideUrl = String(cfg.consumerInstallGuideUrl || '/download/HOW-TO-INSTALL.txt').trim();
+            const versionLabel = String(cfg.consumerInstallVersion || '').trim();
+            const installFile = String(cfg.consumerInstallFileName || 'Claim-Clash-Setup.exe').trim();
+            const installKind = String(cfg.consumerInstallKind || 'setup').trim();
+
+            btn.href = installUrl;
+            if (guide) guide.href = guideUrl;
+
+            if (!available) {
+                btn.classList.add('opacity-50', 'pointer-events-none');
+                btn.removeAttribute('download');
+                if (note) {
+                    note.innerHTML = 'Windows installer is being prepared for the next release. Check back soon, or build from source. ' +
+                        '<a id="setup-desktop-install-guide" href="' + escapeHtml(guideUrl) + '" class="text-zinc-400 hover:text-zinc-300 underline">Install guide</a>';
+                }
+                return;
+            }
+
+            btn.classList.remove('opacity-50', 'pointer-events-none');
+            btn.setAttribute('download', installFile);
+            const kindText = installKind === 'portable'
+                ? 'Portable consumer build (double-click to run; no installer wizard)'
+                : 'Consumer desktop app (Windows installer)';
+            if (note) {
+                const verText = versionLabel ? (' (' + versionLabel + ')') : '';
+                note.innerHTML = kindText + verText + ': no site password, no pre-filled API keys. You add your own AI keys after install. ' +
+                    '<a id="setup-desktop-install-guide" href="' + escapeHtml(guideUrl) + '" class="text-zinc-400 hover:text-zinc-300 underline">Install guide</a>';
+            }
+        }
+
         function applyBuildProfileUi() {
             const alpha = isAlphaBuildProfile();
             const dev = isDevBuildProfile() && !alpha;
@@ -4907,53 +6101,28 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             if (alphaNote) alphaNote.classList.toggle('hidden', !alpha);
             if (devNote) devNote.classList.toggle('hidden', !dev);
             if (releaseNote) releaseNote.classList.toggle('hidden', !release);
-            const keysAgreementItem = document.getElementById('alpha-agreement-keys-item');
-            if (keysAgreementItem) keysAgreementItem.classList.toggle('hidden', !alpha);
-        }
-
-        function initAlphaAgreementGate() {
-            const section = document.getElementById('setup-alpha-agreement-section');
-            const verEl = document.getElementById('alpha-agreement-version');
-            const emailEl = document.getElementById('alpha-agreement-email');
-            const agreementCb = document.getElementById('setup-agreement-checkbox');
-
-            if (!isAlphaBuildProfile()) {
-                if (section) section.classList.add('hidden');
-                return;
+            const setupSaveRow = document.getElementById('setup-save-keys-row');
+            const settingsSaveRow = document.getElementById('settings-save-keys-row');
+            const settingsKeysNote = document.getElementById('settings-keys-note');
+            if (setupSaveRow) setupSaveRow.classList.toggle('hidden', !release);
+            if (settingsSaveRow) settingsSaveRow.classList.toggle('hidden', !release);
+            if (settingsKeysNote) {
+                settingsKeysNote.textContent = release
+                    ? (isSaveApiKeysEnabled()
+                        ? 'API keys are saved on this device only. Grok (xAI) is the default primary AI.'
+                        : 'API keys are session-only until you check Save below. Grok (xAI) is the default primary AI.')
+                    : 'API keys stay in local storage on this device only. Grok (xAI) is the default primary AI.';
             }
-
-            if (section) section.classList.remove('hidden');
-
-            const ver = typeof APP_VERSION !== 'undefined' ? APP_VERSION : '0.1.0';
-            const phase = typeof APP_PHASE !== 'undefined' ? APP_PHASE : 'Alpha';
-            if (verEl) verEl.textContent = ver + ' ' + phase;
-            if (emailEl) emailEl.textContent = FEEDBACK_EMAIL || 'the developer';
-
-            try {
-                if (agreementCb && localStorage.getItem(ALPHA_AGREEMENT_KEY) === ver) {
-                    agreementCb.checked = true;
-                }
-            } catch (e) {}
-
-            if (agreementCb && !agreementCb.dataset.bound) {
-                agreementCb.dataset.bound = '1';
-                agreementCb.addEventListener('change', () => {
-                    const declined = document.getElementById('alpha-agreement-declined');
-                    if (declined && agreementCb.checked) declined.classList.add('hidden');
-                    updateSetupStartState();
-                });
-            }
+            const setupSaveCb = document.getElementById('setup-save-keys-checkbox');
+            const settingsSaveCb = document.getElementById('settings-save-keys-checkbox');
+            if (setupSaveCb) setupSaveCb.disabled = dev || alpha;
+            if (settingsSaveCb) settingsSaveCb.disabled = dev || alpha;
+            syncSaveApiKeysCheckboxes();
+            bindSaveApiKeysCheckbox('setup-save-keys-checkbox');
+            bindSaveApiKeysCheckbox('settings-save-keys-checkbox');
+            applyConsumerInstallUi();
         }
 
-        function declineAlphaAgreement() {
-            const agreementCb = document.getElementById('setup-agreement-checkbox');
-            const declined = document.getElementById('alpha-agreement-declined');
-            if (agreementCb) agreementCb.checked = false;
-            if (declined) declined.classList.remove('hidden');
-            updateSetupStartState();
-        }
-
-        window.declineAlphaAgreement = declineAlphaAgreement;
         window.skipRulesWalkthroughNow = skipRulesWalkthroughNow;
 
         const FEEDBACK_FIELD_IDS = [
@@ -5251,14 +6420,28 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         }
 
         async function getAppWindow() {
-            const tauriWindow = window.__TAURI__ && window.__TAURI__.window;
-            if (tauriWindow && typeof tauriWindow.getCurrentWindow === 'function') {
-                return tauriWindow.getCurrentWindow();
+            if (!window.__TAURI__) return null;
+            const tauriWindow = window.__TAURI__.window;
+            if (tauriWindow) {
+                if (typeof tauriWindow.getCurrentWindow === 'function') {
+                    return tauriWindow.getCurrentWindow();
+                }
+                if (typeof tauriWindow.Window === 'function') {
+                    try { return new tauriWindow.Window('main'); } catch (e) { /* fallback */ }
+                }
+            }
+            const webviewWindow = window.__TAURI__.webviewWindow;
+            if (webviewWindow && typeof webviewWindow.getCurrentWebviewWindow === 'function') {
+                try { return webviewWindow.getCurrentWebviewWindow(); } catch (e) { /* fallback */ }
             }
             return null;
         }
 
         async function isFullscreenActive() {
+            try {
+                const invoked = await tauriInvoke('is_app_fullscreen');
+                if (typeof invoked === 'boolean') return invoked;
+            } catch (e) { /* fallback */ }
             const appWindow = await getAppWindow();
             if (appWindow && typeof appWindow.isFullscreen === 'function') {
                 try { return await appWindow.isFullscreen(); } catch (e) { /* fallback */ }
@@ -5267,32 +6450,70 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         }
 
         function updateFullscreenButtonLabel(isFullscreen) {
-            const btn = document.querySelector('button[onclick="toggleFullScreen()"]');
-            if (!btn) return;
-            if (isFullscreen) {
-                btn.innerHTML = '<i class="fa-solid fa-compress"></i> <span>Shrink</span>';
-            } else {
-                btn.innerHTML = '<i class="fa-solid fa-expand"></i> <span>Full Screen</span>';
-            }
+            const html = isFullscreen
+                ? '<i class="fa-solid fa-compress"></i> <span>Shrink</span>'
+                : '<i class="fa-solid fa-expand"></i> <span>Full Screen</span>';
+            document.querySelectorAll('.fullscreen-toggle-btn').forEach(function (btn) {
+                btn.innerHTML = html;
+            });
         }
 
         async function setAppFullscreen(enabled) {
+            try {
+                const invoked = await tauriInvoke('set_app_fullscreen', { fullscreen: !!enabled });
+                if (typeof invoked === 'boolean') {
+                    updateFullscreenButtonLabel(invoked);
+                    return invoked === !!enabled;
+                }
+            } catch (e) {
+                console.warn('set_app_fullscreen invoke failed', e);
+            }
             const appWindow = await getAppWindow();
             if (appWindow && typeof appWindow.setFullscreen === 'function') {
                 try {
                     await appWindow.setFullscreen(enabled);
                     updateFullscreenButtonLabel(enabled);
-                    return;
-                } catch (e) { /* fallback */ }
-            }
-            if (enabled) {
-                if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
-                    await document.documentElement.requestFullscreen();
+                    if (typeof appWindow.isFullscreen === 'function') {
+                        return await appWindow.isFullscreen() === enabled;
+                    }
+                    return true;
+                } catch (e) {
+                    console.warn('Tauri setFullscreen failed', e);
                 }
-            } else if (document.fullscreenElement && document.exitFullscreen) {
-                await document.exitFullscreen();
             }
-            updateFullscreenButtonLabel(!!document.fullscreenElement);
+            try {
+                if (enabled) {
+                    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+                        await document.documentElement.requestFullscreen();
+                    }
+                } else if (document.fullscreenElement && document.exitFullscreen) {
+                    await document.exitFullscreen();
+                }
+            } catch (e) {
+                console.warn('DOM fullscreen failed', e);
+            }
+            const active = await isFullscreenActive();
+            updateFullscreenButtonLabel(active);
+            return active === enabled;
+        }
+
+        async function maximizeAppWindow() {
+            try {
+                await tauriInvoke('maximize_app_window');
+                return true;
+            } catch (e) {
+                console.warn('maximize_app_window invoke failed', e);
+            }
+            const appWindow = await getAppWindow();
+            if (appWindow && typeof appWindow.maximize === 'function') {
+                try {
+                    await appWindow.maximize();
+                    return true;
+                } catch (e) {
+                    console.warn('Tauri maximize failed', e);
+                }
+            }
+            return false;
         }
 
         async function toggleFullScreen() {
@@ -5328,15 +6549,21 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
         }
 
         async function enterFullscreenOnLaunch() {
-            // Stay windowed on launch so the app is visible on all monitor setups.
-            // Use the toolbar Full Screen button when you want fullscreen.
             await ensureAppWindowVisible();
+            for (let attempt = 0; attempt < 4; attempt++) {
+                const ok = await setAppFullscreen(true);
+                if (ok || await isFullscreenActive()) {
+                    updateFullscreenButtonLabel(true);
+                    return;
+                }
+                await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1)));
+            }
         }
 
         /** Bootstraps the app: version labels, setup screen, or resumes saved keys. */
         function init() {
             applyBuildProfileUi();
-            initAlphaAgreementGate();
+
             reloadApiKeysFromStorage();
             ensureValidPrimary();
             syncSelectedAIsFromKeys();
@@ -5368,17 +6595,42 @@ Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
             }
 
             updateSetupStartState();
+            // Security bootstrap + Rule-of-2 daily prefetch start at brain.js load.
+            // init() schedules primary API status check once setup keys are in the DOM.
             if (window.Brain && typeof Brain.init === 'function') {
                 Brain.init();
             }
+            if (window.Brain && typeof Brain.onRuleOfTwoDailyReady === 'function') {
+                Brain.onRuleOfTwoDailyReady(updateSetupStartState);
+            }
 
             registerSessionAutoSaveHooks();
-            void enterFullscreenOnLaunch();
+            if (window.ClaimClashWeb && typeof window.ClaimClashWeb.applyWebPlatformUi === 'function') {
+                window.ClaimClashWeb.applyWebPlatformUi();
+            }
+            if (window.ClaimClashClient && typeof ClaimClashClient.apply === 'function') {
+                ClaimClashClient.apply();
+            }
+            const skipFullscreen = window.ClaimClashClient && typeof ClaimClashClient.isPhone === 'function' && ClaimClashClient.isPhone();
+            if (!skipFullscreen) {
+                void enterFullscreenOnLaunch();
+            } else {
+                updateFullscreenButtonLabel(false);
+            }
         }
 
         window.onload = init;
         document.addEventListener('fullscreenchange', function () {
             updateFullscreenButtonLabel(!!document.fullscreenElement);
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key !== 'Escape') return;
+            const screen = document.getElementById('api-key-explainer-screen');
+            if (screen && !screen.classList.contains('hidden')) {
+                e.preventDefault();
+                void closeApiKeyExplainer();
+            }
         });
     </script>
 </body>

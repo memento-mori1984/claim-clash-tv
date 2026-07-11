@@ -21,7 +21,7 @@ $ver = Get-Content (Join-Path $root "version.json") -Raw | ConvertFrom-Json
 $version = "{0}.{1}.{2}" -f $ver.major, $ver.minor, $ver.iteration
 $phase = if ($ver.phase) { $ver.phase.Trim() } else { "" }
 $suffix = if ($phase) { " $phase" } else { "" }
-$feedbackEmail = if ($ver.feedbackEmail) { $ver.feedbackEmail } else { "ClaimsClashFeedback@gmail.com" }
+$feedbackEmail = if ($ver.feedbackEmail) { $ver.feedbackEmail } else { "feedback@claim-clash.com" }
 
 $exeName = "Claim Clash $version$suffix.exe"
 $shaName = "$exeName.sha256"
@@ -54,8 +54,10 @@ if (Test-Path $setupPath) {
 }
 
 $howTo = @"
-Claim Clash - Alpha Test Build (Windows)
+Claim Clash - Beta Test Build (Windows)
 ========================================
+
+Copyright (c) 2026 Arcana Veritas LLC. All rights reserved.
 
 Thank you for testing!
 
@@ -71,8 +73,8 @@ QUICK START (PORTABLE)
 3. Double-click: $exeName
 4. If Windows SmartScreen appears (unsigned app), click "More info" then "Run anyway".
 5. If nothing happens when you double-click, open TROUBLESHOOTING.txt and follow the steps.
-6. On the Get started screen, check the alpha tester agreement, then confirm API keys (Gemini, Groq, OpenRouter, and Grok are pre-filled for alpha testing).
-7. Click Next for a short 4-screen rules walkthrough, then Start Claim Clash. Preloaded example questions are fine to explore via Load Example (updated regularly).
+6. On the Get started screen, add at least one of your own API keys (Gemini, Groq, OpenRouter, etc.). Use Shrink (top-right) to window the app while you copy/paste keys from another app.
+7. Click Next for a short rules walkthrough, then Start Claim Clash. Preloaded example questions are fine to explore via Load Example (rule of 2: click 1 = stock example; click 2 = today's current events question).
 
 APP WILL NOT OPEN?
 ------------------
@@ -91,7 +93,7 @@ Claim Clash is designed for two people at one screen. Bring a partner when you c
 - The other player clicks Follow Up to take their turn.
 - Keep alternating. Steelman the other side's strongest argument when you can.
 - Use Cast to TV so you both can read answers on a bigger screen (same Wi-Fi).
-- Use Load Example for sample questions (click 4 for the daily Brain question when available).
+- Use Load Example for sample questions (rule of 2: click 1 = stock example; click 2 = today's current events question, once per session).
 - Solo mode is optional if you are testing alone.
 
 Settings, bookmarks, and session reset:
@@ -123,15 +125,15 @@ REQUIREMENTS
 - Internet connection (the app calls AI services online)
 - Your API keys stay on your computer only (saved in local storage)
 
-IN-APP AGREEMENT
-----------------
-On first launch you must click Begin Testing to accept the alpha tester terms.
+API KEYS
+--------
+This beta zip contains the official build (no embedded API keys). Bring your own keys from Google AI Studio, Groq, OpenRouter, or similar free-tier providers.
 
 WHEN YOU FINISH
 ---------------
 - Send feedback through the app first (see Feedback below).
-- Delete this zip, the extracted folder, and the app executable from your PC.
-- Do not share the pre-filled alpha testing API keys with anyone else.
+- Delete this zip, the extracted folder, and the app executable from your PC when asked.
+- Do not share your personal API keys with anyone else.
 
 FEEDBACK (PLEASE USE THE APP)
 -----------------------------

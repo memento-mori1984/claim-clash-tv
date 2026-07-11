@@ -1,5 +1,7 @@
 {
   "geminiApiKey": "YOUR_GEMINI_KEY",
+  "anthropicApiKey": "YOUR_CLAUDE_KEY",
+  "openaiApiKey": "YOUR_OPENAI_KEY",
   "groqApiKey": "YOUR_GROQ_KEY",
   "openrouterApiKey": "YOUR_OPENROUTER_KEY",
   "xaiApiKey": "YOUR_XAI_KEY"

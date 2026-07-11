@@ -2,7 +2,8 @@
 /**
  * Draft today's current-events question for the signed Brain feed.
  * Rule of 2 (click 2): extremely recent breaking news or a fresh development
- * in an ongoing case. On slow news days, drafts an obviously ridiculous claim.
+ * in an ongoing case. Questions ask for context and impacts — not yes/no.
+ * On slow news days, drafts an obviously ridiculous claim.
  *
  * Usage:
  *   $env:GEMINI_API_KEY = "AIza..."
@@ -152,8 +153,17 @@ async function callGemini(apiKey, prompt) {
                 contents: [{ role: 'user', parts: [{ text: prompt }] }],
                 generationConfig: {
                     temperature: 0.35,
-                    maxOutputTokens: 2048,
-                    responseMimeType: 'application/json'
+                    maxOutputTokens: 1024,
+                    responseMimeType: 'application/json',
+                    responseSchema: {
+                        type: 'object',
+                        properties: {
+                            headline_seed: { type: 'string' },
+                            daily: { type: 'string' },
+                            recency_note: { type: 'string' }
+                        },
+                        required: ['headline_seed', 'daily', 'recency_note']
+                    }
                 }
             })
         });
@@ -169,19 +179,39 @@ async function callGemini(apiKey, prompt) {
     throw new Error(lastError);
 }
 
+function extractFieldsFromPartialJson(raw) {
+    const unescape = (s) => String(s || '').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+    const dailyMatch = raw.match(/"daily"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+    if (!dailyMatch) return null;
+    const seedMatch = raw.match(/"headline_seed"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+    const noteMatch = raw.match(/"recency_note"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+    return {
+        headline_seed: seedMatch ? unescape(seedMatch[1]) : '',
+        daily: unescape(dailyMatch[1]),
+        recency_note: noteMatch ? unescape(noteMatch[1]) : ''
+    };
+}
+
 function extractJsonBlock(text) {
     const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
     const raw = fenced ? fenced[1] : text;
     const start = raw.indexOf('{');
-    const end = raw.lastIndexOf('}');
-    if (start === -1 || end === -1) {
+    if (start === -1) {
         throw new Error(`Model did not return JSON: ${String(text).slice(0, 240)}`);
     }
-    try {
-        return JSON.parse(raw.slice(start, end + 1));
-    } catch (e) {
-        throw new Error(`Invalid JSON from model: ${e.message}`);
+    const end = raw.lastIndexOf('}');
+    const slice = end > start ? raw.slice(start, end + 1) : raw.slice(start);
+    if (end > start) {
+        try {
+            return JSON.parse(slice);
+        } catch (e) {
+            const partial = extractFieldsFromPartialJson(slice);
+            if (partial) return partial;
+        }
     }
+    const partial = extractFieldsFromPartialJson(slice);
+    if (partial) return partial;
+    throw new Error(`Model did not return JSON: ${String(text).slice(0, 240)}`);
 }
 
 function validateQuestion(question, mode) {
@@ -194,6 +224,18 @@ function validateQuestion(question, mode) {
         const stalePattern = /\b(in late|earlier this month|last month|last week|weeks ago|months ago|years ago|202[0-4]|january|february|march|april|may)\b/i;
         if (stalePattern.test(q) && !/\b(today|yesterday|this morning|tonight|just|hours ago|breaking|new filing|new ruling|new vote)\b/i.test(q)) {
             throw new Error('Breaking question sounds too dated; retry with today or yesterday framing');
+        }
+        const quizPattern = /\b(which state|which country|which city|which court|allowed which|what state|who was the|name the state)\b/i;
+        if (quizPattern.test(q)) {
+            throw new Error('Breaking question must not be a "which X" quiz');
+        }
+        const yesNoLead = /^(today|yesterday|this morning|tonight,?\s+)?(did|has|have|was|were|is|are)\b/i;
+        if (yesNoLead.test(q)) {
+            throw new Error('Avoid yes/no openings (Did/Has/Was...); ask for context and impacts');
+        }
+        const explorePattern = /\b(context|background|impact|implications|consequences|affect|means for|stakeholders|ripple effects?|who is affected|what it means|why it matters|how it could|what are the effects)\b/i;
+        if (!explorePattern.test(q)) {
+            throw new Error('Breaking question must request basic context and explore impacts');
         }
     }
 
@@ -223,15 +265,23 @@ function buildBreakingPrompt(dateYmd, headlines) {
         '- Do NOT recycle stories that peaked days ago (e.g. "as the Court closed its term in late June" when players want what broke TODAY).',
         '- If headlines are stale, pick the freshest development you can verify from the list; never default to old Supreme Court roundups.',
         '',
-        'Good (recent + fact-checkable):',
-        '- Did the Senate confirm a new Fed chair nominee in a floor vote yesterday, and what was the final tally?',
-        '- Did prosecutors file new charges today in the ongoing classified-documents case, and against whom?',
+        'Question shape (required — NOT yes/no):',
+        '- Anchor ONE fresh development from the headlines (name the actor, case, bill, agency, or event).',
+        '- Ask the AI to give basic context (what happened, who is involved) AND explore impacts (who is affected, what it could mean next).',
+        '- Use open prompts: "What is the background...", "What are the implications...", "How might this affect...", "Explain the context and impacts of..."',
+        '- NEVER open with Did/Has/Was/Is/Are — those produce shallow true/false answers and conflicting AI guesses.',
+        '- NEVER write quiz questions ("which state", "what country", "who won").',
+        '- One or two sentences, ends with ?, under 280 characters if possible. Neutral tone. No "who is right".',
         '',
-        'Bad (too old or homework-y):',
+        'Good (context + impacts, anchored to a named development):',
+        '- What is the background of Microsoft\'s layoff announcement today, and what impacts could 4,800 job cuts have on the tech sector and affected regions?',
+        '- Yesterday\'s emergency-relief ruling in NetChoice v. Paxton: what context explains the decision, and what impacts could it have on age-verification laws and app stores?',
+        '',
+        'Bad (yes/no, quiz, or homework-y):',
+        '- Did Microsoft today announce companywide cuts, laying off 4,800 employees?',
+        '- Today, the Supreme Court allowed which state to require age verification for mobile apps?',
         '- Did the Supreme Court strike down a birthright citizenship order "today" when that story is days old.',
         '- Broad "what happened this term" questions without a fresh development.',
-        '',
-        'Style: one sentence, ends with ?, under 220 characters if possible. Neutral tone. No "who is right".',
         '',
         'Headlines (Google News US; bracketed age is approximate):',
         list,
@@ -246,21 +296,24 @@ function buildRidiculousPrompt(dateYmd) {
         `You are drafting the click-2 "current events question" for Claim Clash (${dateYmd}).`,
         'It is a slow news day: no dominant fresh headline worth a serious timely question.',
         '',
-        'Write an OBVIOUSLY RIDICULOUS claim that no reasonable player would believe is real.',
-        'It should still sound like viral misinformation someone might joke about, but fact-checking should instantly land on "no, that is fake."',
+        'Write an OBVIOUSLY RIDICULOUS satire question — not a plausible local news item.',
+        'Players must instantly know it is a joke, not wonder which city or council you mean.',
         '',
         'Rules:',
-        '- One sentence, ends with ?, under 220 characters if possible.',
+        '- One or two sentences, ends with ?, under 280 characters if possible.',
+        '- Start with "According to satirical posts online," OR name a clearly fictional place (e.g. "the town of Nonsensington, Nebraska").',
+        '- Ask for absurd context and ridiculous impacts — NOT a yes/no "did this happen" headline.',
         '- Use absurd specifics (fake laws, silly units, cartoon logic, impossible timelines).',
-        '- Do NOT use real breaking news. Do NOT sound like a plausible Reuters headline.',
-        '- Still answerable: reputable sources would clearly debunk it.',
+        '- Do NOT use real breaking news. Do NOT sound like a plausible Reuters or city-council headline.',
+        '- Still answerable: reputable sources would clearly debunk the premise.',
         '- Keep it playful, not cruel or bigoted.',
         '',
         'Good examples:',
-        '- Did Congress pass a law requiring every U.S. highway mile marker to be replaced with bronze statues of eagles by Friday?',
-        '- Did the White House confirm the Moon will switch to a permanent crescent shape visible from Earth after this weekend?',
+        '- According to satirical posts online, what is the supposed context behind the claim that every U.S. highway mile marker must become a bronze eagle statue by Friday, and what impacts would that have on drivers?',
+        '- In the fictional town of Nonsensington, Nebraska, what background explains the new squirrel-helmet ordinance, and how might it affect local park visitors?',
         '',
-        'Bad (too believable):',
+        'Bad (yes/no or too believable):',
+        '- Did Congress pass a law requiring bronze eagle mile markers?',
         '- Did inflation rise 0.3% last month?',
         '- Did a senator introduce a bill about Social Security?',
         '',

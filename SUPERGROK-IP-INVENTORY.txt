@@ -1,0 +1,100 @@
+CLAIM CLASH — IP INVENTORY FOR SUPERGROK REVIEW (v0.1.92 Beta)
+Author / rights: Arcana Veritas LLC (assigned from Zachary Roberts, effective 2026-07-11)
+Ops account: memento-mori1984
+Date: June 30, 2026 (ownership updated July 11, 2026)
+
+USER QUESTION
+-------------
+What specifically should be COPYRIGHTED, TRADEMARKED, and PATENTED in Claim Clash?
+User already received general eCO copyright steps from SuperGrok. Need a concrete inventory mapped to this codebase, with AI-disclaimer guidance and what NOT to claim.
+
+=== COPYRIGHT — LIKELY REGISTER (human-authored) ===
+
+1. COMPUTER PROGRAM (eCO: computer program / literary work)
+   - Rust/Tauri backend: src-tauri/src/*.rs (brain_feed Ed25519 verification, cast HTTP server, session paths, Tauri commands)
+   - Frontend modules: src/brain.js, steelman-directive.js, legal-jurisdiction-directive.js, grade-level.js, session-export.js, example-flow-questions.js, build-profile.js
+   - Main application: src/index.html (~5900 lines — game UI, setup Save/Clear/star API flow, rules engine, modals, Cast integration)
+   - src/cast-mirror.html, src/styles.css
+   - Build/signing scripts: scripts/sign-brain-feed.mjs, generate-brain-keys.mjs, build-msix-store.ps1, package-drive-zip.ps1, etc.
+
+2. LITERARY / TEXT WORKS
+   - RULE_SECTIONS + rules walkthrough (v3.4) in index.html — steelman/strawman pedagogy, two-player flow
+   - distribution/ALPHA-TESTER-AGREEMENT.txt
+   - PRIVACY-POLICY.md / distribution/PRIVACY-POLICY.txt
+   - distribution/HOW-TO-INSTALL.txt, TROUBLESHOOTING.txt, HOW-TO-TEST (generated template)
+   - API key explainer sections (API_KEY_EXPLAINER_SECTIONS in index.html)
+   - Marketing/listing drafts in MARKETING-NOTES.txt (optional)
+
+3. CURATED CONTENT DATABASE
+   - src/example-flow-questions.js — human-written factual example questions (Load Example stock pool)
+   - Brain feed POOL structure + signed feed.json format (human-designed schema)
+   - Grade level mapping logic (grade-level.js) — Common Core band mapping
+
+4. VISUAL / COMPILATION (if filing separately or as deposit exhibits)
+   - assets: claimsclash.png (app logo)
+   - Overall selection/arrangement of UI screens as compilation
+   - MSIX manifest / store assets (StoreLogo.png etc.)
+
+5. EXISTING DEPOSIT MATERIAL (needs refresh to 0.1.92)
+   - copyright-deposit/Claim-Clash-v0.1.0-first25-last25-deposit.txt
+   - copyright-deposit/00-TITLE-PAGE.txt
+   - User should update title page and deposit for current version
+
+=== COPYRIGHT — DISCLAIM OR EXCLUDE ===
+
+- Runtime AI outputs (Gemini, OpenAI, etc.) — user/provider generated, not claimant authorship
+- Brain daily questions when produced via scripts/craft-current-events-question.mjs using Gemini on headlines — claim only if human selects/edits/signs; disclaim raw AI draft in eCO
+- Third-party OSS: Tauri, Rust crates, Font Awesome, jsPDF — exclude from deposit; list in NOTICE
+- User API keys and user session content — not developer's work
+- Standard UI patterns (buttons, modals) — not separately protectable
+
+=== TRADEMARK — CONSIDER USPTO REGISTRATION ===
+
+Already used in app (common-law), NOT yet federal registration:
+- "Claim Clash" — primary product name (Class 9 software / Class 41 education-entertainment?)
+- "memento-mori1984" — Store publisher display name (weaker as product mark)
+- Tagline "Built for two" — descriptive? need SuperGrok on registrability
+- Logo: claimsclash.png — trade dress / logo mark if distinctive
+
+NOT trademark (generic/descriptive):
+- "SuperGrok" (xAI), provider names (Gemini, Groq, etc.)
+- "The Brain" alone may be descriptive; "Claim Clash Brain" as phrase?
+
+=== PATENT — LIKELY LOW PRIORITY (need SuperGrok + attorney view) ===
+
+Probably NOT worth utility patent for indie unless attorney disagrees:
+- Turn-based two-player shared-screen AI Q&A game method (abstract idea)
+- Steelman/strawman pedagogical rules as game rules
+- Multi-provider API key comparison UI
+- Save/Clear/star primary provider UX
+
+Maybe discuss with attorney (still likely prior art):
+- Ed25519 creator-signed remote brain feed preventing local tampering
+- Cast-to-TV LAN mirror with pairing token for game state sync
+- Hidden Brain session isolated from user game prompts (security architecture)
+
+Software patents expensive ($10k+), slow, uncertain after Alice. Owner is Arcana Veritas LLC; product is beta stage.
+
+=== REGISTRATION STRATEGY QUESTIONS FOR SUPERGROK ===
+
+1. Single eCO registration for 0.1.92 Beta computer program + deposit (first/last 25 pages) — sufficient for now?
+2. Separate registration for example questions literary collection?
+3. Separate registration for rules text / game manual?
+4. Group registration for future versions — when does 1.0 qualify?
+5. Exact eCO authorship description + AI disclaimer wording for Brain feed (AI-assisted headline crafting)?
+6. Trademark: file "Claim Clash" now before Store launch? Intent-to-use vs use-in-commerce?
+7. Patent: explicit "skip" recommendation or any narrow claim worth provisional?
+
+=== FACTS ===
+- License: MIT (open source) — copyright registration still valid; registration ≠ proprietary license
+- Copyright notice in app: © 2026 Arcana Veritas LLC. All rights reserved.
+- Trademark: "Claim Clash" is a trademark of Arcana Veritas LLC.
+- IP assignment: legal/IP-ASSIGNMENT.md and legal/ZHR-AV-IP.pdf (effective 2026-07-11)
+- Store identity (ops): memento-mori1984.ClaimClash
+- Project: C:\Users\Ranzh\ClaimClash\claim-clash-tv
+
+Please respond with:
+A) Prioritized list: REGISTER NOW / REGISTER AT 1.0 / TRADEMARK / SKIP PATENT
+B) eCO application title + authorship description + AI disclaimer sample text
+C) What the 0.1.92 deposit should include (file list)
+D) Whether SuperGrok's earlier eCO advice needs correction for this specific project

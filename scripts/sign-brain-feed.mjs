@@ -58,7 +58,7 @@ const unsigned = {
     date: draft.date,
     daily: draft.daily,
     pool: draft.pool ?? [],
-    issued_at: draft.issued_at ?? Math.floor(Date.now() / 1000)
+    issued_at: Math.floor(Date.now() / 1000)
 };
 
 const message = canonicalMessage(unsigned);

@@ -6,13 +6,39 @@ This document tracks publishing Claim Clash to the Microsoft Store.
 
 **Legacy path:** signed **MSI** installer linked in Partner Center (you sign the MSI yourself). See "MSI fallback" below.
 
+## Certification fixes
+
+### 07/10/2026 — Attention needed (Product ID `9NVBNWJWBFSL`)
+
+| Policy | Issue | Fix (use these exact URLs in Partner Center) |
+|--------|--------|-----------------------------------------------|
+| **10.1.2.7 Functionality** | Support Contact `.../blob/main/SUPPORT.md` 404 (repo default branch is `master`, not `main`) | **https://claim-clash.com/download/support** |
+| **10.5.1 Privacy Policy** | Privacy URL `.../blob/main/PRIVACY-POLICY.md` 404 | **https://claim-clash.com/download/privacy-policy** |
+
+Both pages are public HTTPS HTML under `/download/` (no site password). Do **not** resubmit with GitHub `blob/main/` links.
+
+**Partner Center checklist before resubmit:**
+
+1. **Product declarations → Privacy policy URL** → `https://claim-clash.com/download/privacy-policy`
+2. **Store listing → Support info / Support contact website** → `https://claim-clash.com/download/support`  
+   (email can remain `feedback@claim-clash.com`)
+3. Open both URLs in a private browser window and confirm they load (HTTP 200, full page).
+4. Resubmit the package (or metadata-only update if Partner Center allows).
+
+### 07/08/2026 report
+
+| Issue | Fix |
+|-------|-----|
+| Privacy URL `.../blob/main/...` returned 404 (repo uses `master`) | Public page: **https://claim-clash.com/download/privacy-policy** (no login) |
+| `privateNetworkClientServer` declared under `rescap` | Moved to general `<Capability>` in `msix/Package.appxmanifest` |
+
 ## Current Status
 
 - [x] Step 0: MSIX manifest + `scripts/build-msix-store.ps1` scaffolded (`msix/`)
 - [x] Step 1: Enroll as Microsoft Developer
 - [x] Step 2: Reserve app name in Partner Center (MSIX product)
 - [x] Step 3: Host privacy policy at a public HTTPS URL
-- [ ] Step 4: Build Release MSIX and verify locally (`msix/MSIX-TESTING.txt`)
+- [x] Step 4: Build Release MSIX — `dist\Claim Clash 0.1.93.0 Store.msix` (cert fixes applied 2026-07-08)
 - [ ] Step 5: Declare capabilities in Partner Center
 - [ ] Step 6: Prepare Store listing (screenshots, description)
 - [ ] Step 7: Submit MSIX to Partner Center
@@ -23,14 +49,15 @@ This document tracks publishing Claim Clash to the Microsoft Store.
 
 1. Go to [storedeveloper.microsoft.com](https://storedeveloper.microsoft.com) (required entry point; do not start from legacy Partner Center links).
 2. Click **Get started for free**.
-3. Select **Individual developer** (publishing as Zachary H. Roberts; matches `PublisherDisplayName` in `msix/Package.appxmanifest`).
+3. Select **Individual developer** if that is how the account was originally enrolled (current ops publisher display: `memento-mori1984`).  
+   **Preferred long-term:** **Company** account under **Arcana Veritas LLC** (legal owner of Claim Clash as of the 2026-07-11 IP assignment; see `legal/IP-ASSIGNMENT.md`). Individual cannot be changed to Company later on the same account, so a new company enrollment may be required.
 4. Sign in with a **personal Microsoft account (MSA)** — e.g. RanZhiSen@gmail.com if that is your MSA, or create one.
-5. Complete **identity verification** (government ID + selfie; mobile capture in good lighting).
+5. Complete **identity verification** (government ID + selfie; mobile capture in good lighting). For Company, prepare LLC documents as Microsoft requests.
 6. Review profile details (name, country) and finish setup.
 7. Click **Go to Partner Center dashboard** (or wait ~5 minutes, then open [Apps and games](https://aka.ms/submitwindowsapp)).
 8. Confirm you land on **Apps & Games overview** with permission to create a new product.
 
-**Account type note:** Choose **Company** only if you are publishing under a registered business (LLC, corp, etc.) with DUNS or business documents. Individual cannot be changed to Company later.
+**Account type note:** Legal copyright and trademark for Claim Clash are held by **Arcana Veritas LLC**. The Store package identity may still show `memento-mori1984` until Partner Center is on a company publisher. In-app and website notices already list Arcana Veritas LLC.
 
 **After enrollment:** Reply here or check off Step 1 in this file so we can proceed to Step 2 (reserve **Claim Clash**).
 
@@ -53,9 +80,14 @@ In Partner Center (**Apps & games** overview):
 
 6. Values saved in `msix/store-identity.json`; `build-msix-store.ps1` syncs them into the manifest on each build.
 
-**Privacy policy (can do now):** In the product, go to **Product declarations** → **Privacy policy** and enter:
+**Privacy + support (required):** In the product, set:
 
-`https://github.com/memento-mori1984/claim-clash-tv/blob/main/PRIVACY-POLICY.md`
+| Field | URL |
+|-------|-----|
+| **Privacy policy** | `https://claim-clash.com/download/privacy-policy` |
+| **Support contact website** | `https://claim-clash.com/download/support` |
+
+Support email: `feedback@claim-clash.com`
 
 ## Step 3 — Privacy policy (required)
 
@@ -96,7 +128,7 @@ Add-AppxPackage -Path "dist\Claim Clash 0.1.82.0 Store.msix"
 
 Verify Cast, session saves, and export using `msix/MSIX-TESTING.txt` before Partner Center upload.
 
-Manifest: `msix/Package.appxmanifest` (capabilities: `internetClient`, `privateNetworkClientServer`, `runFullTrust`).
+Manifest: `msix/Package.appxmanifest` (capabilities: `internetClient`, `privateNetworkClientServer` as general capabilities; `runFullTrust` under `rescap` only).
 
 ### MSI fallback (older Tauri Store workflow)
 
@@ -150,7 +182,7 @@ Prepare in Partner Center:
 - **Screenshots** — Main game, Settings, Cast modal, About (shows privacy link)
 - **Category** — Entertainment or Education (your choice)
 - **Privacy policy URL** — From Step 3
-- **Support contact** — ClaimsClashFeedback@gmail.com
+- **Support contact** — feedback@claim-clash.com
 
 Release builds hide alpha-only UI (pre-filled keys, alpha agreement). Store users bring their own API keys.
 

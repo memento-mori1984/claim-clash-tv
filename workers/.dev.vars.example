@@ -1,0 +1,5 @@
+# Copy to .dev.vars for local wrangler dev (never commit .dev.vars)
+# Generate values: node ../scripts/hash-web-dev-password.mjs "YourPassword"
+
+DEV_PASSWORD_CREDENTIAL=saltB64.hashB64
+SESSION_SECRET=randomBase64Secret

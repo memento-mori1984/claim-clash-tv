@@ -1,0 +1,32 @@
+CLAIM CLASH — bookmark for July 1, 2026
+========================================
+
+WHERE WE LEFT OFF (June 30, 2026 ~9:10 PM)
+- eCO copyright upload is READY. Use ONLY the UPLOAD-READY folder.
+- "File type not allowed" was from uploading raw .rs/.js/.json/.md etc.
+
+UPLOAD FROM THIS FOLDER:
+  C:\Users\Ranzh\ClaimClash\claim-clash-tv\copyright-deposit\Claim-Clash-v0.1.92-eco-UPLOAD-READY
+  G:\My Drive\Claim Clash Copyright Deposit v0.1.92 UPLOAD-READY
+
+EASIEST eCO UPLOAD (1 file):
+  Claim-Clash-0.1.92-Beta-COMPLETE-DEPOSIT.txt
+
+OR MINIMUM (3 files):
+  01-TITLE-PAGE.txt
+  06-source-FIRST-1500-lines.txt
+  07-source-LAST-1500-lines.txt
+
+READ FIRST:
+  00-READ-THIS-UPLOAD-GUIDE.txt
+
+DO NOT UPLOAD FROM:
+  copyright-deposit\Claim-Clash-v0.1.92-eco-deposit  (wrong file types)
+
+STILL PENDING (optional / later)
+- Partner Center: upload MSIX from G:\My Drive\Claim Clash Microsoft Store\
+- SuperGrok IP/legal review (SUPERGROK-BRIEF.txt, ECO-EXACT-COPYRIGHT-FILES.txt)
+- Version: 0.1.92 Beta | © 2026 Arcana Veritas LLC
+
+RESUME PROMPT:
+  "Continue Claim Clash — finish eCO copyright upload" or paste this file.

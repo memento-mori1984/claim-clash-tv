@@ -1,6 +1,8 @@
 Claim Clash - The app will not open (Windows)
 =============================================
 
+Copyright (c) 2026 Arcana Veritas LLC. All rights reserved.
+
 If you double-click the app and nothing happens, try these steps in order.
 You do not need to be good with computers. Just follow one step at a time.
 
@@ -73,6 +75,6 @@ Please email the developer with:
   - What happened when you double-clicked (nothing, error message, SmartScreen, etc.).
   - Whether Steps 1 through 6 were tried.
 
-Feedback email: ClaimsClashFeedback@gmail.com
+Feedback email: feedback@claim-clash.com
 
 Version: {{VERSION}}

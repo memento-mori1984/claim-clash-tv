@@ -118,9 +118,9 @@ Current version: see `package.json` and `version.json` (currently 0.1.86 Beta).
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-Copyright © 2026 Zachary H. Roberts. All rights reserved.
+Copyright © 2026 Arcana Veritas LLC. All rights reserved.
 
-"Claim Clash" is a trademark of Zachary H. Roberts.
+"Claim Clash" is a trademark of Arcana Veritas LLC.
 
 ## Recommended IDE
 

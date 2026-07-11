@@ -1,0 +1,153 @@
+CLAIM CLASH v0.1.92 Beta — EXACT FILES TO COPYRIGHT (eCO deposit)
+=================================================================
+Author / claimant: Arcana Veritas LLC (assigned from Zachary Roberts effective 2026-07-11)
+Project root: C:\Users\Ranzh\ClaimClash\claim-clash-tv
+Registration title suggestion: "Claim Clash 0.1.92 Beta" (computer program)
+Status: Unpublished beta (as of June 30, 2026)
+
+=== PRIMARY eCO DEPOSIT (computer program — REQUIRED) ===
+
+For software over 50 pages, eCO typically wants first 25 + last 25 pages of source.
+Primary source file (largest human-authored module):
+
+  src\index.html
+
+Deposit method:
+  1. Generate PDF or text: first 25 pages + last 25 pages of src\index.html
+  2. Redact any lines containing embedded API key placeholders if present (Dev profile only; Release has none)
+
+Supporting source exhibits (attach as additional deposit files OR merge into one PDF appendix):
+
+  RUST / TAURI BACKEND
+  src-tauri\src\main.rs
+  src-tauri\src\lib.rs
+  src-tauri\src\brain_feed.rs
+  src-tauri\src\brain_config.rs
+  src-tauri\build.rs
+  src-tauri\Cargo.toml
+  src-tauri\tauri.conf.json
+  src-tauri\tauri.store.conf.json
+
+  JAVASCRIPT MODULES (human-authored)
+  src\brain.js
+  src\steelman-directive.js
+  src\legal-jurisdiction-directive.js
+  src\grade-level.js
+  src\session-export.js
+  src\session-recall.js
+  src\example-flow-questions.js
+  src\build-profile.js
+
+  HTML / CSS / CAST
+  src\cast-mirror.html
+  src\cast-pairing.html
+  src\styles.css
+
+  BRAIN FEED (human-designed schema + signing; disclaim AI question text — see below)
+  scripts\generate-brain-keys.mjs
+  scripts\sign-brain-feed.mjs
+  scripts\craft-current-events-question.mjs
+  brain-feed\README.md
+  brain-feed\draft.json
+
+=== SECONDARY REGISTRATION OR SUPPLEMENTAL EXHIBITS (literary works) ===
+
+Optional separate eCO filing OR appendix to main deposit:
+
+  GAME RULES & IN-APP TEXT (embedded in index.html — also in PDF export)
+  src\Claim_Clash_Game_Rules_Final.pdf
+
+  LEGAL / DISTRIBUTION TEXT
+  PRIVACY-POLICY.md
+  distribution\PRIVACY-POLICY.txt
+  distribution\ALPHA-TESTER-AGREEMENT.txt
+  distribution\HOW-TO-INSTALL.txt
+  distribution\TROUBLESHOOTING.txt
+  NOTICE
+
+  DOCUMENTATION
+  README.md
+  SECURITY.md
+  MICROSOFT_STORE.md
+  msix\MSIX-TESTING.txt
+  GRADE-LEVEL-NOTES.txt
+
+=== VISUAL WORKS (optional separate VA registration or deposit exhibit) ===
+
+  src\claimsclash.png
+  src\claimsclash-square.png
+  msix\Assets\StoreLogo.png
+  msix\Assets\MedTile.png
+  msix\Assets\WideTile.png
+  msix\Assets\app.ico
+  msix\Package.appxmanifest
+
+=== EXCLUDE FROM COPYRIGHT DEPOSIT (NOT YOUR WORK) ===
+
+  src\vendor\jspdf.umd.min.js
+  src\vendor\jszip.min.js
+  src\assets\tauri.svg
+  src\assets\javascript.svg
+  node_modules\** (entire tree)
+  src-tauri\target\** (compiled artifacts)
+  dist\** (built executables)
+  msix\*.msix (compiled packages)
+  msix\extract-test\**
+  msix\devcert.pfx
+  brain-feed\private.key.pem
+  scripts\alpha-keys.local.json (if present — secrets)
+  Any *.exe, *.dll, *.msix, *.sha256
+
+=== AI-ASSISTED CONTENT — DISCLAIM IN eCO APPLICATION ===
+
+  brain-feed\feed.json
+    — Daily questions may be drafted with Gemini via craft-current-events-question.mjs.
+    — Claim: human authorship in feed structure, signing pipeline, selection/editing.
+    — Disclaim: machine-generated question wording unless you manually rewrote each entry.
+
+  Runtime AI responses (Gemini, OpenAI, etc.)
+    — NOT deposited; not author’s work.
+
+  src\jailbreak-mode.archive.js
+    — Archived/disabled feature; optional omit from deposit.
+
+=== BUILD / PACKAGING SCRIPTS (include if claiming full program compilation) ===
+
+  scripts\build-msix-store.ps1
+  scripts\build-release.ps1
+  scripts\build-dev.ps1
+  scripts\build-with-checksum.ps1 (project root)
+  scripts\package-drive-zip.ps1
+  scripts\set-build-profile.ps1
+  scripts\sync-version.ps1
+  build-with-checksum.ps1
+  version.json
+
+=== EXISTING DEPOSIT PACKAGE (UPDATE FROM v0.1.0) ===
+
+  copyright-deposit\00-TITLE-PAGE.txt  — update to 0.1.92
+  copyright-deposit\Claim-Clash-v0.1.0-first25-last25-deposit.txt  — regenerate for 0.1.92
+  copyright-deposit\Claim-Clash-v0.1.0-source-deposit.txt  — regenerate
+
+=== MINIMUM FILING SET (if user wants ONE registration only) ===
+
+Register ONE work: "Claim Clash 0.1.92 Beta" as computer program.
+
+Deposit minimum:
+  1. First 25 + last 25 pages of src\index.html (PDF)
+  2. One combined PDF of all src-tauri\src\*.rs files
+  3. One combined PDF of all src\*.js (excluding vendor\)
+  4. example-flow-questions.js as literary exhibit (curated questions)
+  5. claimsclash.png as visual exhibit
+
+=== NOT COPYRIGHT (trademark — separate USPTO process) ===
+
+  Word mark: "Claim Clash"
+  Logo: claimsclash.png
+  (Do not file these in eCO copyright; use USPTO trademark if registering.)
+
+=== NOT RECOMMENDED (patent) ===
+
+  No source files need patent filing for standard eCO copyright.
+
+SuperGrok: confirm this list, correct any errors, and output final eCO deposit checklist with file order for upload.

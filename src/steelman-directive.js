@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
+// Copyright (c) 2026 Arcana Veritas LLC. All rights reserved.
 // Hidden facilitator directives for steelmanning (never shown in UI or exports).
 
 (function () {

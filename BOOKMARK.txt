@@ -1,0 +1,33 @@
+﻿CLAIM CLASH - BOOKMARK (July 11, 2026)
+======================================
+
+WHERE WE LEFT OFF
+-----------------
+IP assignment effective 2026-07-11: all product IP owned by Arcana Veritas LLC.
+Docs/code updated locally; push GitHub + redeploy claim-clash.com privacy/support.
+
+Legal owner: Arcana Veritas LLC
+Founder:     Zachary Roberts (Sole Member)
+Address:     74 Quebec Ct, Falling Waters, WV 25419
+Instrument:  legal/ZHR-AV-IP.pdf  |  legal/IP-ASSIGNMENT.md
+Product ID:  9NVBNWJWBFSL (Store ops still memento-mori1984)
+
+VERSION
+-------
+0.1.93 Beta
+
+PROJECT PATHS
+-------------
+Repo:       C:\Users\Ranzh\ClaimClash\claim-clash-tv
+Grok Link:  C:\Users\Ranzh\grok-link
+No Ducking: C:\Users\Ranzh\AndroidStudioProjects\NoDuckingWay
+
+WEB DEPLOY
+----------
+cd C:\Users\Ranzh\ClaimClash\claim-clash-tv
+.\scripts\deploy-web.ps1
+
+PARTNER CENTER (manual)
+-----------------------
+In-app and website ownership now Arcana Veritas LLC.
+Consider company publisher account under Arcana Veritas LLC when ready.

@@ -1,11 +1,12 @@
 {
     "major":  0,
     "minor":  1,
-    "iteration":  91,
+    "iteration":  93,
     "alphaBaselineIteration":  51,
     "phase":  "Beta",
-    "feedbackEmail":  "ClaimsClashFeedback@gmail.com",
-    "privacyPolicyUrl":  "https://github.com/memento-mori1984/claim-clash-tv/blob/master/PRIVACY-POLICY.md",
+    "feedbackEmail":  "feedback@claim-clash.com",
+    "privacyPolicyUrl":  "https://claim-clash.com/download/privacy-policy",
+    "supportUrl":  "https://claim-clash.com/download/support",
     "brainFeedUrl":  "https://raw.githubusercontent.com/memento-mori1984/claim-clash-tv/master/brain-feed/feed.json",
     "brainVerifyPublicKeyHex":  "ac589a76a04a9b87cba69c91b8bdd3675cfbdd9830da330ad933ceea237fadfb"
 }

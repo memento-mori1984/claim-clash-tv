@@ -3,9 +3,9 @@
   "identifier": "com.ranzh.claim-clash",
   "bundle": {
     "active": true,
-    "copyright": "Copyright (c) 2026 Zachary H. Roberts. All rights reserved.",
-    "publisher": "Zachary H. Roberts",
-    "homepage": "https://github.com/memento-mori1984/claim-clash-tv/blob/main/PRIVACY-POLICY.md",
+    "copyright": "Copyright (c) 2026 Arcana Veritas LLC. All rights reserved.",
+    "publisher": "Arcana Veritas LLC",
+    "homepage": "https://claim-clash.com/download/privacy-policy",
     "shortDescription": "Structured fact-finding between opposing perspectives",
     "targets": ["msi"],
     "icon": [

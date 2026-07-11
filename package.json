@@ -1,10 +1,10 @@
 {
   "name": "claim-clash-tv",
   "private": true,
-  "version": "0.1.91",
+  "version": "0.1.93",
   "description": "Claim Clash - Structured Fact-Finding Between Opposing Perspectives",
-  "author": "Zachary H. Roberts",
-  "copyright": "Copyright (c) 2026 Zachary H. Roberts. All rights reserved.",
+  "author": "Arcana Veritas LLC",
+  "copyright": "Copyright (c) 2026 Arcana Veritas LLC. All rights reserved.",
   "license": "MIT",
   "type": "module",
   "scripts": {

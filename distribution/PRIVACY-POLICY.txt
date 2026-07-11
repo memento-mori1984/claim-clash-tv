@@ -1,10 +1,12 @@
 Claim Clash Privacy Policy
 ==========================
 
+Copyright (c) 2026 Arcana Veritas LLC. All rights reserved.
+
 Effective date: June 27, 2026
 Last updated: June 27, 2026
 
-Operator: Zachary H. Roberts
+Operator: Arcana Veritas LLC
 
 SUMMARY
 -------
@@ -16,8 +18,10 @@ SUMMARY
 
 STORE LISTING URL
 -----------------
-Host PRIVACY-POLICY.md from the repository at a public HTTPS URL and enter
-that URL in Microsoft Partner Center. Update privacyPolicyUrl in version.json
+Public privacy policy URL (Microsoft Store):
+  https://claim-clash.com/download/privacy-policy
+
+Enter that URL in Microsoft Partner Center. Update privacyPolicyUrl in version.json
 to match before building a Store release.
 
 DATA ON YOUR DEVICE
@@ -39,6 +43,6 @@ Accounts, automatic uploads of keys/conversations, telemetry, or ad tracking.
 
 CONTACT
 -------
-ClaimsClashFeedback@gmail.com
+feedback@claim-clash.com
 
 Full policy: see PRIVACY-POLICY.md in the repository root.

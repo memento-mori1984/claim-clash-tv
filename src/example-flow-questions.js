@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
+// Copyright (c) 2026 Arcana Veritas LLC. All rights reserved.
 // Preselected example questions for Load Example Flow (random pick each click).
 
 window.EXAMPLE_FLOW_QUESTIONS = [

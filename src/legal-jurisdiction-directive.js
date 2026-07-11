@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
+// Copyright (c) 2026 Arcana Veritas LLC. All rights reserved.
 // Hidden Brain facilitator: jurisdiction prompts for legal / construction / economics topics.
 // Never shown in UI, exports, or player-facing copy.
 

@@ -2,7 +2,7 @@ Claim Clash - Alpha Tester Agreement
 ====================================
 
 Version: {{VERSION}}
-Copyright (c) 2026 Zachary H. Roberts. All rights reserved.
+Copyright (c) 2026 Arcana Veritas LLC. All rights reserved.
 
 Thank you for helping test Claim Clash before public release. Please read this
 file before you run the app. When you click Begin Testing in the app, you agree
@@ -46,7 +46,7 @@ WHEN YOU FINISH TESTING
 OWNERSHIP
 ---------
 - Claim Clash, including its name, design, rules, code, and content, belongs to
-  Zachary H. Roberts.
+  Arcana Veritas LLC.
 - This agreement does not give you any ownership, license, or commercial rights.
 - Any feedback you provide may be used to improve the product without payment or
   credit unless the developer agrees otherwise in writing.
@@ -97,6 +97,21 @@ NO WARRANTY
 -----------
 - This alpha build is provided "as is" with no warranty of any kind.
 - The developer is not liable for any loss or damage from using this test build.
+
+
+BREACH REMEDIES
+---------------
+- If you breach this agreement — including sharing access, leaking API keys,
+  copying the product, or misusing confidential materials — you may face the
+  fullest effective legal reproach available under applicable law.
+- That may include injunctive relief, actual and consequential damages,
+  disgorgement of unjust enrichment, and recovery of reasonable attorneys'
+  fees and costs where permitted.
+- Egregious breaches may also result in the tester being launched into space
+  as a test subject with our pending partnership with SpaceX (no warranty on
+  return trajectory, re-entry heat shield, or snack availability).
+- Unauthorized access, key misuse, or distribution may also be reported to
+  service providers and authorities where appropriate.
 
 
 NOT LEGAL ADVICE
